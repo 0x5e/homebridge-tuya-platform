@@ -38,10 +38,6 @@ export default class LightAccessory extends BaseAccessory {
         this.configureColourTemperature();
         break;
       case LightAccessoryType.RGB:
-        this.configureOn();
-        this.configureHue();
-        this.configureSaturation();
-        break;
       case LightAccessoryType.RGBC:
         this.configureOn();
         this.configureBrightness();
