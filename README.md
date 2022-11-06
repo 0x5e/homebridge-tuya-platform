@@ -19,6 +19,7 @@ If beta version works fine for a while, it will be merged into the upstream repo
 - Less duplicate code.
 - Less API errors.
 - Less development costs for new accessory categroies.
+- Scene supported.
 - More supported devices.
     - Air Quality Sensor
     - Carbon Monoxide Sensor

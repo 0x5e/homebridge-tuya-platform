@@ -22,6 +22,7 @@ import LightSensorAccessory from './LightSensorAccessory';
 import MotionSensorAccessory from './MotionSensorAccessory';
 import AirQualitySensorAccessory from './AirQualitySensorAccessory';
 import HumanPresenceSensorAccessory from './HumanPresenceSensorAccessory';
+import SceneAccessory from './SceneAccessory';
 
 import LegacyAccessoryFactory from './LegacyAccessoryFactory';
 
@@ -112,6 +113,9 @@ export default class AccessoryFactory {
         break;
       case 'hps':
         handler = new HumanPresenceSensorAccessory(platform, accessory);
+        break;
+      case 'scene':
+        handler = new SceneAccessory(platform, accessory);
         break;
     }
 

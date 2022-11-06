@@ -263,6 +263,12 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     deviceManager.ownerIDs = homeIDList.map(homeID =>homeID.toString());
     const devices = await deviceManager.updateDevices(homeIDList);
 
+    this.log.info('Fetching scene list.');
+    for (const homeID of homeIDList) {
+      const scenes = await deviceManager.getSceneList(homeID);
+      devices.push(...scenes);
+    }
+
     this.deviceManager = deviceManager;
     return devices;
   }
