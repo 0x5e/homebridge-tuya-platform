@@ -78,7 +78,8 @@ If you are personal user and don't know which to choose, please use `Smart Home`
 Before configuration, please goto [Tuya IoT Platform](https://iot.tuya.com)
 - Create a cloud develop project.
 - Go to `Project Page` > `Devices Panel` > `Link Tuya App Account`, link your app account.
-
+- Go to `Project Page` > `Service API` > `Go to Authorize`, subscribe to `IoT Core` API (its free)
+- 
 #### For "Custom" Project
 
 - `platform` - **required** : Must be 'TuyaPlatform'
