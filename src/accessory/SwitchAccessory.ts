@@ -16,6 +16,7 @@ export default class SwitchAccessory extends BaseAccessory {
       || this.accessory.addService(this.mainService(), schema.code, schema.code);
 
     service.setCharacteristic(this.Characteristic.Name, schema.code);
+    service.setCharacteristic(this.Characteristic.ConfiguredName, schema.code);
 
     service.getCharacteristic(this.Characteristic.On)
       .onGet(async () => {
