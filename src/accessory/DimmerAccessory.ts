@@ -4,7 +4,7 @@ import { TuyaPlatform } from '../platform';
 import BaseAccessory from './BaseAccessory';
 import { remap, limit } from '../util/util';
 
-export default class LightAccessory extends BaseAccessory {
+export default class DimmerAccessory extends BaseAccessory {
 
   constructor(
     public readonly platform: TuyaPlatform,
