@@ -17,6 +17,7 @@ export default class SwitchAccessory extends BaseAccessory {
 
     service.setCharacteristic(this.Characteristic.Name, schema.code);
     if (!service.testCharacteristic(this.Characteristic.ConfiguredName)) {
+      service.addOptionalCharacteristic(this.Characteristic.ConfiguredName); // silence warning
       service.setCharacteristic(this.Characteristic.ConfiguredName, schema.code);
     }
 
