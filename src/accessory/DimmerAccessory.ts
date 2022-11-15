@@ -2,6 +2,7 @@ import { PlatformAccessory, Service } from 'homebridge';
 import { TuyaDeviceSchemaIntegerProperty } from '../device/TuyaDevice';
 import { TuyaPlatform } from '../platform';
 import BaseAccessory from './BaseAccessory';
+import { remap, limit } from '../util/util';
 
 export default class LightAccessory extends BaseAccessory {
 
@@ -70,24 +71,22 @@ export default class LightAccessory extends BaseAccessory {
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
         let value = Math.floor(100 * (status.value as number) / range);
-        value = Math.max(0, value);
-        value = Math.min(100, value);
+        value = limit(value, 0, 100);
         return value;
       })
       .onSet((value) => {
         this.log.debug(`Characteristic.Brightness set to: ${value}`);
         let brightValue = Math.floor(value as number * range / 100);
 
-        // TODO limit or remap?
-        // const minStatus = this.getStatus(`brightness_min_${index}`);
-        // const maxStatus = this.getStatus(`brightness_max_${index}`);
-        // if (minStatus && maxStatus) {
-        //   brightValue = Math.max((minStatus.value as number), brightValue);
-        //   brightValue = Math.min((maxStatus.value as number), brightValue);
-        // }
+        const minStatus = this.getStatus(`brightness_min_${index}`);
+        const maxStatus = this.getStatus(`brightness_max_${index}`);
+        if (minStatus && maxStatus) {
+          brightValue = remap(brightValue, 0, range, (minStatus.value as number), (maxStatus.value as number));
+          brightValue = Math.max((minStatus.value as number), brightValue);
+          brightValue = Math.min((maxStatus.value as number), brightValue);
+        }
 
-        brightValue = Math.max(min, brightValue);
-        brightValue = Math.min(max, brightValue);
+        brightValue = limit(brightValue, min, max);
         this.sendCommands([{ code: schema.code, value: brightValue }], true);
       });
 
