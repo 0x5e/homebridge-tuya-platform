@@ -1,5 +1,5 @@
 import { PlatformAccessory, Service } from 'homebridge';
-import { TuyaDeviceSchemaIntegerProperty } from '../device/TuyaDevice';
+import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
 import { TuyaPlatform } from '../platform';
 import BaseAccessory from './BaseAccessory';
 import { remap, limit } from '../util/util';
@@ -12,7 +12,29 @@ export default class DimmerAccessory extends BaseAccessory {
   ) {
     super(platform, accessory);
 
-    for (let index = 1; index <= 3; index++) {
+    this.configure();
+  }
+
+  getOnSchema(index: number) {
+    if (index === 0) {
+      return this.getSchema('switch')
+        || this.getSchema('switch_led');
+    }
+    return this.getSchema(`switch_${index}`)
+      || this.getSchema(`switch_led_${index}`);
+  }
+
+  getBrightnessSchema(index: number) {
+    if (index === 0) {
+      return this.getSchema('bright_value');
+    }
+    return this.getSchema(`bright_value_${index}`);
+  }
+
+
+  configure() {
+
+    for (let index = 0; index <= 3; index++) {
       const schema = this.getBrightnessSchema(index);
       if (!schema) {
         continue;
@@ -20,8 +42,7 @@ export default class DimmerAccessory extends BaseAccessory {
 
       const oldService = this.accessory.getService(this.Service.Lightbulb);
       if (oldService && oldService?.subtype === undefined) {
-        // todo remove old service
-        platform.log.warn('Remove old service:', oldService.UUID);
+        this.platform.log.warn('Remove old service:', oldService.UUID);
         this.accessory.removeService(oldService);
       }
 
@@ -31,15 +52,6 @@ export default class DimmerAccessory extends BaseAccessory {
       this.configureBrightness(service, index);
     }
   }
-
-  getOnSchema(index: number) {
-    return this.getSchema(`switch_led_${index}`);
-  }
-
-  getBrightnessSchema(index: number) {
-    return this.getSchema(`bright_value_${index}`);
-  }
-
 
   configureOn(service: Service, index: number) {
     const schema = this.getOnSchema(index);
@@ -64,32 +76,61 @@ export default class DimmerAccessory extends BaseAccessory {
       return;
     }
 
-    const { min, max } = schema.property as TuyaDeviceSchemaIntegerProperty;
+    const { max } = schema.property as TuyaDeviceSchemaIntegerProperty;
     const range = max; // not max - min
+    const props = {
+      minValue: 0,
+      maxValue: 100,
+      minStep: 1,
+    };
+
+    const minStatus = this.getStatus(`brightness_min_${index}`);
+    const maxStatus = this.getStatus(`brightness_max_${index}`);
+    if (minStatus && maxStatus && maxStatus.value > minStatus.value) {
+      const minValue = Math.ceil(remap(minStatus.value as number, 0, range, 0, 100));
+      const maxValue = Math.floor(remap(maxStatus.value as number, 0, range, 0, 100));
+      props.minValue = Math.max(props.minValue, minValue);
+      props.maxValue = Math.min(props.maxValue, maxValue);
+    }
+    this.log.debug('Set props for Brightness:', props);
 
     service.getCharacteristic(this.Characteristic.Brightness)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        let value = Math.floor(100 * (status.value as number) / range);
-        value = limit(value, 0, 100);
+        let value = status.value as number;
+        value = remap(value, 0, range, 0, 100);
+        value = limit(value, props.minValue, props.maxValue);
         return value;
       })
       .onSet((value) => {
         this.log.debug(`Characteristic.Brightness set to: ${value}`);
-        let brightValue = Math.floor(value as number * range / 100);
+        let brightValue = value as number;
+        brightValue = remap(brightValue, 0, 100, 0, range);
+        brightValue = Math.floor(brightValue);
+        this.sendCommands([{ code: schema.code, value: brightValue }], true);
+      }).setProps(props);
 
-        const minStatus = this.getStatus(`brightness_min_${index}`);
-        const maxStatus = this.getStatus(`brightness_max_${index}`);
-        if (minStatus && maxStatus) {
-          brightValue = remap(brightValue, 0, range, (minStatus.value as number), (maxStatus.value as number));
-          brightValue = Math.max((minStatus.value as number), brightValue);
-          brightValue = Math.min((maxStatus.value as number), brightValue);
+  }
+
+  async onDeviceStatusUpdate(status: TuyaDeviceStatus[]) {
+
+    // brightness range updated
+    if (status.length !== this.device.status.length) {
+      for (const _status of status) {
+        if (!_status.code.startsWith('brightness_min_')
+          && !_status.code.startsWith('brightness_max_')) {
+          continue;
         }
 
-        brightValue = limit(brightValue, min, max);
-        this.sendCommands([{ code: schema.code, value: brightValue }], true);
-      });
+        this.platform.log.warn('Brightness range updated, please restart homebridge to take effect.');
+        // TODO updating props
+        // this.platform.log.debug('Brightness range updated, resetting props...');
+        // this.configure();
+        break;
+      }
+    }
 
+    super.onDeviceStatusUpdate(status);
   }
 
 }
