@@ -89,6 +89,9 @@
 						"items": {
 							"title": "Home ID",
 							"type": "integer"
+						},
+						"condition": {
+							"functionBody": "return model.options.projectType === '2';"
 						}
 					}					
 				}
