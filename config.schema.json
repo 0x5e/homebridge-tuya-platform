@@ -81,7 +81,15 @@
 						"condition": {
 							"functionBody": "return model.options.projectType === '2';"
 						}
-					}
+					},
+					"homeWhitelist": {
+						"title": "Whitelisted Home ID",
+						"type": "integer",
+						"required": false,
+						"condition": {
+							"functionBody": "return model.options.projectType === '2';"
+						}
+					}					
 				}
 			}
 		}

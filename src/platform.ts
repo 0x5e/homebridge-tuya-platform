@@ -254,7 +254,16 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     const homeIDList: number[] = [];
     for (const { home_id, name } of res.result) {
       this.log.info(`Got home_id=${home_id}, name=${name}`);
-      homeIDList.push(home_id);
+      if (this.options.homeWhitelist) {
+        if (home_id === this.options.homeWhitelist) {
+            this.log.info(`Matched home_id=${home_id} to whitelist; adding to homeIDList`);
+            homeIDList.push(home_id);
+        } else {
+            this.log.info(`Did not match home_id=${home_id} to whitelist; not adding to homeIDList`);
+        }
+      } else {
+        homeIDList.push(home_id);
+      }
     }
 
     if (homeIDList.length === 0) {
