@@ -17,7 +17,7 @@ export interface TuyaPlatformHomeConfigOptions {
   username: string;
   password: string;
   appSchema: string;
-  homeWhitelist: number;
+  homeWhitelist: Array<number>;
 }
 
 export type TuyaPlatformConfigOptions = TuyaPlatformCustomConfigOptions | TuyaPlatformHomeConfigOptions;
@@ -42,6 +42,6 @@ export const homeOptionsSchema = {
     username: { type: 'string', required: true },
     password: { type: 'string', required: true },
     appSchema: { 'type': 'string', required: true },
-    homeWhitelist: { 'type': 'integer', 'minimum': 1},
+    homeWhitelist: { 'type': 'array'},
   },
 };
