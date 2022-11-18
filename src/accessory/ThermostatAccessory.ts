@@ -74,10 +74,10 @@ export default class ThermostatAccessory extends BaseAccessory {
         if (status.value === 'hot' || status.value === 'opened' || status.value === 'heating') {
           return this.Characteristic.CurrentHeatingCoolingState.HEAT;
         } else if (
-          status.value === "cold" ||
-          status.value === "eco" ||
-          status.value === "idle" ||
-          status.value === "window_opened"
+          status.value === 'cold' ||
+          status.value === 'eco' ||
+          status.value === 'idle' ||
+          status.value === 'window_opened'
         ) {
           return this.Characteristic.CurrentHeatingCoolingState.COOL;
         }
