@@ -27,7 +27,7 @@ export default class HumidifierAccessory extends BaseAccessory {
     const { ACTIVE, INACTIVE } = this.Characteristic.Active;
     this.mainService().getCharacteristic(this.Characteristic.Active)
       .onGet(() => {
-        const status = this.getStatus('switch_spray');
+        const status = this.getStatus('switch');
         return (status?.value as boolean) ? ACTIVE : INACTIVE;
       })
       .onSet(value => {
