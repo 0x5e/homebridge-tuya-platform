@@ -37,6 +37,7 @@
     "crypto-js": "^4.1.1",
     "debounce": "^1.2.1",
     "jsonschema": "^1.4.1",
+    "kelvin-to-rgb": "^1.0.2",
     "mqtt": "^4.2.6",
     "uuid": "^9.0.0"
   },
