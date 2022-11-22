@@ -104,6 +104,7 @@ export default class AccessoryFactory {
       case 'co2bj':
         handler = new CarbonDioxideSensorAccessory(platform, accessory);
         break;
+      case 'wnykq':
       case 'wsdcg':
         handler = new TemperatureHumiditySensorAccessory(platform, accessory);
         break;
