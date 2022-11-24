@@ -28,7 +28,7 @@ export default class TuyaHomeDeviceManager extends TuyaDeviceManager {
       device.schema = await this.getDeviceSchema(device.id);
     }
 
-    // this.log.debug('[TuyaHomeDeviceManager] Devices updated.\n', JSON.stringify(devices, null, 2));
+    // this.log.debug('Devices updated.\n', JSON.stringify(devices, null, 2));
     this.devices = devices;
     return devices;
   }
@@ -36,7 +36,7 @@ export default class TuyaHomeDeviceManager extends TuyaDeviceManager {
   async getSceneList(homeID: number) {
     const res = await this.api.get(`/v1.1/homes/${homeID}/scenes`);
     if (res.success === false) {
-      this.log.warn('[TuyaHomeDeviceManager] Get scene list failed. homeId = %d, code = %s, msg = %s', homeID, res.code, res.msg);
+      this.log.warn('Get scene list failed. homeId = %d, code = %s, msg = %s', homeID, res.code, res.msg);
       return [];
     }
 

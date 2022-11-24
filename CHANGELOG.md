@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0] - (unreleased)
+
+### Add
+- Add scene support.
+- Add `sceneWhitelist` option for whitelisting scenes.
+
+
 ## [1.6.0] - (unreleased)
 
 This version has been completely rewritten in TypeScript, brings a lot of bug fix and new device support.
@@ -32,7 +39,7 @@ This version has been completely rewritten in TypeScript, brings a lot of bug fi
 - Add debounce in `BaseAccessory.sendCommands()` for better API request peformance.
 - Persist `TuyaDeviceList.{uid}.json` for debugging. (#41)
 - Add `homeWhitelist` option for whitelisting homes. (#84)
-- Add scene support.
+
 
 ### Fixed
 - Fix 1004 signature error when url query has more than 2 elements.

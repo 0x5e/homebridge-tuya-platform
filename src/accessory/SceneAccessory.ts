@@ -18,7 +18,7 @@ export default class SceneAccessory extends BaseAccessory {
           const deviceManager = this.platform.deviceManager as TuyaHomeDeviceManager;
           const res = await deviceManager.executeScene(this.device.owner_id, this.device.id);
           if (res.success === false) {
-            this.log.warn('[SceneAccessory] executeScene. homeId = %s, code = %s, msg = %s', this.device.owner_id, res.code, res.msg);
+            this.log.warn('ExecuteScene failed. homeId = %s, code = %s, msg = %s', this.device.owner_id, res.code, res.msg);
           }
           setTimeout(() => {
             service.getCharacteristic(this.Characteristic.On).updateValue(false);

@@ -100,6 +100,7 @@ Before configuration, please goto [Tuya IoT Platform](https://iot.tuya.com)
 - `options.password` - **required** : Password
 - `options.appSchema` - **required** : App schema. 'tuyaSmart' for Tuya Smart App, 'smartlife' for Smart Life App.
 - `options.homeWhitelist` - **optional**: An array of integer home ID values to whitelist. If present, only includes devices matching this Home ID value.
+- `options.sceneWhitelist` - **optional**: An array of integer scene ID values to whitelist. If present, only includes scene matching this Scene ID value.
 
 
 ## Limitations
