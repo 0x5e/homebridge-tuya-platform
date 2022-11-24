@@ -2,9 +2,7 @@ import EventEmitter from 'events';
 import TuyaOpenAPI from '../core/TuyaOpenAPI';
 import TuyaOpenMQ from '../core/TuyaOpenMQ';
 import Logger, { PrefixLogger } from '../util/Logger';
-import TuyaDevice, {
-  TuyaDeviceSchema, TuyaDeviceSchemaMode, TuyaDeviceSchemaProperty, TuyaDeviceSchemaType, TuyaDeviceStatus,
-} from './TuyaDevice';
+import TuyaDevice, { TuyaDeviceSchema, TuyaDeviceSchemaMode, TuyaDeviceSchemaProperty, TuyaDeviceStatus } from './TuyaDevice';
 
 enum Events {
   DEVICE_ADD = 'DEVICE_ADD',
@@ -93,11 +91,10 @@ export default class TuyaDeviceManager extends EventEmitter {
 
     // Combine functions and status together, as it used to be.
     const schemas = new Map<string, TuyaDeviceSchema>();
-    for (const { code, type: rawType, values } of [...res.result.status, ...res.result.functions]) {
+    for (const { code, type, values } of [...res.result.status, ...res.result.functions]) {
       if (schemas[code]) {
         continue;
       }
-      const type = rawType.charAt(0).toUpperCase() + rawType.slice(1).toLowerCase();
       const read = (res.result.status).find(schema => schema.code === code) !== undefined;
       const write = (res.result.functions).find(schema => schema.code === code) !== undefined;
       let mode = TuyaDeviceSchemaMode.UNKNOWN;
@@ -110,11 +107,7 @@ export default class TuyaDeviceManager extends EventEmitter {
       }
       let property: TuyaDeviceSchemaProperty;
       try {
-        if (type === TuyaDeviceSchemaType.String) {
-          property = values;
-        } else {
-          property = JSON.parse(values);
-        }
+        property = JSON.parse(values);
         schemas[code] = { code, mode, type, property };
       } catch (error) {
         this.log.error(error);
@@ -132,7 +125,7 @@ export default class TuyaDeviceManager extends EventEmitter {
 
 
   async onMQTTMessage(topic: string, protocol: TuyaMQTTProtocol, message) {
-    switch (protocol) {
+    switch(protocol) {
       case TuyaMQTTProtocol.DEVICE_STATUS_UPDATE: {
         const { devId, status } = message;
         const device = this.getDevice(devId);
