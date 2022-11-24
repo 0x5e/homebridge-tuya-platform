@@ -1,14 +1,26 @@
 import { PlatformAccessory } from 'homebridge';
-import { TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty } from '../device/TuyaDevice';
+import { TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty, TuyaDeviceSchemaType } from '../device/TuyaDevice';
 import { TuyaPlatform } from '../platform';
+import { limit, remap } from '../util/util';
 import BaseAccessory from './BaseAccessory';
+import { configureActive } from './characteristic/Active';
+import { configureOn } from './characteristic/On';
+
+const SCHEMA_CODE = {
+  FAN_ACTIVE: ['switch_fan', 'fan_switch', 'switch'],
+  FAN_DIRECTION: ['fan_direction'],
+  FAN_SPEED: ['fan_speed'],
+  FAN_SPEED_LEVEL: ['fan_speed_enum', 'fan_speed'],
+  LIGHT_ON: ['light', 'switch_led'],
+  LIGHT_BRIGHTNESS: ['bright_value'],
+};
 
 export default class FanAccessory extends BaseAccessory {
 
   constructor(platform: TuyaPlatform, accessory: PlatformAccessory) {
     super(platform, accessory);
 
-    this.configureActive();
+    configureActive(this, this.fanService(), this.getSchema(...SCHEMA_CODE.FAN_ACTIVE));
     if (this.getFanSpeedSchema()) {
       this.configureRotationSpeed();
     } else if (this.getFanSpeedLevelSchema()) {
@@ -17,9 +29,16 @@ export default class FanAccessory extends BaseAccessory {
       this.configureRotationSpeedOn();
     }
 
-    this.configureLightOn();
+    this.configureRotationDirection();
+
+    configureOn(this, this.lightService(), this.getSchema(...SCHEMA_CODE.LIGHT_ON));
     this.configureLightBrightness();
   }
+
+  requiredSchema() {
+    return [SCHEMA_CODE.FAN_ACTIVE];
+  }
+
 
   fanService() {
     return this.accessory.getService(this.Service.Fanv2)
@@ -31,57 +50,37 @@ export default class FanAccessory extends BaseAccessory {
     || this.accessory.addService(this.Service.Lightbulb);
   }
 
-  getFanActiveSchema() {
-    return this.getSchema('switch_fan')
-      || this.getSchema('fan_switch')
-      || this.getSchema('switch');
-  }
 
   getFanSpeedSchema() {
-    return this.getSchema('fan_speed');
+    const schema = this.getSchema(...SCHEMA_CODE.FAN_SPEED);
+    if (schema && schema.type === TuyaDeviceSchemaType.Integer) {
+      return schema;
+    }
+    return undefined;
   }
 
   getFanSpeedLevelSchema() {
-    return this.getSchema('fan_speed_enum');
+    const schema = this.getSchema(...SCHEMA_CODE.FAN_SPEED_LEVEL);
+    if (schema && schema.type === TuyaDeviceSchemaType.Enum) {
+      return schema;
+    }
+    return undefined;
   }
 
-  getLightOnSchema() {
-    return this.getSchema('light')
-      || this.getSchema('switch_led');
-  }
-
-  getLightBrightnessSchema() {
-    return this.getSchema('bright_value');
-  }
-
-
-  configureActive() {
-    const schema = this.getFanActiveSchema()!;
-    this.fanService().getCharacteristic(this.Characteristic.Active)
-      .onGet(() => {
-        const status = this.getStatus(schema.code)!;
-        return status.value as boolean;
-      })
-      .onSet(value => {
-        const status = this.getStatus(schema.code)!;
-        this.sendCommands([{
-          code: status.code,
-          value: (value === this.Characteristic.Active.ACTIVE) ? true : false,
-        }], true);
-      });
-  }
 
   configureRotationSpeed() {
     const schema = this.getFanSpeedSchema()!;
+    const { min, max } = schema.property as TuyaDeviceSchemaIntegerProperty;
     this.fanService().getCharacteristic(this.Characteristic.RotationSpeed)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        let value = Math.max(0, status.value as number);
-        value = Math.min(100, value);
-        return value;
+        const value = Math.round(remap(status.value as number, min, max, 0, 100));
+        return limit(value, 0, 100);
       })
       .onSet(value => {
-        this.sendCommands([{ code: schema.code, value: value as number }], true);
+        let speed = Math.round(remap(value as number, 0, 100, min, max));
+        speed = limit(speed, min, max);
+        this.sendCommands([{ code: schema.code, value: speed }], true);
       });
   }
 
@@ -102,13 +101,18 @@ export default class FanAccessory extends BaseAccessory {
       .onSet(value => {
         const index = value as number / props.minStep;
         value = property.range[index].toString();
+        this.log.debug('Set RotationSpeed to:', value);
         this.sendCommands([{ code: schema.code, value }], true);
       })
       .setProps(props);
   }
 
   configureRotationSpeedOn() {
-    const schema = this.getFanActiveSchema()!;
+    const schema = this.getSchema(...SCHEMA_CODE.FAN_ACTIVE);
+    if (!schema) {
+      return;
+    }
+
     const props = { minValue: 0, maxValue: 100, minStep: 100};
     this.log.debug('Set props for RotationSpeed:', props);
 
@@ -118,51 +122,47 @@ export default class FanAccessory extends BaseAccessory {
         return (status.value as boolean) ? 100 : 0;
       })
       .onSet(value => {
-        const status = this.getStatus(schema.code)!;
-        this.sendCommands([{ code: status.code, value: (value > 50) ? true : false }], true);
+        this.sendCommands([{ code: schema.code, value: (value > 50) ? true : false }], true);
       })
       .setProps(props);
   }
 
-  configureLightOn() {
-    const schema = this.getLightOnSchema();
+  configureRotationDirection() {
+    const schema = this.getSchema(...SCHEMA_CODE.FAN_DIRECTION);
     if (!schema) {
       return;
     }
 
-    this.lightService().getCharacteristic(this.Characteristic.On)
+    const { CLOCKWISE, COUNTER_CLOCKWISE } = this.Characteristic.RotationDirection;
+    this.fanService().getCharacteristic(this.Characteristic.RotationDirection)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        return status.value as boolean;
+        return (status.value !== 'reverse') ? CLOCKWISE : COUNTER_CLOCKWISE;
       })
       .onSet(value => {
-        this.sendCommands([{
-          code: schema.code,
-          value: value as boolean,
-        }], true);
+        this.sendCommands([{ code: schema.code, value: (value === CLOCKWISE) ? 'forward' : 'reverse' }]);
       });
   }
 
   configureLightBrightness() {
-    const schema = this.getLightBrightnessSchema();
+    const schema = this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHTNESS);
     if (!schema) {
       return;
     }
 
-    const property = schema.property as TuyaDeviceSchemaIntegerProperty;
+    const { min, max } = schema.property as TuyaDeviceSchemaIntegerProperty;
     this.lightService().getCharacteristic(this.Characteristic.Brightness)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        let value = Math.floor(100 * (status.value as number) / property.max);
-        value = Math.max(0, value);
-        value = Math.min(100, value);
-        return value;
+        const value = Math.round(remap(status.value as number, 0, max, 0, 100));
+        return limit(value, 0, 100);
       })
       .onSet(value => {
-        const status = this.getStatus(schema.code)!;
+        let brightness = Math.round(remap(value as number, 0, 100, 0, max));
+        brightness = limit(brightness, min, max);
         this.sendCommands([{
-          code: status.code,
-          value: Math.floor((value as number) * property.max / 100),
+          code: schema.code,
+          value: brightness,
         }], true);
       });
   }

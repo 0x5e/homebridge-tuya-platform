@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 // @ts-ignore
 import { version } from '../../package.json';
 
-import Logger from '../util/Logger';
+import Logger, { PrefixLogger } from '../util/Logger';
 
 enum Endpoints {
   AMERICA = 'https://openapi.tuyaus.com',
@@ -30,10 +30,10 @@ const DEFAULT_ENDPOINTS = {
 export const LOGIN_ERROR_MESSAGES = {
   1004: 'Please make sure your endpoint, accessId, accessKey is right.',
   1010: 'Please make sure you are not running multiple HomeBridge or HomeAssistant instance with same tuya account.',
-  1104: 'Please make sure your endpoint, accessId, accessKey is right.',
   1106: 'Please make sure your countryCode, username, password, appSchema is correct, and app account is linked with cloud project.',
+  1114: 'Please make sure your endpoint, accessId, accessKey is right.',
   2401: 'Username or password is wrong.',
-  2406: 'Please make sure your cloud project is created after May 25, 2021.',
+  2406: 'Please make sure you selected the right data center where your app account located, and the app account is linked with cloud project.',
 };
 
 export const API_ERROR_MESSAGES = {
@@ -91,7 +91,7 @@ export default class TuyaOpenAPI {
     public log: Logger = console,
     public lang = 'en',
   ) {
-
+    this.log = new PrefixLogger(log, TuyaOpenAPI.name);
   }
 
   isLogin() {
@@ -122,10 +122,10 @@ export default class TuyaOpenAPI {
       return;
     }
 
-    this.log.debug('[TuyaOpenAPI] Refreshing access_token');
+    this.log.debug('Refreshing access_token');
     const res = await this.get(`/v1.0/token/${this.tokenInfo.refresh_token}`);
     if (res.success === false) {
-      this.log.error('[TuyaOpenAPI] Refresh access_token failed. code = %s, msg = %s', res.code, res.msg);
+      this.log.error('Refresh access_token failed. code = %s, msg = %s', res.code, res.msg);
       return;
     }
 
@@ -270,7 +270,7 @@ export default class TuyaOpenAPI {
       'dev_channel': 'homebridge',
       'devVersion': version,
     };
-    this.log.debug('[TuyaOpenAPI] request:\nmethod = %s\nendpoint = %s\npath = %s\nquery = %s\nheaders = %s\nbody = %s',
+    this.log.debug('Request:\nmethod = %s\nendpoint = %s\npath = %s\nquery = %s\nheaders = %s\nbody = %s',
       method, this.endpoint, path, JSON.stringify(params, null, 2), JSON.stringify(headers, null, 2), JSON.stringify(body, null, 2));
     const res = await axios({
       baseURL: this.endpoint,
@@ -281,7 +281,7 @@ export default class TuyaOpenAPI {
       data: body,
     });
 
-    this.log.debug('[TuyaOpenAPI] response:\npath = %s\ndata = %s', path, JSON.stringify(res.data, null, 2));
+    this.log.debug('Response:\npath = %s\ndata = %s', path, JSON.stringify(res.data, null, 2));
     if (res.data && API_ERROR_MESSAGES[res.data.code]) {
       this.log.error(API_ERROR_MESSAGES[res.data.code]);
     }

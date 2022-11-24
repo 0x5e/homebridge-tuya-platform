@@ -3,8 +3,10 @@
 import { PlatformAccessory, Service, Characteristic } from 'homebridge';
 import { debounce } from 'debounce';
 
-import { TuyaDeviceSchema, TuyaDeviceStatus } from '../device/TuyaDevice';
+import { TuyaDeviceStatus } from '../device/TuyaDevice';
 import { TuyaPlatform } from '../platform';
+import { limit } from '../util/util';
+import { PrefixLogger } from '../util/Logger';
 
 const MANUFACTURER = 'Tuya Inc.';
 
@@ -20,7 +22,7 @@ export default class BaseAccessory {
 
   public deviceManager = this.platform.deviceManager!;
   public device = this.deviceManager.getDevice(this.accessory.context.deviceID)!;
-  public log = this.platform.log;
+  public log = new PrefixLogger(this.platform.log, this.device.name.length > 0 ? this.device.name : this.device.id);
 
   constructor(
     public readonly platform: TuyaPlatform,
@@ -30,22 +32,18 @@ export default class BaseAccessory {
     this.addAccessoryInfoService();
     this.addBatteryService();
 
-    for (const schema of this.device.schema) {
-      this.configureService(schema);
-    }
-
     this.onDeviceStatusUpdate(this.device.status);
-
   }
 
   addAccessoryInfoService() {
     const service = this.accessory.getService(this.Service.AccessoryInformation)
-    || this.accessory.addService(this.Service.AccessoryInformation);
+      || this.accessory.addService(this.Service.AccessoryInformation);
 
     service
       .setCharacteristic(this.Characteristic.Manufacturer, MANUFACTURER)
       .setCharacteristic(this.Characteristic.Model, this.device.product_id)
       .setCharacteristic(this.Characteristic.Name, this.device.name)
+      .setCharacteristic(this.Characteristic.ConfiguredName, this.device.name)
       .setCharacteristic(this.Characteristic.SerialNumber, this.device.uuid)
     ;
   }
@@ -55,6 +53,7 @@ export default class BaseAccessory {
       return;
     }
 
+    const { BATTERY_LEVEL_NORMAL, BATTERY_LEVEL_LOW } = this.Characteristic.StatusLowBattery;
     const service = this.accessory.getService(this.Service.Battery)
       || this.accessory.addService(this.Service.Battery);
 
@@ -63,37 +62,29 @@ export default class BaseAccessory {
         .onGet(() => {
           let status = this.getBatteryState();
           if (status) {
-            return (status!.value === 'low') ?
-              this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW :
-              this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+            return (status!.value === 'low') ? BATTERY_LEVEL_LOW : BATTERY_LEVEL_NORMAL;
           }
 
           // fallback
           status = this.getBatteryPercentage();
-          return (status!.value as number <= 20) ?
-            this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW :
-            this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-
+          return (status!.value as number <= 20) ? BATTERY_LEVEL_LOW : BATTERY_LEVEL_NORMAL;
         });
     }
 
     if (this.getBatteryPercentage()) {
       service.getCharacteristic(this.Characteristic.BatteryLevel)
         .onGet(() => {
-          const status = this.getBatteryPercentage();
-          let percent = Math.max(0, status!.value as number);
-          percent = Math.min(100, percent);
-          return percent;
+          const status = this.getBatteryPercentage()!;
+          return limit(status.value as number, 0, 100);
         });
     }
 
     if (this.getChargeState()) {
+      const { NOT_CHARGING, CHARGING } = this.Characteristic.ChargingState;
       service.getCharacteristic(this.Characteristic.ChargingState)
         .onGet(() => {
           const status = this.getChargeState();
-          return (status?.value as boolean) ?
-            this.Characteristic.ChargingState.CHARGING :
-            this.Characteristic.ChargingState.NOT_CHARGING;
+          return (status?.value as boolean) ? CHARGING : NOT_CHARGING;
         });
     }
   }
@@ -104,7 +95,9 @@ export default class BaseAccessory {
 
   getBatteryPercentage() {
     return this.getStatus('battery_percentage')
-      || this.getStatus('residual_electricity');
+      || this.getStatus('residual_electricity')
+      || this.getStatus('va_battery')
+      || this.getStatus('battery');
   }
 
   getChargeState() {
@@ -112,8 +105,15 @@ export default class BaseAccessory {
   }
 
 
-  getSchema(code: string) {
-    return this.device.schema.find(schema => schema.code === code);
+  getSchema(...codes: string[]) {
+    for (const code of codes) {
+      const schema = this.device.schema.find(schema => schema.code === code);
+      if (!schema) {
+        continue;
+      }
+      return schema;
+    }
+    return undefined;
   }
 
   getStatus(code: string) {
@@ -122,7 +122,7 @@ export default class BaseAccessory {
 
   private sendQueue = new Map<string, TuyaDeviceStatus>();
   private debounceSendCommands = debounce(async () => {
-    const commands = Object.values(this.sendQueue);
+    const commands = [...this.sendQueue.values()];
     await this.deviceManager.sendCommands(this.device.id, commands);
     this.sendQueue.clear();
   }, 100);
@@ -143,16 +143,34 @@ export default class BaseAccessory {
 
     for (const newStatus of commands) {
       // Update send queue
-      this.sendQueue[newStatus.code] = newStatus;
+      this.sendQueue.set(newStatus.code, newStatus);
     }
 
     this.debounceSendCommands();
   }
 
+  checkRequirements() {
+    let result = true;
+    for (const codes of this.requiredSchema()) {
+      const schema = this.getSchema(...codes);
+      if (schema) {
+        continue;
+      }
+      this.log.warn('Missing one of the required schema: %s', codes);
+      result = false;
+    }
 
-  configureService(schema: TuyaDeviceSchema) {
+    if (!result) {
+      this.log.warn('Existing schema: %o', this.device.schema);
+    }
 
+    return result;
   }
+
+  requiredSchema(): string[][] {
+    return [];
+  }
+
 
   async onDeviceInfoUpdate(info) {
     // name, online, ...
@@ -166,8 +184,8 @@ export default class BaseAccessory {
         if (characteristic.value === newValue) {
           continue;
         }
-        this.log.debug('Update value %o => %o for devId = %o service = %o, subtype = %o, characteristic = %o',
-          characteristic.value, newValue, this.device.id, service.UUID, service.subtype, characteristic.UUID);
+        this.log.debug('Update value %o => %o for service = %o, subtype = %o, characteristic = %o',
+          characteristic.value, newValue, service.UUID, service.subtype, characteristic.UUID);
         characteristic.updateValue(newValue);
       }
     }

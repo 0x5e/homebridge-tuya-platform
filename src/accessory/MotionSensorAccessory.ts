@@ -1,23 +1,22 @@
 import { PlatformAccessory } from 'homebridge';
 import { TuyaPlatform } from '../platform';
 import BaseAccessory from './BaseAccessory';
+import { configureMotionDetected } from './characteristic/MotionDetected';
+
+const SCHEMA_CODE = {
+  PIR: ['pir'],
+};
 
 export default class MotionSensorAccessory extends BaseAccessory {
 
   constructor(platform: TuyaPlatform, accessory: PlatformAccessory) {
     super(platform, accessory);
 
-    if (this.getStatus('pir')) {
-      const service = this.accessory.getService(this.Service.MotionSensor)
-        || this.accessory.addService(this.Service.MotionSensor);
+    configureMotionDetected(this, undefined, this.getSchema(...SCHEMA_CODE.PIR));
+  }
 
-      service.getCharacteristic(this.Characteristic.MotionDetected)
-        .onGet(() => {
-          const status = this.getStatus('pir');
-          return (status!.value === 'pir');
-        });
-    }
-
+  requiredSchema() {
+    return [SCHEMA_CODE.PIR];
   }
 
 }

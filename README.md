@@ -6,11 +6,8 @@
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![Build and Lint](https://github.com/0x5e/homebridge-tuya-platform/actions/workflows/build.yml/badge.svg)](https://github.com/0x5e/homebridge-tuya-platform/actions/workflows/build.yml)
 
-Tuya plugin for Hombridge, maintained by @0x5e, former employee of Tuya.
+Fork version of official Tuya Homebridge plugin. Brings a lot of bug fix and new device support.
 
-Published as [@0x5e/homebridge-tuya-platform](https://npmjs.com/package/@0x5e/homebridge-tuya-platform), currently in beta version.
-
-If beta version works fine for a while, it will be merged into the upstream repo in the future.
 
 ## Features
 
@@ -21,28 +18,26 @@ If beta version works fine for a while, it will be merged into the upstream repo
 - Less development costs for new accessory categroies.
 - Scene supported.
 - More supported devices.
-    - Air Quality Sensor
-    - Carbon Monoxide Sensor
-    - Carbon Dioxide Sensor
-    - Motion Sensor
-    - Light Sensor
-    - Water Detector
-    - Temperature and Humidity Sensor
-    - Human Presence Sensor
-    - Window
-    - Thermostat
-    - Irrigator
-- Reimplemented accessory code. Some bug fixed.
-    - Switch
-    - Outlet
-    - Lightbulb
-    - Fan
-    - Garage Door Opener
-    - Window Covering
-    - Smoke Sensor
-    - Contact Sensor
-    - Leak Sensor
-- For `Custom` project, `username` and `password` options are no longer need. The plugin will create a default user and authorize to all assets automatically.
+    - [Light] Spotlight (`sxd`)
+    - [Light] Motion Sensor Light (`gyd`)
+    - [Dimmer] Dual Dimmer (`tgq`)
+    - [Dimmer] Dual Dimmer Switch (`tgkg`)
+    - [Switch] Scene Light Socket (`qjdcz`)
+    - [Fanv2] Ceiling Fan Light (`fsd`)
+    - [Window] Door and Window Controller (`mc`)
+    - [WindowCovering] Curtain Switch (`clkg`)
+    - [Thermostat] Thermostat (`wk`)
+    - [Thermostat] Thermostat Valve (`wkf`)
+    - [Valve] Irrigator (`ggq`)
+    - [AirQualitySensor] PM2.5 Detector (`pm25`)
+    - [TemperatureHumiditySensor] Temperature and Humidity Sensor (`wsdcg`)
+    - [MotionSensor] Motion Sensor (`pir`)
+    - [HumanPresenceSensor] Human Presence Sensor (`hps`)
+    - [LightSensor] Light Sensor (`ldcg`)
+    - [CarbonMonoxideSensor] CO Detector (`cobj`)
+    - [CarbonDioxideSensor] CO2 Detector (`co2bj`)
+    - [LeakSensor] Water Detector (`sj`)
+    - [HumidifierDehumidifier] Humidifier (`jsq`)
 
 
 ## Supported Tuya Devices
@@ -77,8 +72,14 @@ The differenct between them is:
 If you are personal user and don't know which to choose, please use `Smart Home`.
 
 Before configuration, please goto [Tuya IoT Platform](https://iot.tuya.com)
-- Create a cloud develop project.
+- Create a cloud develop project, select the data center where your app account located. See [Mappings Between OEM App Accounts and Data Centers](https://developer.tuya.com/en/docs/iot/oem-app-data-center-distributed?id=Kafi0ku9l07qb) (If you don't know where it is, just select all.)
 - Go to `Project Page` > `Devices Panel` > `Link Tuya App Account`, link your app account.
+- Go to `Project Page` > `Service API` > `Go to Authorize`, subscribe the following APIs (it's free for trial):
+    - Authorization Token Management
+    - Device Status Notification
+    - IoT Core
+    - Industry Project Client Service (for "Custom" project)
+- **⚠️Extend the API trial period every 6 months here (first-time subscription only give 1 month): [Tuya IoT Platform -> Cloud -> Cloud Services -> IoT Core](https://iot.tuya.com/cloud/products/detail?abilityId=1442730014117204014&id=p1668587814138nv4h3n&abilityAuth=0&tab=1)**
 
 #### For "Custom" Project
 
@@ -98,6 +99,13 @@ Before configuration, please goto [Tuya IoT Platform](https://iot.tuya.com)
 - `options.username` - **required** : Username
 - `options.password` - **required** : Password
 - `options.appSchema` - **required** : App schema. 'tuyaSmart' for Tuya Smart App, 'smartlife' for Smart Life App.
+- `options.homeWhitelist` - **optional**: An array of integer home ID values to whitelist. If present, only includes devices matching this Home ID value.
+
+
+## Limitations
+- **⚠️Don't forget to extend the API trial period every 6 months. Maybe you can set up a reminder in calendar.**
+- The app account can't be used in multiple HomeBridge/HomeAssistant instance at the same time! Please consider using different app accounts instead.
+- The plugin requires the internet access to Tuya Cloud, and the lan protocol is not supported. See [#90](https://github.com/0x5e/homebridge-tuya-platform/issues/90)
 
 
 ## Troubleshooting

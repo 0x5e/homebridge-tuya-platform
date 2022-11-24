@@ -14,7 +14,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Ambiance Light | 氛围灯 | fwd | Lightbulb | ✅ |
 | String Lights | 灯串 | dc | Lightbulb | ✅ |
 | Strip Lights | 灯带 | dd | Lightbulb | ✅ |
-| Motion Sensor Light | 感应灯 | gyd | | |
+| Motion Sensor Light | 感应灯 | gyd | Lightbulb | ✅ |
 | Ceiling Fan Light | 风扇灯 | fsd | Fanv2 | ✅ |
 | Solar Light | 太阳能灯 | tyndj | | |
 | Dimmer | 调光器 | tgq | Lightbulb | ✅ |
@@ -68,7 +68,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Thermostat Valve | 温控阀 | wkf | Thermostat | ✅ |
 | Bathroom Heater | 浴霸 | yb | | |
 | Irrigator | 灌溉器 | ggq | Valve | ✅ |
-| Humidifier | 加湿器 | jsq | | |
+| Humidifier | 加湿器 | jsq | Humidifier Dehumidifier | ✅ |
 | Dehumidifier | 除湿机 | cs | | |
 | Fan | 风扇 | fs | Fanv2 | ✅ |
 | Water Purifier | 净水器 | js | | |

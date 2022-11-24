@@ -1,9 +1,10 @@
 import mqtt from 'mqtt';
 import { v4 as uuid_v4 } from 'uuid';
 import Crypto from 'crypto';
+import CryptoJS from 'crypto-js';
 
 import TuyaOpenAPI from './TuyaOpenAPI';
-import Logger from '../util/Logger';
+import Logger, { PrefixLogger } from '../util/Logger';
 
 const GCM_TAG_LENGTH = 16;
 
@@ -25,9 +26,9 @@ type TuyaMQTTCallback = (topic: string, protocol: number, data) => void;
 
 export default class TuyaOpenMQ {
 
-  public running = false;
   public client?: mqtt.MqttClient;
   public config?: TuyaMQTTConfig;
+  public version = '1.0';
   public messageListeners = new Set<TuyaMQTTCallback>();
   public linkId = uuid_v4();
 
@@ -37,16 +38,14 @@ export default class TuyaOpenMQ {
     public api: TuyaOpenAPI,
     public log: Logger = console,
   ) {
-
+    this.log = new PrefixLogger(log, TuyaOpenMQ.name);
   }
 
   start() {
-    this.running = true;
-    this._loop();
+    this._connect();
   }
 
   stop() {
-    this.running = false;
     if (this.timer) {
       clearTimeout(this.timer);
     }
@@ -56,22 +55,17 @@ export default class TuyaOpenMQ {
     }
   }
 
-  async _loop() {
+  async _connect() {
+    this.stop();
 
     const res = await this._getMQConfig('mqtt');
     if (res.success === false) {
-      this.log.warn('[TuyaOpenMQ] Get MQTT config failed. code = %s, msg = %s', res.code, res.msg);
-      this.stop();
+      this.log.warn('Get MQTT config failed. code = %s, msg = %s', res.code, res.msg);
       return;
     }
 
-    if (this.client) {
-      this.client.removeAllListeners();
-      this.client.end();
-    }
-
     const { url, client_id, username, password, expire_time, source_topic } = res.result;
-    this.log.debug('[TuyaOpenMQ] connecting to:', url);
+    this.log.debug('Connecting to:', url);
     const client = mqtt.connect(url, {
       clientId: client_id,
       username: username,
@@ -88,7 +82,7 @@ export default class TuyaOpenMQ {
     this.config = res.result;
 
     // reconnect every 2 hours required
-    this.timer = setTimeout(this._loop.bind(this), (expire_time - 60) * 1000);
+    this.timer = setTimeout(this._connect.bind(this), (expire_time - 60) * 1000);
 
   }
 
@@ -98,39 +92,41 @@ export default class TuyaOpenMQ {
       'link_id': this.linkId,
       'link_type': linkType,
       'topics': 'device',
-      'msg_encrypted_version': '2.0',
+      'msg_encrypted_version': this.version,
     });
     return res;
   }
 
   _onConnect() {
-    this.log.debug('[TuyaOpenMQ] connected');
+    this.log.debug('Connected');
   }
 
   _onError(error: Error) {
-    this.log.error('[TuyaOpenMQ] error:', error);
+    this.log.error('Error:', error);
   }
 
   _onEnd() {
-    this.log.debug('[TuyaOpenMQ] end');
+    this.log.debug('End');
   }
 
   private lastPayload?;
   async _onMessage(topic: string, payload: Buffer) {
     const { protocol, data, t } = JSON.parse(payload.toString());
     const messageData = this._decodeMQMessage(data, this.config!.password, t);
+    if (!messageData) {
+      this.log.warn('Message decode failed:', payload.toString());
+      return;
+    }
     let message = JSON.parse(messageData);
-    this.log.debug('[TuyaOpenMQ] onMessage:\ntopic = %s\nprotocol = %s\nmessage = %s', topic, protocol, JSON.stringify(message, null, 2));
+    this.log.debug('onMessage:\ntopic = %s\nprotocol = %s\nmessage = %s', topic, protocol, JSON.stringify(message, null, 2));
 
     // Check message order
     const currentPayload = { protocol, message, t };
     if (protocol === 4 && this.lastPayload && t < this.lastPayload.t) {
-      this.log.warn('[TuyaOpenMQ] Message received with wrong order.');
-      this.log.warn('[TuyaOpenMQ] LastMessage: dataId = %s, t = %s, %s',
-        this.lastPayload.message['dataId'], this.lastPayload.t, new Date(this.lastPayload.t).toISOString());
-      this.log.warn('[TuyaOpenMQ] CurrentMessage: dataId = %s, t = %s, %s',
-        message['dataId'], t, new Date(t).toISOString());
-      this.log.warn('[TuyaOpenMQ] Fallback to use API fetching the latest device status.');
+      this.log.warn('Message received with wrong order.');
+      this.log.warn('LastMessage: dataId = %s, t = %s', this.lastPayload.message['dataId'], this.lastPayload.t);
+      this.log.warn('CurrentMessage: dataId = %s, t = %s', message['dataId'], t);
+      this.log.warn('Fallback to use API fetching the latest device status.');
       const devId = message['devId'];
       const res = await this.api.get(`/v1.0/iot-03/devices/${devId}/status`);
       if (res.success === false) {
@@ -145,7 +141,16 @@ export default class TuyaOpenMQ {
     }
   }
 
-  _decodeMQMessage(data: string, password: string, t: number) {
+  _decodeMQMessage_1_0(b64msg: string, password: string) {
+    password = password.substring(8, 24);
+    const msg = CryptoJS.AES.decrypt(b64msg, CryptoJS.enc.Utf8.parse(password), {
+      mode: CryptoJS.mode.ECB,
+      padding: CryptoJS.pad.Pkcs7,
+    }).toString(CryptoJS.enc.Utf8);
+    return msg;
+  }
+
+  _decodeMQMessage_2_0(data: string, password: string, t: number) {
     // Base64 decoding generates Buffers
     const tmpbuffer = Buffer.from(data, 'base64');
     const key = password.substring(8, 24).toString();
@@ -166,6 +171,13 @@ export default class TuyaOpenMQ {
     return msg.toString('utf8');
   }
 
+  _decodeMQMessage(data: string, password: string, t: number) {
+    if (this.version === '2.0') {
+      return this._decodeMQMessage_2_0(data, password, t);
+    } else {
+      return this._decodeMQMessage_1_0(data, password);
+    }
+  }
 
   addMessageListener(listener: TuyaMQTTCallback) {
     this.messageListeners.add(listener);

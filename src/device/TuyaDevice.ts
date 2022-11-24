@@ -41,8 +41,7 @@ export type TuyaDeviceSchema = {
   // name: string;
   mode: TuyaDeviceSchemaMode;
   type: TuyaDeviceSchemaType;
-  values: string;
-  property: TuyaDeviceSchemaProperty; // JSON.parse(schema.values);
+  property: TuyaDeviceSchemaProperty;
 };
 
 export type TuyaDeviceStatus = {
@@ -84,6 +83,7 @@ export default class TuyaDevice {
 
   constructor(obj: Partial<TuyaDevice>) {
     Object.assign(this, obj);
+    this.status.sort((a, b) => a.code > b.code ? 1 : -1);
   }
 
 }

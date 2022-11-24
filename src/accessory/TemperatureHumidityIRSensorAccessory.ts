@@ -5,12 +5,11 @@ import { configureCurrentRelativeHumidity } from './characteristic/CurrentRelati
 import { configureCurrentTemperature } from './characteristic/CurrentTemperature';
 
 const SCHEMA_CODE = {
-  SENSOR_STATUS: ['va_temperature', 'va_humidity', 'humidity_value'],
   CURRENT_TEMP: ['va_temperature'],
   CURRENT_HUMIDITY: ['va_humidity', 'humidity_value'],
 };
 
-export default class TemperatureHumiditySensorAccessory extends BaseAccessory {
+export default class TemperatureHumidityIRSensorAccessory extends BaseAccessory {
 
   constructor(platform: TuyaPlatform, accessory: PlatformAccessory) {
     super(platform, accessory);
@@ -20,7 +19,9 @@ export default class TemperatureHumiditySensorAccessory extends BaseAccessory {
   }
 
   requiredSchema() {
-    return [SCHEMA_CODE.SENSOR_STATUS];
+    return [];
   }
+
+
 
 }
