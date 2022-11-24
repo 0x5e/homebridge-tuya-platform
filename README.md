@@ -37,6 +37,7 @@ Fork version of official Tuya Homebridge plugin. Brings a lot of bug fix and new
     - [CarbonDioxideSensor] CO2 Detector (`co2bj`)
     - [LeakSensor] Water Detector (`sj`)
     - [HumidifierDehumidifier] Humidifier (`jsq`)
+- Support overriding device config.
 
 
 ## Supported Tuya Devices
@@ -78,27 +79,30 @@ Before configuration, please goto [Tuya IoT Platform](https://iot.tuya.com)
     - Device Status Notification
     - IoT Core
     - Industry Project Client Service (for "Custom" project)
-- **⚠️Extend the API trial period every 6 months here (first-time subscription only give 1 month): [Tuya IoT Platform -> Cloud -> Cloud Services -> IoT Core](https://iot.tuya.com/cloud/products/detail?abilityId=1442730014117204014&id=p1668587814138nv4h3n&abilityAuth=0&tab=1)**
+- **⚠️Extend the API trial period every 6 months here (first-time subscription only give 1 month): [Tuya IoT Platform > Cloud > Cloud Services > IoT Core](https://iot.tuya.com/cloud/products/detail?abilityId=1442730014117204014&id=p1668587814138nv4h3n&abilityAuth=0&tab=1)**
 
 #### For "Custom" Project
 
 - `platform` - **required** : Must be 'TuyaPlatform'
 - `options.projectType` - **required** : Must be '1'
-- `options.endpoint` - **required** : Endpoint URL from [API Reference -> Endpoints](https://developer.tuya.com/en/docs/iot/api-request?id=Ka4a8uuo1j4t4#title-1-Endpoints) table.
-- `options.accessId` - **required** : Access ID from [Tuya IoT Platform -> Cloud Develop](https://iot.tuya.com/cloud)
-- `options.accessKey` - **required** : Access Secret from [Tuya IoT Platform -> Cloud Develop](https://iot.tuya.com/cloud)
+- `options.endpoint` - **required** : Endpoint URL from [API Reference > Endpoints](https://developer.tuya.com/en/docs/iot/api-request?id=Ka4a8uuo1j4t4#title-1-Endpoints) table.
+- `options.accessId` - **required** : Access ID from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
+- `options.accessKey` - **required** : Access Secret from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
 
 #### For "Smart Home" Project
 
 - `platform` - **required** : Must be 'TuyaPlatform'
 - `options.projectType` - **required** : Must be '2'
-- `options.accessId` - **required** : Access ID from [Tuya IoT Platform -> Cloud Develop](https://iot.tuya.com/cloud)
-- `options.accessKey` - **required** : Access Secret from [Tuya IoT Platform -> Cloud Develop](https://iot.tuya.com/cloud)
+- `options.accessId` - **required** : Access ID from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
+- `options.accessKey` - **required** : Access Secret from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
 - `options.countryCode` - **required** : Country Code
 - `options.username` - **required** : Username
 - `options.password` - **required** : Password
 - `options.appSchema` - **required** : App schema. 'tuyaSmart' for Tuya Smart App, 'smartlife' for Smart Life App.
 - `options.homeWhitelist` - **optional**: An array of integer home ID values to whitelist. If present, only includes devices matching this Home ID value.
+
+#### Advanced options
+See [ADVANCED_OPTIONS.md](./ADVANCED_OPTIONS.md)
 
 
 ## Limitations
@@ -109,15 +113,29 @@ Before configuration, please goto [Tuya IoT Platform](https://iot.tuya.com)
 
 ## Troubleshooting
 
-When your device is not working well, or not supported yet, please submit the issue and upload your device informations.
-If that's still not enough, you can enable the debug mode to get the detail log.
+The plugin only works with the standard devices with standard schemas defined at [Tuya IoT Development Platform Documentation > Cloud Development > Standard Instruction Set](https://developer.tuya.com/en/docs/iot/standarddescription?id=K9i5ql6waswzq).
+
+If your device is not working well, please do these steps:
+- Change device's control mode:
+    - Go to "[Tuya Platform Cloud Development](https://iot.tuya.com/cloud/) > Your Project > Devices > All Devices > View Devices by Product".
+    - Find your device-related product, click the "pencil" icon (Change Control Instruction Mode).
+    - <img width="500" alt="image" src="https://user-images.githubusercontent.com/5144674/202967707-8b934e05-36d6-4b42-bb7b-87e5b24474c4.png">
+    - The "Table of Instructions" shows the cloud mapping, you can know which DP Codes of your device is missing, you need to manually map them in the plugin config.
+    - <img width="500" alt="image" src="https://user-images.githubusercontent.com/5144674/202967528-4838f9a1-0547-4102-afbb-180dc9b198b1.png">
+    - Select "DP Instruction" and save.
+
+- Add [advanced device options](./ADVANCED_OPTIONS.md) into the config.
+
+If your device works perfect after setting device options, congratulations! Please share your config with others by submitting a PR. Examples here: xxx.
+
+If still not working, please enable homebridge debug mode, submit the issue with device info json and homebridge logs.
 
 #### Get Device Information
 
 After successful launching Homebridge, the device list will be saved inside Homebridge's persist path.
 You can get the file path from running log like this:
 ```
-[2022/11/3 18:37:43] [TuyaPlatform] Device list saved at ~/.homebridge/persist/TuyaDeviceList.{uid}.json
+[2022/11/3 18:37:43] [TuyaPlatform] Device list saved at /path/to/TuyaDeviceList.{uid}.json
 ```
 
 Please remove the sensitive data such as `ip`, `lon`, `lat`, `local_key`, `uid` before uploading.
