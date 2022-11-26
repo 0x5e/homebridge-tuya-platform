@@ -14,6 +14,7 @@ const SCHEMA_CODE = {
   COLOR: ['colour_data', 'colour_data_v2'],
   WORK_MODE: ['work_mode'],
   PIR: ['pir_state'],
+  PIR_ON: ['switch_pir'],
 };
 
 const DEFAULT_COLOR_TEMPERATURE_KELVIN = 6500;
@@ -75,7 +76,7 @@ export default class LightAccessory extends BaseAccessory {
         break;
     }
 
-    configureMotionDetected(this, undefined, this.getSchema(...SCHEMA_CODE.PIR));
+    this.configurePIR();
   }
 
   getLightService() {
@@ -98,11 +99,11 @@ export default class LightAccessory extends BaseAccessory {
       accessoryType = LightAccessoryType.RGBC;
     } else if (on && !temp && h && s && v) {
       accessoryType = LightAccessoryType.RGB;
-    } else if (on && bright && temp && !color) {
+    } else if (on && bright && temp) {
       accessoryType = LightAccessoryType.CW;
-    } else if (on && bright && !temp && !color) {
+    } else if (on && bright && !temp) {
       accessoryType = LightAccessoryType.C;
-    } else if (on && !bright && !temp && !color) {
+    } else if (on && !bright && !temp) {
       accessoryType = LightAccessoryType.Normal;
     } else {
       accessoryType = LightAccessoryType.Unknown;
@@ -314,4 +315,16 @@ export default class LightAccessory extends BaseAccessory {
       });
   }
 
+  configurePIR() {
+    const onSchema = this.getSchema(...SCHEMA_CODE.PIR_ON);
+    if (onSchema) {
+      const service = this.accessory.getService(onSchema.code)
+        || this.accessory.addService(this.Service.Switch, onSchema.code, onSchema.code);
+      configureOn(this, service, onSchema);
+    }
+
+    const motionSchema = this.getSchema(...SCHEMA_CODE.PIR);
+    configureMotionDetected(this, undefined, motionSchema);
+
+  }
 }
