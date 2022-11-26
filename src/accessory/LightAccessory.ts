@@ -19,13 +19,13 @@ const SCHEMA_CODE = {
 const DEFAULT_COLOR_TEMPERATURE_KELVIN = 6500;
 
 enum LightAccessoryType {
-  Unknown = -1,
-  Normal = 0, // Normal Accessory, similar to SwitchAccessory, OutletAccessory.
-  C = 1, // Accessory with brightness.
-  CW = 2, // Accessory with brightness and color temperature (Cold and Warm).
-  RGB = 3, // Accessory with color (RGB <--> HSB).
-  RGBC = 4, // Accessory with color and brightness.
-  RGBCW = 5, // Accessory with color, brightness and color temperature (two work mode).
+  Unknown = 'Unknown',
+  Normal = 'Normal', // Normal Accessory, similar to SwitchAccessory, OutletAccessory.
+  C = 'C', // Accessory with brightness.
+  CW = 'CW', // Accessory with brightness and color temperature (Cold and Warm).
+  RGB = 'RGB', // Accessory with color (RGB <--> HSB).
+  RGBC = 'RGBC', // Accessory with color and brightness.
+  RGBCW = 'RGBCW', // Accessory with color, brightness and color temperature (two work mode).
 }
 
 type TuyaDeviceSchemaColorProperty = {
@@ -43,7 +43,10 @@ export default class LightAccessory extends BaseAccessory {
   ) {
     super(platform, accessory);
 
-    switch (this.getAccessoryType()) {
+    const type = this.getAccessoryType();
+    this.log.info('Light Accessory type:', type);
+
+    switch (type) {
       case LightAccessoryType.Normal:
         configureOn(this, this.getLightService(), this.getSchema(...SCHEMA_CODE.ON));
         break;
