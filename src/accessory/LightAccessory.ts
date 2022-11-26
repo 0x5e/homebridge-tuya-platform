@@ -13,6 +13,7 @@ const SCHEMA_CODE = {
   COLOR_TEMP: ['temp_value', 'temp_value_v2'],
   COLOR: ['colour_data', 'colour_data_v2'],
   WORK_MODE: ['work_mode'],
+  PIR: ['pir_state'],
 };
 
 const DEFAULT_COLOR_TEMPERATURE_KELVIN = 6500;
@@ -71,7 +72,7 @@ export default class LightAccessory extends BaseAccessory {
         break;
     }
 
-    configureMotionDetected(this);
+    configureMotionDetected(this, undefined, this.getSchema(...SCHEMA_CODE.PIR));
   }
 
   getLightService() {
