@@ -1,11 +1,10 @@
 import { TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty, TuyaDeviceSchemaType } from '../device/TuyaDevice';
 import { limit, remap } from '../util/util';
 import BaseAccessory from './BaseAccessory';
-import { configureActive } from './characteristic/Active';
 import { configureOn } from './characteristic/On';
 
 const SCHEMA_CODE = {
-  FAN_ACTIVE: ['switch_fan', 'fan_switch', 'switch'],
+  FAN_ON: ['switch_fan', 'fan_switch', 'switch'],
   FAN_DIRECTION: ['fan_direction'],
   FAN_SPEED: ['fan_speed'],
   FAN_SPEED_LEVEL: ['fan_speed_enum', 'fan_speed'],
@@ -16,12 +15,15 @@ const SCHEMA_CODE = {
 export default class FanAccessory extends BaseAccessory {
 
   requiredSchema() {
-    return [SCHEMA_CODE.FAN_ACTIVE];
+    return [SCHEMA_CODE.FAN_ON];
   }
 
   configureServices() {
 
-    configureActive(this, this.fanService(), this.getSchema(...SCHEMA_CODE.FAN_ACTIVE));
+    const oldService = this.accessory.getService(this.Service.Fanv2);
+    oldService && this.accessory.removeService(oldService);
+
+    configureOn(this, this.fanService(), this.getSchema(...SCHEMA_CODE.FAN_ON));
     if (this.getFanSpeedSchema()) {
       this.configureRotationSpeed();
     } else if (this.getFanSpeedLevelSchema()) {
@@ -38,8 +40,8 @@ export default class FanAccessory extends BaseAccessory {
 
 
   fanService() {
-    return this.accessory.getService(this.Service.Fanv2)
-      || this.accessory.addService(this.Service.Fanv2);
+    return this.accessory.getService(this.Service.Fan)
+      || this.accessory.addService(this.Service.Fan);
   }
 
   lightService() {
@@ -105,7 +107,7 @@ export default class FanAccessory extends BaseAccessory {
   }
 
   configureRotationSpeedOn() {
-    const schema = this.getSchema(...SCHEMA_CODE.FAN_ACTIVE);
+    const schema = this.getSchema(...SCHEMA_CODE.FAN_ON);
     if (!schema) {
       return;
     }
