@@ -1,4 +1,4 @@
-import { PlatformAccessory } from 'homebridge';
+import { HAPStatus, PlatformAccessory } from 'homebridge';
 import TuyaHomeDeviceManager from '../device/TuyaHomeDeviceManager';
 import { TuyaPlatform } from '../platform';
 import BaseAccessory from './BaseAccessory';
@@ -14,15 +14,17 @@ export default class SceneAccessory extends BaseAccessory {
     service.getCharacteristic(this.Characteristic.On)
       .onGet(() => false)
       .onSet(async (value) => {
-        if (value === true) {
-          const deviceManager = this.platform.deviceManager as TuyaHomeDeviceManager;
-          const res = await deviceManager.executeScene(this.device.owner_id, this.device.id);
-          if (res.success === false) {
-            this.log.warn('ExecuteScene failed. homeId = %s, code = %s, msg = %s', this.device.owner_id, res.code, res.msg);
-          }
-          setTimeout(() => {
-            service.getCharacteristic(this.Characteristic.On).updateValue(false);
-          }, 150);
+        if (value === false) {
+          return;
+        }
+        const deviceManager = this.platform.deviceManager as TuyaHomeDeviceManager;
+        const res = await deviceManager.executeScene(this.device.owner_id, this.device.id);
+        setTimeout(() => {
+          service.getCharacteristic(this.Characteristic.On).updateValue(false);
+        }, 150);
+        if (res.success === false) {
+          this.log.warn('ExecuteScene failed. homeId = %s, code = %s, msg = %s', this.device.owner_id, res.code, res.msg);
+          throw new this.platform.api.hap.HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
         }
       });
   }
