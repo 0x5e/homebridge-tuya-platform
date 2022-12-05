@@ -94,8 +94,8 @@
 							"functionBody": "return model.options.projectType === '2';"
 						}
 					},
-					"devices": {
-						"title": "Advanced Device Config",
+					"deviceOverrides": {
+						"title": "Device Overriding Configs",
 						"type": "array",
 						"items": {
 							"type": "object",
@@ -111,17 +111,27 @@
 									"description": "Category Code or `hidden`",
 									"type": "string"
 								},
-								"schemaTransform": {
-									"name": "Schema Transform Map",
+								"schema": {
+									"name": "Schema Overriding Configs",
 									"type": "array",
 									"properties": {
-										"key": {
-											"title": "Code",
+										"oldCode": {
+											"title": "Original Schema Code",
 											"type": "string",
 											"required": true
 										},
-										"value": {
-
+										"code": {
+											"title": "New Schema Code",
+											"type": "string",
+											"required": true
+										},
+										"type": {
+											"title": "New Schema Type",
+											"type": "string"
+										},
+										"property": {
+											"title": "New Schema Property",
+											"type": "object"
 										}
 									}
 								}

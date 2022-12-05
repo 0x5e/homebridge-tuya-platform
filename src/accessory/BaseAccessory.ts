@@ -3,7 +3,7 @@
 import { PlatformAccessory, Service, Characteristic } from 'homebridge';
 import { debounce } from 'debounce';
 
-import { TuyaDeviceSchemaMode, TuyaDeviceStatus } from '../device/TuyaDevice';
+import { TuyaDeviceSchema, TuyaDeviceSchemaMode, TuyaDeviceSchemaProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
 import { TuyaPlatform } from '../platform';
 import { limit } from '../util/util';
 import { PrefixLogger } from '../util/Logger';
@@ -105,9 +105,34 @@ export default class BaseAccessory {
   }
 
 
+  private getOriginalSchema(code: string) {
+    return this.device.schema.find(schema => schema.code === code);
+  }
+
+  private getOverridedSchema(code: string) {
+    const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, code);
+    if (!schemaConfig) {
+      return undefined;
+    }
+
+    const oldSchema = this.device.schema.find(schema => schema.code === schemaConfig.oldCode);
+    if (!oldSchema) {
+      return undefined;
+    }
+
+    const schema = {
+      code,
+      mode: oldSchema.mode,
+      type: schemaConfig.type || oldSchema.type,
+      property: schemaConfig.property || oldSchema.property,
+    } as TuyaDeviceSchema;
+
+    return schema;
+  }
+
   getSchema(...codes: string[]) {
     for (const code of codes) {
-      const schema = this.device.schema.find(schema => schema.code === code);
+      const schema = this.getOriginalSchema(code) || this.getOverridedSchema(code);
       if (!schema) {
         continue;
       }
@@ -123,8 +148,35 @@ export default class BaseAccessory {
     return undefined;
   }
 
-  getStatus(code: string) {
+  private getOriginalStatus(code: string) {
     return this.device.status.find(status => status.code === code);
+  }
+
+  private getOverridedStatus(code: string) {
+    const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, code);
+    if (!schemaConfig) {
+      return undefined;
+    }
+
+    const originalStatus = this.getOriginalStatus(schemaConfig.oldCode);
+    if (!originalStatus) {
+      return undefined;
+    }
+
+    const status = { code: schemaConfig.code, value: originalStatus.value } as TuyaDeviceStatus;
+    if (schemaConfig.onGet) {
+      const convert = (script, value) => {
+        eval(script);
+        return value;
+      };
+      status.value = convert(schemaConfig.onGet, originalStatus.value);
+    }
+
+    return status;
+  }
+
+  getStatus(code: string) {
+    return this.getOriginalStatus(code) || this.getOverridedStatus(code);
   }
 
   private sendQueue = new Map<string, TuyaDeviceStatus>();
@@ -135,6 +187,23 @@ export default class BaseAccessory {
   }, 100);
 
   async sendCommands(commands: TuyaDeviceStatus[], debounce = false) {
+
+    // convert to original commands
+    for (const command of commands) {
+      const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, command.code);
+      if (!schemaConfig) {
+        continue;
+      }
+
+      command.code = schemaConfig.oldCode;
+      if (schemaConfig.onSet) {
+        const convert = (script, value) => {
+          eval(script);
+          return value;
+        };
+        command.value = convert(schemaConfig.onSet, command.value);
+      }
+    }
 
     // Update cache immediately
     for (const newStatus of commands) {

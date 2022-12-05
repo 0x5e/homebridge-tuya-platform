@@ -131,15 +131,29 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
   }
 
   getDeviceConfig(device: TuyaDevice) {
-    if (!this.options.devices) {
+    if (!this.options.deviceOverrides) {
       return undefined;
     }
 
-    const deviceConfig = this.options.devices.find(config => config.id === device.id);
-    const productConfig = this.options.devices.find(config => config.id === device.product_id);
-    const globalConfig = this.options.devices.find(config => config.id === 'global');
+    const deviceConfig = this.options.deviceOverrides.find(config => config.id === device.id);
+    const productConfig = this.options.deviceOverrides.find(config => config.id === device.product_id);
+    const globalConfig = this.options.deviceOverrides.find(config => config.id === 'global');
 
     return deviceConfig || productConfig || globalConfig;
+  }
+
+  getDeviceSchemaConfig(device: TuyaDevice, code: string) {
+    const deviceConfig = this.getDeviceConfig(device);
+    if (!deviceConfig || !deviceConfig.schema) {
+      return undefined;
+    }
+
+    const schemaConfig = deviceConfig.schema.find(item => item.code === code);
+    if (!schemaConfig) {
+      return undefined;
+    }
+
+    return schemaConfig;
   }
 
   async initCustomProject() {
@@ -298,7 +312,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
 
   addAccessory(device: TuyaDevice) {
     const deviceConfig = this.getDeviceConfig(device);
-    if (deviceConfig) {
+    if (deviceConfig?.category) {
       this.log.warn('Override %o category to %o', device.name, deviceConfig.category);
       device.category = deviceConfig.category;
       if (deviceConfig.category === 'hidden') {

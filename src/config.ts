@@ -1,9 +1,19 @@
 import { PlatformConfig } from 'homebridge';
+import { TuyaDeviceSchemaProperty, TuyaDeviceSchemaType } from './device/TuyaDevice';
+
+export interface TuyaPlatformDeviceSchemaConfig {
+  oldCode: string;
+  code: string;
+  type: TuyaDeviceSchemaType;
+  property: TuyaDeviceSchemaProperty;
+  onGet: string;
+  onSet: string;
+}
 
 export interface TuyaPlatformDeviceConfig {
   id: string;
   category: string;
-  // schemaTransform: Array<object>;
+  schema: Array<TuyaPlatformDeviceSchemaConfig>;
 }
 
 export interface TuyaPlatformCustomConfigOptions {
@@ -13,7 +23,7 @@ export interface TuyaPlatformCustomConfigOptions {
   accessKey: string;
   username: string;
   password: string;
-  devices: Array<TuyaPlatformDeviceConfig>;
+  deviceOverrides: Array<TuyaPlatformDeviceConfig>;
 }
 
 export interface TuyaPlatformHomeConfigOptions {
@@ -25,7 +35,7 @@ export interface TuyaPlatformHomeConfigOptions {
   password: string;
   appSchema: string;
   homeWhitelist: Array<number>;
-  devices: Array<TuyaPlatformDeviceConfig>;
+  deviceOverrides: Array<TuyaPlatformDeviceConfig>;
 }
 
 export type TuyaPlatformConfigOptions = TuyaPlatformCustomConfigOptions | TuyaPlatformHomeConfigOptions;
@@ -39,7 +49,7 @@ export const customOptionsSchema = {
     endpoint: { type: 'string', format: 'url', required: true },
     accessId: { type: 'string', required: true },
     accessKey: { type: 'string', required: true },
-    devices: { 'type': 'array' },
+    deviceOverrides: { 'type': 'array' },
   },
 };
 
@@ -52,6 +62,6 @@ export const homeOptionsSchema = {
     password: { type: 'string', required: true },
     appSchema: { 'type': 'string', required: true },
     homeWhitelist: { 'type': 'array' },
-    devices: { 'type': 'array' },
+    deviceOverrides: { 'type': 'array' },
   },
 };

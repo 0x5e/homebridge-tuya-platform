@@ -1,18 +1,19 @@
-# Advanced Device Options
+# Advanced Device Configs
 
-- `options.devices` - **optional**: An array of device config objects used for overriding properties.
-- `options.devices[].id` - **required**: Device ID or Product ID.
+- `options.deviceOverrides` - **optional**: An array of device overriding config objects.
+- `options.deviceOverrides[].id` - **required**: Device ID or Product ID or `global`.
 <!--
-- `options.devices[].accessoryCategory` - **optional**: Accessory Category ID. Overriding this property can change accessory's icon. See: [Homebridge Plugin Documentation > Categories](https://developers.homebridge.io/#/categories)
+- `options.deviceOverrides[].accessoryCategory` - **optional**: Accessory Category ID. Overriding this property can change accessory's icon. See: [Homebridge Plugin Documentation > Categories](https://developers.homebridge.io/#/categories)
 -->
-- `options.devices[].category` - **optional**: Device category code. See [SUPPORTED_DEVICES.md](./SUPPORTED_DEVICES.md). Also you can use `hidden` to hide device or product. **⚠️Overriding this property may leads to unexpected behaviors and exceptions. Please remove accessory cache after change it.**
+- `options.deviceOverrides[].category` - **optional**: Device category code. See [SUPPORTED_DEVICES.md](./SUPPORTED_DEVICES.md). Also you can use `hidden` to hide device or product. **⚠️Overriding this property may leads to unexpected behaviors and exceptions. Please remove accessory cache after change it.**
 
-- `options.devices[].schemaTransform` - **optional**: Schema transform map. When your device have non-standard schemas, this is used for transform them.
-- `options.devices[].schemaTransform[code].code` - **optional**: New schema code.
-- `options.devices[].schemaTransform[code].type` - **optional**: New schema type. One of the `Boolean`, `Integer`, `Enum`, `Json`, `Raw`.
-- `options.devices[].schemaTransform[code].property` - **optional**: New schema property object. For `Integer` type, the object should contains `min`, `max`, `scale`, `step`; For `Enum` type, the object should contains `range`. For detail information, please see `TuyaDeviceSchemaProperty` in [TuyaDevice.ts](./src/device/TuyaDevice.ts).
-- `options.devices[].schemaTransform[code].onGet` - **optional**: A Javascript function to transform old value to new value. The function is called with one argument: `value`.
-- `options.devices[].schemaTransform[code].onSet` - **optional**: A Javascript function to transform new value to old value. The function is called with one argument: `value`.
+- `options.deviceOverrides[].schema` - **optional**: An array of schema overriding config objects. When your device have non-standard schemas, this is used for transform them.
+- `options.deviceOverrides[].schema[].oldCode` - **required**: Original Schema code.
+- `options.deviceOverrides[].schema[].newCode` - **required**: New Schema code.
+- `options.deviceOverrides[].schema[].type` - **optional**: New schema type. One of the `Boolean`, `Integer`, `Enum`, `String`, `Json`, `Raw`.
+- `options.deviceOverrides[].schema[].property` - **optional**: New schema property object. For `Integer` type, the object should contains `min`, `max`, `scale`, `step`; For `Enum` type, the object should contains `range`. For detail information, please see `TuyaDeviceSchemaProperty` in [TuyaDevice.ts](./src/device/TuyaDevice.ts).
+- `options.deviceOverrides[].schema[].onGet` - **optional**: A Javascript function to transform old value into new value. The function is called with one argument: `value`.
+- `options.deviceOverrides[].schema[].onSet` - **optional**: A Javascript function to transform new value into old value. The function is called with one argument: `value`.
 
 ## Examples
 
@@ -22,7 +23,7 @@
 {
   "options": {
     // ...
-    "devices": [{
+    "deviceOverrides": [{
       "id": "{device_id}",
       "category": "hidden"
     }]
@@ -36,13 +37,12 @@
 {
   "options": {
     // ...
-    "devices": [{
+    "deviceOverrides": [{
       "id": "{device_id}",
-      "schemaTransform": {
-        "{oldCode}": {
+      "schema": [{
+          "oldCode": "{oldCode}",
           "code": "{newCode}",
-        }
-      }
+      }]
     }]
   }
 }
@@ -56,15 +56,15 @@ If you want to convert a enum schema as a switch, you can do it like this:
 {
   "options": {
     // ...
-    "devices": [{
+    "deviceOverrides": [{
       "id": "{device_id}",
-      "schemaTransform": {
-        "{oldCode}": {
-          "type": "Boolean",
-          "onGet": "return (value === 'open') ? true : false;",
-          "onSet": "return (value === true) ? 'open' : 'close';",
-        }
-      }
+      "schema": [{
+        "oldCode": "{oldCode}",
+        "code": "{newCode}",
+        "type": "Boolean",
+        "onGet": "return (value === 'open') ? true : false;",
+        "onSet": "return (value === true) ? 'open' : 'close';",
+      }]
     }]
   }
 }
@@ -84,20 +84,20 @@ After transform the value using `onGet` and `onSet`, the `property` should be ch
 {
   "options": {
     // ...
-    "devices": [{
+    "deviceOverrides": [{
       "id": "{device_id}",
-      "schemaTransform": {
-        "{oldCode}": {
-          "onGet": "return (value * 5);",
-          "onSet": "return (value / 5);",
-          "property": {
-            "min": 200,
-            "max": 500,
-            "scale": 1,
-            "step": 5,
-          },
+      "schema": [{
+        "oldCode": "{oldCode}",
+        "code": "{newCode}",
+        "onGet": "return (value * 5);",
+        "onSet": "return (value / 5);",
+        "property": {
+          "min": 200,
+          "max": 500,
+          "scale": 1,
+          "step": 5,
         }
-      }
+      }]
     }]
   }
 }
@@ -109,20 +109,20 @@ Or if you are not familiar with `scale`, just simply ignore the decimal part is 
 {
   "options": {
     // ...
-    "devices": [{
+    "deviceOverrides": [{
       "id": "{device_id}",
-      "schemaTransform": {
-        "{oldCode}": {
-          "onGet": "return Math.round(value / 2);",
-          "onSet": "return (value * 2);",
-          "property": {
-            "min": 20,
-            "max": 50,
-            "scale": 0,
-            "step": 1,
-          },
+      "schema": [{
+        "oldCode": "{oldCode}",
+        "code": "{newCode}",
+        "onGet": "return Math.round(value / 2);",
+        "onSet": "return (value * 2);",
+        "property": {
+          "min": 20,
+          "max": 50,
+          "scale": 0,
+          "step": 1,
         }
-      }
+      }]
     }]
   }
 }
