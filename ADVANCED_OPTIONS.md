@@ -2,7 +2,9 @@
 
 - `options.devices` - **optional**: An array of device config objects used for overriding properties.
 - `options.devices[].id` - **required**: Device ID or Product ID.
+<!--
 - `options.devices[].accessoryCategory` - **optional**: Accessory Category ID. Overriding this property can change accessory's icon. See: [Homebridge Plugin Documentation > Categories](https://developers.homebridge.io/#/categories)
+-->
 - `options.devices[].category` - **optional**: Device category code. See [SUPPORTED_DEVICES.md](./SUPPORTED_DEVICES.md). Also you can use `hidden` to hide device or product. **⚠️Overriding this property may leads to unexpected behaviors and exceptions. Please remove accessory cache after change it.**
 
 - `options.devices[].schemaTransform` - **optional**: Schema transform map. When your device have non-standard schemas, this is used for transform them.
