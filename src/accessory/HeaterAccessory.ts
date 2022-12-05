@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { PlatformAccessory } from 'homebridge';
 import { TuyaDeviceSchemaIntegerProperty } from '../device/TuyaDevice';
-import { TuyaPlatform } from '../platform';
 import { limit } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 import { configureActive } from './characteristic/Active';
 import { configureCurrentTemperature } from './characteristic/CurrentTemperature';
+import { configureLockPhysicalControls } from './characteristic/LockPhysicalControls';
+import { configureSwingMode } from './characteristic/SwingMode';
 
 const SCHEMA_CODE = {
   ACTIVE: ['switch'],
@@ -19,28 +19,26 @@ const SCHEMA_CODE = {
 
 export default class HeaterAccessory extends BaseAccessory {
 
-  constructor(platform: TuyaPlatform, accessory: PlatformAccessory) {
-    super(platform, accessory);
+  requiredSchema() {
+    return [SCHEMA_CODE.ACTIVE];
+  }
 
+  configureServices() {
     configureActive(this, this.mainService(), this.getSchema(...SCHEMA_CODE.ACTIVE));
     this.configureCurrentState();
     this.configureTargetState();
     configureCurrentTemperature(this, this.mainService(), this.getSchema(...SCHEMA_CODE.CURRENT_TEMP));
-    this.configureLock();
-    this.configureSwing();
+    configureLockPhysicalControls(this, this.mainService(), this.getSchema(...SCHEMA_CODE.LOCK));
+    configureSwingMode(this, this.mainService(), this.getSchema(...SCHEMA_CODE.SWING));
     this.configureHeatingThreshouldTemp();
     this.configureTempDisplayUnits();
   }
 
-  requiredSchema() {
-    return [SCHEMA_CODE.ACTIVE];
-  }
 
   mainService() {
     return this.accessory.getService(this.Service.HeaterCooler)
       || this.accessory.addService(this.Service.HeaterCooler);
   }
-
 
   configureCurrentState() {
     const schema = this.getSchema(...SCHEMA_CODE.WORK_STATE);
@@ -72,40 +70,6 @@ export default class HeaterAccessory extends BaseAccessory {
         // TODO
       })
       .setProps({ validValues });
-  }
-
-  configureLock() {
-    const schema = this.getSchema(...SCHEMA_CODE.LOCK);
-    if (!schema) {
-      return;
-    }
-
-    const { CONTROL_LOCK_DISABLED, CONTROL_LOCK_ENABLED } = this.Characteristic.LockPhysicalControls;
-    this.mainService().getCharacteristic(this.Characteristic.LockPhysicalControls)
-      .onGet(() => {
-        const status = this.getStatus(schema.code)!;
-        return (status.value as boolean) ? CONTROL_LOCK_ENABLED : CONTROL_LOCK_DISABLED;
-      })
-      .onSet(value => {
-        this.sendCommands([{ code: schema.code, value: (value === CONTROL_LOCK_ENABLED) ? true : false }]);
-      });
-  }
-
-  configureSwing() {
-    const schema = this.getSchema(...SCHEMA_CODE.SWING);
-    if (!schema) {
-      return;
-    }
-
-    const { SWING_DISABLED, SWING_ENABLED } = this.Characteristic.SwingMode;
-    this.mainService().getCharacteristic(this.Characteristic.SwingMode)
-      .onGet(() => {
-        const status = this.getStatus(schema.code)!;
-        return (status.value as boolean) ? SWING_ENABLED : SWING_DISABLED;
-      })
-      .onSet(value => {
-        this.sendCommands([{ code: schema.code, value: (value === SWING_ENABLED) ? true : false }]);
-      });
   }
 
   configureHeatingThreshouldTemp() {

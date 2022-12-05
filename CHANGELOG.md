@@ -1,6 +1,16 @@
 # Changelog
 
-## [1.6.0] - (unreleased)
+## [1.7.0] - (unreleased)
+
+### Added
+- Add scene support. (#118)
+- Add `sceneWhitelist` option for whitelisting scenes. (#118)
+
+### Changed
+- Support Ceiling Fan icon customize and Floor Fan `lock`, `swing` feature. (#131)
+
+
+## [1.6.0] - (2022.12.3)
 
 This version has been completely rewritten in TypeScript, brings a lot of bug fix and new device support.
 

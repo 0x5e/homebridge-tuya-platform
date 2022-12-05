@@ -27,6 +27,7 @@ import HumanPresenceSensorAccessory from './HumanPresenceSensorAccessory';
 import HumidifierAccessory from './HumidifierAccessory';
 import AirPurifierAccessory from './AirPurifierAccessory';
 import TemperatureHumidityIRSensorAccessory from './TemperatureHumidityIRSensorAccessory';
+import SceneAccessory from './SceneAccessory';
 
 
 export default class AccessoryFactory {
@@ -126,12 +127,12 @@ export default class AccessoryFactory {
       case 'jsq':
         handler = new HumidifierAccessory(platform, accessory);
         break;
-
+      case 'scene':
+        handler = new SceneAccessory(platform, accessory);
+        break;
     }
 
-    if (handler && handler.checkRequirements && !handler.checkRequirements()) {
-      handler = undefined;
-    }
+    handler && handler.checkRequirements() && handler.configureServices();
 
     if (!handler) {
       platform.log.warn(`Unsupported device: ${device.name}.`);
