@@ -1,4 +1,4 @@
-# Advanced Device Configs
+# Advanced Options
 
 - `options.deviceOverrides` - **optional**: An array of device overriding config objects.
 - `options.deviceOverrides[].id` - **required**: Device ID or Product ID or `global`.
@@ -12,8 +12,8 @@
 - `options.deviceOverrides[].schema[].newCode` - **required**: New Schema code.
 - `options.deviceOverrides[].schema[].type` - **optional**: New schema type. One of the `Boolean`, `Integer`, `Enum`, `String`, `Json`, `Raw`.
 - `options.deviceOverrides[].schema[].property` - **optional**: New schema property object. For `Integer` type, the object should contains `min`, `max`, `scale`, `step`; For `Enum` type, the object should contains `range`. For detail information, please see `TuyaDeviceSchemaProperty` in [TuyaDevice.ts](./src/device/TuyaDevice.ts).
-- `options.deviceOverrides[].schema[].onGet` - **optional**: A Javascript function to transform old value into new value. The function is called with one argument: `value`.
-- `options.deviceOverrides[].schema[].onSet` - **optional**: A Javascript function to transform new value into old value. The function is called with one argument: `value`.
+- `options.deviceOverrides[].schema[].onGet` - **optional**: An one-line JavaScript code convert old value to new value. The function is called with one argument: `value`.
+- `options.deviceOverrides[].schema[].onSet` - **optional**: An one-line JavaScript code convert new value to old value. The function is called with one argument: `value`.
 
 ## Examples
 
@@ -62,8 +62,8 @@ If you want to convert a enum schema as a switch, you can do it like this:
         "oldCode": "{oldCode}",
         "code": "{newCode}",
         "type": "Boolean",
-        "onGet": "return (value === 'open') ? true : false;",
-        "onSet": "return (value === true) ? 'open' : 'close';",
+        "onGet": "(value === 'open') ? true : false;",
+        "onSet": "(value === true) ? 'open' : 'close';",
       }]
     }]
   }
@@ -89,8 +89,8 @@ After transform the value using `onGet` and `onSet`, the `property` should be ch
       "schema": [{
         "oldCode": "{oldCode}",
         "code": "{newCode}",
-        "onGet": "return (value * 5);",
-        "onSet": "return (value / 5);",
+        "onGet": "(value * 5);",
+        "onSet": "(value / 5);",
         "property": {
           "min": 200,
           "max": 500,
@@ -114,8 +114,8 @@ Or if you are not familiar with `scale`, just simply ignore the decimal part is 
       "schema": [{
         "oldCode": "{oldCode}",
         "code": "{newCode}",
-        "onGet": "return Math.round(value / 2);",
-        "onSet": "return (value * 2);",
+        "onGet": "Math.round(value / 2);",
+        "onSet": "(value * 2);",
         "property": {
           "min": 20,
           "max": 50,
