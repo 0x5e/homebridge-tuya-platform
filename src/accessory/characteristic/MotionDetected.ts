@@ -1,5 +1,5 @@
 import { Service } from 'homebridge';
-import { TuyaDeviceSchema } from '../../device/TuyaDevice';
+import { TuyaDeviceSchema, TuyaDeviceSchemaType } from '../../device/TuyaDevice';
 import BaseAccessory from '../BaseAccessory';
 
 export function configureMotionDetected(accessory: BaseAccessory, service?: Service, schema?: TuyaDeviceSchema) {
@@ -15,6 +15,12 @@ export function configureMotionDetected(accessory: BaseAccessory, service?: Serv
   service.getCharacteristic(accessory.Characteristic.MotionDetected)
     .onGet(() => {
       const status = accessory.getStatus(schema.code)!;
-      return (status.value === 'pir');
+      if (schema.type === TuyaDeviceSchemaType.Enum) { // pir
+        return (status.value === 'pir');
+      } else if (schema.type === TuyaDeviceSchemaType.Raw) { // camera
+        const url = Buffer.from(status.value as string, 'base64').toString('binary');
+        return url.length > 0;
+      }
+      return false;
     });
 }
