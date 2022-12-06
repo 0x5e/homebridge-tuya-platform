@@ -16,7 +16,7 @@ const MANUFACTURER = 'Tuya Inc.';
  * Tuya Standard Instruction Set Documentation:
  *   https://developer.tuya.com/en/docs/iot/standarddescription?id=K9i5ql6waswzq
  */
-export default class BaseAccessory {
+class BaseAccessory {
   public readonly Service: typeof Service = this.platform.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.platform.api.hap.Characteristic;
 
@@ -105,34 +105,9 @@ export default class BaseAccessory {
   }
 
 
-  private getOriginalSchema(code: string) {
-    return this.device.schema.find(schema => schema.code === code);
-  }
-
-  private getOverridedSchema(code: string) {
-    const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, code);
-    if (!schemaConfig) {
-      return undefined;
-    }
-
-    const oldSchema = this.device.schema.find(schema => schema.code === schemaConfig.oldCode);
-    if (!oldSchema) {
-      return undefined;
-    }
-
-    const schema = {
-      code,
-      mode: oldSchema.mode,
-      type: schemaConfig.type || oldSchema.type,
-      property: schemaConfig.property || oldSchema.property,
-    } as TuyaDeviceSchema;
-
-    return schema;
-  }
-
   getSchema(...codes: string[]) {
     for (const code of codes) {
-      const schema = this.getOriginalSchema(code) || this.getOverridedSchema(code);
+      const schema = this.device.schema.find(schema => schema.code === code);
       if (!schema) {
         continue;
       }
@@ -148,35 +123,8 @@ export default class BaseAccessory {
     return undefined;
   }
 
-  private getOriginalStatus(code: string) {
-    return this.device.status.find(status => status.code === code);
-  }
-
-  private getOverridedStatus(code: string) {
-    const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, code);
-    if (!schemaConfig) {
-      return undefined;
-    }
-
-    const originalStatus = this.getOriginalStatus(schemaConfig.oldCode);
-    if (!originalStatus) {
-      return undefined;
-    }
-
-    const status = { code: schemaConfig.code, value: originalStatus.value } as TuyaDeviceStatus;
-    if (schemaConfig.onGet) {
-      const convert = (script, value) => {
-        eval(script);
-        return value;
-      };
-      status.value = convert(schemaConfig.onGet, originalStatus.value);
-    }
-
-    return status;
-  }
-
   getStatus(code: string) {
-    return this.getOriginalStatus(code) || this.getOverridedStatus(code);
+    return this.device.status.find(status => status.code === code);
   }
 
   private sendQueue = new Map<string, TuyaDeviceStatus>();
@@ -187,23 +135,6 @@ export default class BaseAccessory {
   }, 100);
 
   async sendCommands(commands: TuyaDeviceStatus[], debounce = false) {
-
-    // convert to original commands
-    for (const command of commands) {
-      const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, command.code);
-      if (!schemaConfig) {
-        continue;
-      }
-
-      command.code = schemaConfig.oldCode;
-      if (schemaConfig.onSet) {
-        const convert = (script, value) => {
-          eval(script);
-          return value;
-        };
-        command.value = convert(schemaConfig.onSet, command.value);
-      }
-    }
 
     // Update cache immediately
     for (const newStatus of commands) {
@@ -270,4 +201,99 @@ export default class BaseAccessory {
     }
   }
 
+}
+
+// Overriding getSchema, getStatus, sendCommands
+export default class OverridedBaseAccessory extends BaseAccessory {
+
+  private getOverridedSchema(code: string) {
+    const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, code);
+    if (!schemaConfig) {
+      return undefined;
+    }
+
+    const oldSchema = this.device.schema.find(schema => schema.code === schemaConfig.oldCode);
+    if (!oldSchema) {
+      return undefined;
+    }
+
+    const schema = {
+      code,
+      mode: oldSchema.mode,
+      type: schemaConfig.type || oldSchema.type,
+      property: schemaConfig.property || oldSchema.property,
+    } as TuyaDeviceSchema;
+
+    this.log.debug('Override schema %o => %o', oldSchema, schema);
+
+    return schema;
+  }
+
+  getSchema(...codes: string[]) {
+    for (const code of codes) {
+      const schema = this.getOverridedSchema(code) || super.getSchema(code);
+      if (!schema) {
+        continue;
+      }
+      return schema;
+    }
+    return undefined;
+  }
+
+
+  private getOverridedStatus(code: string) {
+    const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, code);
+    if (!schemaConfig) {
+      return undefined;
+    }
+
+    const originalStatus = super.getStatus(schemaConfig.oldCode);
+    if (!originalStatus) {
+      return undefined;
+    }
+
+    const status = { code: schemaConfig.code, value: originalStatus.value } as TuyaDeviceStatus;
+    if (schemaConfig.onGet) {
+      const convert = (script, value) => {
+        eval(script);
+        return value;
+      };
+      status.value = convert(schemaConfig.onGet, originalStatus.value);
+    }
+
+    this.log.debug('Override status %o => %o', originalStatus, status);
+
+    return status;
+  }
+
+  getStatus(code: string) {
+    return this.getOverridedStatus(code) || super.getStatus(code);
+  }
+
+
+  async sendCommands(commands: TuyaDeviceStatus[], debounce?: boolean) {
+
+    // convert to original commands
+    for (const command of commands) {
+      const schemaConfig = this.platform.getDeviceSchemaConfig(this.device, command.code);
+      if (!schemaConfig) {
+        continue;
+      }
+
+      const originalCommand = { code: schemaConfig.oldCode, value: command.value } as TuyaDeviceStatus;
+      if (schemaConfig.onSet) {
+        const convert = (script, value) => {
+          eval(script);
+          return value;
+        };
+        originalCommand.value = convert(schemaConfig.onSet, command.value);
+      }
+
+      this.log.debug('Override command %o => %o', command, originalCommand);
+      command.code = originalCommand.code;
+      command.value = originalCommand.value;
+    }
+
+    super.sendCommands(commands, debounce);
+  }
 }
