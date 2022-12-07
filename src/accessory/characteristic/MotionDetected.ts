@@ -19,7 +19,10 @@ export function configureMotionDetected(accessory: BaseAccessory, service?: Serv
         return (status.value === 'pir');
       } else if (schema.type === TuyaDeviceSchemaType.Raw) { // camera
         const url = Buffer.from(status.value as string, 'base64').toString('binary');
-        return url.length > 0;
+        if (url.length > 0) {
+          accessory.log.info('Motion event picture:', url);
+          return true;
+        }
       }
       return false;
     });

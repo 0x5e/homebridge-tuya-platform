@@ -1,4 +1,4 @@
-import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
+import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceSchemaType, TuyaDeviceStatus } from '../device/TuyaDevice';
 import { limit, remap } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 import { configureMotionDetected } from './characteristic/MotionDetected';
@@ -7,7 +7,7 @@ import { configureOn } from './characteristic/On';
 const SCHEMA_CODE = {
   MOTION_ON: ['motion_switch'],
   MOTION_DETECT: ['movement_detect_pic'],
-  DOORBELL: ['doorbell_ring_exist'],
+  DOORBELL: ['doorbell_ring_exist', 'doorbell_pic'],
   LIGHT_ON: ['floodlight_switch'],
   LIGHT_BRIGHTNESS: ['floodlight_lightness'],
 };
@@ -96,24 +96,24 @@ export default class MotionSensorAccessory extends BaseAccessory {
       return;
     }
 
-    const { SINGLE_PRESS, DOUBLE_PRESS, LONG_PRESS } = this.Characteristic.ProgrammableSwitchEvent;
     const characteristic = this.getDoorbellService().getCharacteristic(this.Characteristic.ProgrammableSwitchEvent);
-
-    const _status = status.find(_status => _status.code === schema.code)!;
-
-    let value: number;
-    if (_status.value === 'click' || _status.value === 'single_click') {
-      value = SINGLE_PRESS;
-    } else if (_status.value === 'double_click') {
-      value = DOUBLE_PRESS;
-    } else if (_status.value === 'press' || _status.value === 'long_press') {
-      value = LONG_PRESS;
-    } else {
+    const _status = status.find(_status => _status.code === schema.code);
+    if (!_status) {
       return;
     }
 
-    this.log.debug('ProgrammableSwitchEvent updateValue: %o %o', _status.code, value);
-    characteristic.updateValue(value);
+    if (schema.type === TuyaDeviceSchemaType.Boolean && _status.value === false) { // doorbell_ring_exist
+      return;
+    } else if (schema.type === TuyaDeviceSchemaType.Raw) { // doorbell_pic
+      const url = Buffer.from(_status.value as string, 'base64').toString('binary');
+      if (url.length === 0) {
+        return;
+      }
+      this.log.info('Doorbell picture:', url);
+    }
+
+    const { SINGLE_PRESS } = this.Characteristic.ProgrammableSwitchEvent;
+    characteristic.updateValue(SINGLE_PRESS);
 
   }
 
