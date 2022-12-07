@@ -16,6 +16,6 @@ export function configureOccupancyDetected(accessory: BaseAccessory, service?: S
   service.getCharacteristic(accessory.Characteristic.OccupancyDetected)
     .onGet(() => {
       const status = accessory.getStatus(schema.code)!;
-      return (status.value === 'presence' || status.value === '1') ? OCCUPANCY_DETECTED : OCCUPANCY_NOT_DETECTED;
+      return (status.value === 'presence') ? OCCUPANCY_DETECTED : OCCUPANCY_NOT_DETECTED;
     });
 }
