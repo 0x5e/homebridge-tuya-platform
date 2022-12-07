@@ -75,7 +75,13 @@ export default class MotionSensorAccessory extends BaseAccessory {
       return;
     }
 
-    this.getDoorbellService();
+    const { SINGLE_PRESS } = this.Characteristic.ProgrammableSwitchEvent;
+    this.getDoorbellService()
+      .getCharacteristic(this.Characteristic.ProgrammableSwitchEvent)
+      .setProps({
+        minValue: SINGLE_PRESS,
+        maxValue: SINGLE_PRESS,
+      });
   }
 
   getLightService() {
