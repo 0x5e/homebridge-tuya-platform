@@ -1,4 +1,4 @@
-import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceSchemaType, TuyaDeviceStatus } from '../device/TuyaDevice';
+import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
 import { limit, remap } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 import { configureMotionDetected } from './characteristic/MotionDetected';
