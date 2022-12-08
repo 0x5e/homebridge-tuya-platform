@@ -3,6 +3,7 @@ import { limit, remap } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 import { configureMotionDetected } from './characteristic/MotionDetected';
 import { configureOn } from './characteristic/On';
+import { configureProgrammableSwitchEvent, onProgrammableSwitchEvent } from './characteristic/ProgrammableSwitchEvent';
 
 const SCHEMA_CODE = {
   MOTION_ON: ['motion_switch'],
@@ -75,13 +76,7 @@ export default class MotionSensorAccessory extends BaseAccessory {
       return;
     }
 
-    const { SINGLE_PRESS } = this.Characteristic.ProgrammableSwitchEvent;
-    this.getDoorbellService()
-      .getCharacteristic(this.Characteristic.ProgrammableSwitchEvent)
-      .setProps({
-        minValue: SINGLE_PRESS,
-        maxValue: SINGLE_PRESS,
-      });
+    configureProgrammableSwitchEvent(this, this.getDoorbellService(), schema);
   }
 
   getLightService() {
@@ -102,25 +97,12 @@ export default class MotionSensorAccessory extends BaseAccessory {
       return;
     }
 
-    const characteristic = this.getDoorbellService().getCharacteristic(this.Characteristic.ProgrammableSwitchEvent);
     const _status = status.find(_status => _status.code === schema.code);
     if (!_status) {
       return;
     }
 
-    if (schema.type === TuyaDeviceSchemaType.Boolean && _status.value === false) { // doorbell_ring_exist
-      return;
-    } else if (schema.type === TuyaDeviceSchemaType.Raw) { // doorbell_pic
-      const url = Buffer.from(_status.value as string, 'base64').toString('binary');
-      if (url.length === 0) {
-        return;
-      }
-      this.log.info('Doorbell picture:', url);
-    }
-
-    const { SINGLE_PRESS } = this.Characteristic.ProgrammableSwitchEvent;
-    characteristic.updateValue(SINGLE_PRESS);
-
+    onProgrammableSwitchEvent(this, this.getDoorbellService(), _status);
   }
 
 }
