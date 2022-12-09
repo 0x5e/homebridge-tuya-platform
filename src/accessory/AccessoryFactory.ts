@@ -7,6 +7,7 @@ import LightAccessory from './LightAccessory';
 import DimmerAccessory from './DimmerAccessory';
 import OutletAccessory from './OutletAccessory';
 import SwitchAccessory from './SwitchAccessory';
+import WirelessSwitchAccessory from './WirelessSwitchAccessory';
 import SceneSwitchAccessory from './SceneSwitchAccessory';
 import FanAccessory from './FanAccessory';
 import GarageDoorAccessory from './GarageDoorAccessory';
@@ -26,6 +27,7 @@ import MotionSensorAccessory from './MotionSensorAccessory';
 import AirQualitySensorAccessory from './AirQualitySensorAccessory';
 import HumanPresenceSensorAccessory from './HumanPresenceSensorAccessory';
 import HumidifierAccessory from './HumidifierAccessory';
+import DehumidifierAccessory from './DehumidifierAccessory';
 import AirPurifierAccessory from './AirPurifierAccessory';
 import TemperatureHumidityIRSensorAccessory from './TemperatureHumidityIRSensorAccessory';
 import SceneAccessory from './SceneAccessory';
@@ -49,6 +51,7 @@ export default class AccessoryFactory {
       case 'dc':
       case 'dd':
       case 'gyd':
+      case 'tyndj':
       case 'sxd':
         handler = new LightAccessory(platform, accessory);
         break;
@@ -64,6 +67,9 @@ export default class AccessoryFactory {
       case 'tdq':
       case 'qjdcz':
         handler = new SwitchAccessory(platform, accessory);
+        break;
+      case 'wxkg':
+        handler = new WirelessSwitchAccessory(platform, accessory);
         break;
       case 'cjkg':
         handler = new SceneSwitchAccessory(platform, accessory);
@@ -130,6 +136,9 @@ export default class AccessoryFactory {
         break;
       case 'jsq':
         handler = new HumidifierAccessory(platform, accessory);
+        break;
+      case 'cs':
+        handler = new DehumidifierAccessory(platform, accessory);
         break;
       case 'scene':
         handler = new SceneAccessory(platform, accessory);

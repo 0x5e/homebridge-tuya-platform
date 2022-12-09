@@ -16,7 +16,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Strip Lights | 灯带 | dd | Lightbulb | ✅ |
 | Motion Sensor Light | 感应灯 | gyd | Lightbulb | ✅ |
 | Ceiling Fan Light | 风扇灯 | fsd | Fanv2 | ✅ |
-| Solar Light | 太阳能灯 | tyndj | | |
+| Solar Light | 太阳能灯 | tyndj | Lightbulb | ✅ |
 | Dimmer | 调光器 | tgq | Lightbulb | ✅ |
 | Remote Control | 遥控器 | ykq | | |
 | Spotlight | 射灯 | sxd | Lightbulb | ✅ |
@@ -35,7 +35,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Garage Door Opener | 车库门控制器 | ckmkzq | Garage Door Opener | ✅ |
 | Dimmer Switch | 调光开关 | tgkg | Lightbulb | ✅ |
 | Fan Switch | 风扇开关 | fskg | Fanv2 | ✅ |
-| Wireless Switch | 无线开关 | wxkg | | |
+| Wireless Switch | 无线开关 | wxkg | Stateless Programmable Switch | ✅ |
 | Secne Light Socket | 情景灯插座 | qjdcz | Switch | ✅ |
 
 
@@ -69,7 +69,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Bathroom Heater | 浴霸 | yb | | |
 | Irrigator | 灌溉器 | ggq | Valve | ✅ |
 | Humidifier | 加湿器 | jsq | Humidifier Dehumidifier | ✅ |
-| Dehumidifier | 除湿机 | cs | | |
+| Dehumidifier | 除湿机 | cs | Humidifier Dehumidifier | ✅ |
 | Fan | 风扇 | fs | Fanv2 | ✅ |
 | Water Purifier | 净水器 | js | | |
 | Electric Blanket | 电热毯 | dr | | |
