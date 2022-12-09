@@ -1,8 +1,10 @@
-import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
-import { limit, remap } from '../util/util';
-import BaseAccessory from './BaseAccessory';
-import { configureMotionDetected } from './characteristic/MotionDetected';
-import { configureOn } from './characteristic/On';
+
+import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus, TuyaDeviceSchemaType } from "../device/TuyaDevice";
+import { TuyaStreamingDelegate } from "../util/TuyaStreamDelegate";
+import { remap, limit } from "../util/util";
+import BaseAccessory from "./BaseAccessory";
+import { configureMotionDetected } from "./characteristic/MotionDetected";
+import { configureOn } from "./characteristic/On";
 import { configureProgrammableSwitchEvent, onProgrammableSwitchEvent } from './characteristic/ProgrammableSwitchEvent';
 
 const SCHEMA_CODE = {
@@ -13,16 +15,18 @@ const SCHEMA_CODE = {
   LIGHT_BRIGHTNESS: ['floodlight_lightness'],
 };
 
-export default class MotionSensorAccessory extends BaseAccessory {
+export default class CameraAccessory extends BaseAccessory {
+  private stream: TuyaStreamingDelegate | undefined
 
   requiredSchema() {
     return [];
   }
 
   configureServices() {
+    this.configureDoorbell();
+    this.configureCamera();
     this.configureFloodLight();
     this.configureMotion();
-    this.configureDoorbell();
   }
 
   configureFloodLight() {
@@ -79,9 +83,18 @@ export default class MotionSensorAccessory extends BaseAccessory {
     configureProgrammableSwitchEvent(this, this.getDoorbellService(), schema);
   }
 
+  configureCamera() {
+    if (this.stream !== undefined) {
+      return;
+    }
+
+    this.stream = new TuyaStreamingDelegate(this);
+    this.accessory.configureController(this.stream.controller);
+  }
+  
   getLightService() {
     return this.accessory.getService(this.Service.Lightbulb)
-      || this.accessory.addService(this.Service.Lightbulb);
+      || this.accessory.addService(this.Service.Lightbulb, this.accessory.displayName + ' Floodlight');
   }
 
   getDoorbellService() {
