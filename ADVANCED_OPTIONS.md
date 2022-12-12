@@ -1,11 +1,13 @@
 # Advanced Options
 
+**During the beta version, the options are unstable, may get changed during updates.**
+
 - `options.deviceOverrides` - **optional**: An array of device overriding config objects.
-- `options.deviceOverrides[].id` - **required**: Device ID or Product ID or `global`.
+- `options.deviceOverrides[].id` - **required**: Device ID, Product ID, Scene ID, or `global`.
 <!--
 - `options.deviceOverrides[].accessoryCategory` - **optional**: Accessory Category ID. Overriding this property can change accessory's icon. See: [Homebridge Plugin Documentation > Categories](https://developers.homebridge.io/#/categories)
 -->
-- `options.deviceOverrides[].category` - **optional**: Device category code. See [SUPPORTED_DEVICES.md](./SUPPORTED_DEVICES.md). Also you can use `hidden` to hide device or product. **⚠️Overriding this property may leads to unexpected behaviors and exceptions. Please remove accessory cache after change it.**
+- `options.deviceOverrides[].category` - **optional**: Device category code. See [SUPPORTED_DEVICES.md](./SUPPORTED_DEVICES.md). Also you can use `hidden` to hide device, product, or scene. **⚠️Overriding this property may leads to unexpected behaviors and exceptions. Please remove accessory cache after change this.**
 
 - `options.deviceOverrides[].schema` - **optional**: An array of schema overriding config objects. When your device have non-standard schemas, this is used for transform them.
 - `options.deviceOverrides[].schema[].oldCode` - **required**: Original Schema code.
