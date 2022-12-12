@@ -116,10 +116,31 @@ See [ADVANCED_OPTIONS.md](./ADVANCED_OPTIONS.md)
 - The app account can't be used in multiple Homebridge/HomeAssistant instance at the same time! Please consider using different app accounts instead.
 - The plugin requires the internet access to Tuya Cloud, and the lan protocol is not supported. See [#90](https://github.com/0x5e/homebridge-tuya-platform/issues/90)
 
+## FAQ
+
+Q: What is "standard device" and "non-standard device", how to know what my device is?
+A: If your device is working properly, you don't need to know this.
+"standard device" means the device's DP Code is matching the code in documentation at: [Tuya IoT Development Platform Documentation > Cloud Development > Standard Instruction Set](https://developer.tuya.com/en/docs/iot/standarddescription?id=K9i5ql6waswzq).
+For example, a Lightbulb must have `switch_led` for power on/off, and optional code
+`bright_value`/`bright_value_v2` for brightness, `temp_value`/`temp_value_v2` for color temperature, `work_mode` for change working mode. These code can be found from above documentation. 
+If your Lightbulb can adjust brightness in Tuya App, but can't do with the plugin, then mostly it's an "non-standard device".
+
+
+Q: Can "non-standard device" be supportd by this plugin?
+A: Yes. The device should be in the support list, then you need do these steps before it's working.
+1. Change device's control mode on Tuya Platform.
+  - Go to "[Tuya Platform Cloud Development](https://iot.tuya.com/cloud/) > Your Project > Devices > All Devices > View Devices by Product".
+  - Find your device-related product, click the "pencil" icon (Change Control Instruction Mode).
+  - <img width="500" alt="image" src="https://user-images.githubusercontent.com/5144674/202967707-8b934e05-36d6-4b42-bb7b-87e5b24474c4.png">
+  - The "Table of Instructions" shows the cloud mapping, you can know which DP Codes of your device is missing, you need to manually map them later.
+  - <img width="500" alt="image" src="https://user-images.githubusercontent.com/5144674/202967528-4838f9a1-0547-4102-afbb-180dc9b198b1.png">
+  - Select "DP Instruction" and save.
+2. Config the schema with [ADVANCED_OPTIONS.md](./ADVANCED_OPTIONS.md).
+
 
 ## Troubleshooting
 
-If your device is in the support list, but not working properly, meanwhile, the same feature works well in Tuya App, please complete the following steps before submit the issue.
+If your device is not supported, please complete the following steps to collecting the data.
 
 #### 1. Get Device Information
 
@@ -165,14 +186,14 @@ message = {
 }
 ```
 
-If you can't get any mqtt logs when controlling the device, mostly means that your device is a "non-standard device". You need to change device control mode into "DP Instruction" mode. See [#111](https://github.com/0x5e/homebridge-tuya-platform/issues/111).
+If you can't get any mqtt logs when controlling the device, mostly means that your device is a "non-standard device".
 
-If you can get mqtt logs, please submit the issue with device info json and logs.
+With the device info json and mqtt logs, please submit the issue to help us supporting new device category.
 
 
 ## Contributing
 
-Please see https://github.com/homebridge/homebridge-plugin-template
+Please see https://github.com/homebridge/homebridge-plugin-template for setup development environment.
 
 PRs and issues are welcome.
 
