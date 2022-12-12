@@ -4,6 +4,10 @@
 
 ### Added
 - Add scene support. (#118)
+- Add Wireless Switch support (`wxkg`).
+- Add Solar Light support (`tyndj`).
+- Add Dehumidifier support (`cs`).
+- Add Scene Switch support (`wxkg`).
 - Add device overriding config support. "non-standard" devices have possibility to be supported now.
 
 
