@@ -101,37 +101,86 @@
 							"type": "object",
 							"properties": {
 								"id": {
-									"name": "ID",
+									"title": "ID",
 									"description": "Device ID or Product ID or `global`",
 									"type": "string",
 									"required": true
 								},
 								"category": {
-									"name": "Category",
+									"title": "Category",
 									"description": "Category Code or `hidden`",
 									"type": "string"
 								},
 								"schema": {
-									"name": "Schema Overriding Configs",
+									"title": "Schema Overriding Configs",
 									"type": "array",
-									"properties": {
-										"oldCode": {
-											"title": "Original Schema Code",
-											"type": "string",
-											"required": true
-										},
-										"code": {
-											"title": "New Schema Code",
-											"type": "string",
-											"required": true
-										},
-										"type": {
-											"title": "New Schema Type",
-											"type": "string"
-										},
-										"property": {
-											"title": "New Schema Property",
-											"type": "object"
+									"items": {
+										"type": "object",
+										"properties": {
+											"oldCode": {
+												"title": "Original Schema Code",
+												"type": "string",
+												"required": true
+											},
+											"code": {
+												"title": "New Schema Code",
+												"type": "string",
+												"required": true
+											},
+											"type": {
+												"title": "New Schema Type",
+												"type": "string",
+												"default": "Boolean",
+												"oneOf": [{
+													"title": "Boolean",
+													"enum": ["Boolean"]
+												}, {
+													"title": "Integer",
+													"enum": ["Integer"]
+												}, {
+													"title": "Enum",
+													"enum": ["Enum"]
+												}, {
+													"title": "String",
+													"enum": ["String"]
+												}, {
+													"title": "Json",
+													"enum": ["Json"]
+												}, {
+													"title": "Raw",
+													"enum": ["Raw"]
+												}]
+											},
+											"property": {
+												"title": "New Schema Property",
+												"type": "object",
+												"properties": {
+													"min": {
+														"title": "min",
+														"type": "integer"
+													},
+													"max": {
+														"title": "max",
+														"type": "integer"
+													},
+													"scale": {
+														"title": "scale",
+														"type": "integer"
+													},
+													"step": {
+														"title": "step",
+														"type": "integer"
+													},
+													"range": {
+														"title": "range",
+														"type": "array",
+														"items": {
+															"title": "value",
+															"type": "string"
+														}
+													}
+												}
+											}
 										}
 									}
 								}

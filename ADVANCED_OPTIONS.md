@@ -9,7 +9,7 @@
 
 - `options.deviceOverrides[].schema` - **optional**: An array of schema overriding config objects. When your device have non-standard schemas, this is used for transform them.
 - `options.deviceOverrides[].schema[].oldCode` - **required**: Original Schema code.
-- `options.deviceOverrides[].schema[].newCode` - **required**: New Schema code.
+- `options.deviceOverrides[].schema[].code` - **required**: New Schema code.
 - `options.deviceOverrides[].schema[].type` - **optional**: New schema type. One of the `Boolean`, `Integer`, `Enum`, `String`, `Json`, `Raw`.
 - `options.deviceOverrides[].schema[].property` - **optional**: New schema property object. For `Integer` type, the object should contains `min`, `max`, `scale`, `step`; For `Enum` type, the object should contains `range`. For detail information, please see `TuyaDeviceSchemaProperty` in [TuyaDevice.ts](./src/device/TuyaDevice.ts).
 - `options.deviceOverrides[].schema[].onGet` - **optional**: An one-line JavaScript code convert old value to new value. The function is called with one argument: `value`.
