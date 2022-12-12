@@ -121,9 +121,12 @@ See [ADVANCED_OPTIONS.md](./ADVANCED_OPTIONS.md)
 #### What is "standard device" and "non-standard device", how to know what my device is?
 
 If your device is working properly, you don't need to know this.
+
 "standard device" means the device's DP Code is matching the code in documentation at: [Tuya IoT Development Platform Documentation > Cloud Development > Standard Instruction Set](https://developer.tuya.com/en/docs/iot/standarddescription?id=K9i5ql6waswzq).
+
 For example, a Lightbulb must have `switch_led` for power on/off, and optional code
 `bright_value`/`bright_value_v2` for brightness, `temp_value`/`temp_value_v2` for color temperature, `work_mode` for change working mode. These code can be found from above documentation. 
+
 If your Lightbulb can adjust brightness in Tuya App, but can't do with the plugin, then mostly it's an "non-standard device".
 
 
