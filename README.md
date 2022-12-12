@@ -118,16 +118,18 @@ See [ADVANCED_OPTIONS.md](./ADVANCED_OPTIONS.md)
 
 ## FAQ
 
-Q: What is "standard device" and "non-standard device", how to know what my device is?
-A: If your device is working properly, you don't need to know this.
+#### What is "standard device" and "non-standard device", how to know what my device is?
+
+If your device is working properly, you don't need to know this.
 "standard device" means the device's DP Code is matching the code in documentation at: [Tuya IoT Development Platform Documentation > Cloud Development > Standard Instruction Set](https://developer.tuya.com/en/docs/iot/standarddescription?id=K9i5ql6waswzq).
 For example, a Lightbulb must have `switch_led` for power on/off, and optional code
 `bright_value`/`bright_value_v2` for brightness, `temp_value`/`temp_value_v2` for color temperature, `work_mode` for change working mode. These code can be found from above documentation. 
 If your Lightbulb can adjust brightness in Tuya App, but can't do with the plugin, then mostly it's an "non-standard device".
 
 
-Q: Can "non-standard device" be supportd by this plugin?
-A: Yes. The device should be in the support list, then you need do these steps before it's working.
+#### Can "non-standard device" be supportd by this plugin?
+
+Yes. The device should be in the support list, then you need do these steps before it's working.
 1. Change device's control mode on Tuya Platform.
   - Go to "[Tuya Platform Cloud Development](https://iot.tuya.com/cloud/) > Your Project > Devices > All Devices > View Devices by Product".
   - Find your device-related product, click the "pencil" icon (Change Control Instruction Mode).
@@ -136,6 +138,12 @@ A: Yes. The device should be in the support list, then you need do these steps b
   - <img width="500" alt="image" src="https://user-images.githubusercontent.com/5144674/202967528-4838f9a1-0547-4102-afbb-180dc9b198b1.png">
   - Select "DP Instruction" and save.
 2. Config the schema with [ADVANCED_OPTIONS.md](./ADVANCED_OPTIONS.md).
+
+
+#### Local support
+See [#90](https://github.com/0x5e/homebridge-tuya-platform/issues/90).
+
+Although the plugin didn't implemented tuya local protocol now, it still remains possibility in the future.
 
 
 ## Troubleshooting
