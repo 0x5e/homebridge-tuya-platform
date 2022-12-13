@@ -230,8 +230,8 @@ export class TuyaStreamingDelegate implements CameraStreamingDelegate, FfmpegStr
       );
 
       callback(undefined, snapshot);
-    } catch (error: any) {
-      callback(error);
+    } catch (error) {
+      callback(error as Error);
     }
   }
 
@@ -455,27 +455,28 @@ export class TuyaStreamingDelegate implements CameraStreamingDelegate, FfmpegStr
   }
 
   private async fetchSnapshot(): Promise<Buffer> {
-    return new Promise(async (resolve, reject) => {
-      this.camera.log.debug('Running Snapshot commands for %s', this.camera.accessory.displayName);
+    this.camera.log.debug('Running Snapshot commands for %s', this.camera.accessory.displayName);
 
-      if (!this.camera.device.online) {
-        reject(new Error(`${this.camera.accessory.displayName} is currently offline.`));
-      }
+    if (!this.camera.device.online) {
+      throw new Error(`${this.camera.accessory.displayName} is currently offline.`);
+    }
 
-      // TODO: Check if there is a stream already running to fetch snapshot.
+    // TODO: Check if there is a stream already running to fetch snapshot.
 
-      const rtspUrl = await this.retrieveDeviceRTSP();
+    const rtspUrl = await this.retrieveDeviceRTSP();
 
-      const ffmpegArgs = [
-        '-i', rtspUrl,
-        '-frames:v', '1',
-        '-hide_banner',
-        '-loglevel',
-        'error',
-        '-f',
-        'image2',
-        '-',
-      ];
+    const ffmpegArgs = [
+      '-i', rtspUrl,
+      '-frames:v', '1',
+      '-hide_banner',
+      '-loglevel',
+      'error',
+      '-f',
+      'image2',
+      '-',
+    ];
+
+    return new Promise((resolve, reject) => {
 
       const ffmpeg = spawn(
         defaultFfmpegPath,
