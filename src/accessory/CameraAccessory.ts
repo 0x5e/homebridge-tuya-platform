@@ -1,5 +1,5 @@
 
-import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus, TuyaDeviceSchemaType } from '../device/TuyaDevice';
+import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
 import { TuyaStreamingDelegate } from '../util/TuyaStreamDelegate';
 import { limit, remap } from '../util/util';
 import BaseAccessory from './BaseAccessory';
@@ -16,7 +16,7 @@ const SCHEMA_CODE = {
 
 export default class CameraAccessory extends BaseAccessory {
 
-  private stream: TuyaStreamingDelegate | undefined
+  private stream: TuyaStreamingDelegate | undefined;
 
   requiredSchema() {
     return [];
@@ -91,7 +91,7 @@ export default class CameraAccessory extends BaseAccessory {
     this.stream = new TuyaStreamingDelegate(this);
     this.accessory.configureController(this.stream.controller);
   }
-  
+
   getLightService() {
     return this.accessory.getService(this.Service.Lightbulb)
       || this.accessory.addService(this.Service.Lightbulb, this.accessory.displayName + ' Floodlight');
