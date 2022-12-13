@@ -1,10 +1,9 @@
 
-import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus, TuyaDeviceSchemaType } from "../device/TuyaDevice";
-import { TuyaStreamingDelegate } from "../util/TuyaStreamDelegate";
-import { remap, limit } from "../util/util";
-import BaseAccessory from "./BaseAccessory";
-import { configureMotionDetected } from "./characteristic/MotionDetected";
-import { configureOn } from "./characteristic/On";
+import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus, TuyaDeviceSchemaType } from '../device/TuyaDevice';
+import { TuyaStreamingDelegate } from '../util/TuyaStreamDelegate';
+import { limit, remap } from '../util/util';
+import BaseAccessory from './BaseAccessory';
+import { configureOn } from './characteristic/On';
 import { configureProgrammableSwitchEvent, onProgrammableSwitchEvent } from './characteristic/ProgrammableSwitchEvent';
 
 const SCHEMA_CODE = {
@@ -16,6 +15,7 @@ const SCHEMA_CODE = {
 };
 
 export default class CameraAccessory extends BaseAccessory {
+
   private stream: TuyaStreamingDelegate | undefined
 
   requiredSchema() {
@@ -71,7 +71,7 @@ export default class CameraAccessory extends BaseAccessory {
       configureOn(this, onService, onSchema);
     }
 
-    configureMotionDetected(this, undefined, this.getSchema(...SCHEMA_CODE.MOTION_DETECT));
+    this.getMotionService().setCharacteristic(this.Characteristic.MotionDetected, false);
   }
 
   configureDoorbell() {
@@ -102,20 +102,44 @@ export default class CameraAccessory extends BaseAccessory {
       || this.accessory.addService(this.Service.Doorbell);
   }
 
+  getMotionService() {
+    return this.accessory.getService(this.Service.MotionSensor)
+      || this.accessory.addService(this.Service.MotionSensor, this.accessory.displayName + ' Motion Detect');
+  }
+
   async onDeviceStatusUpdate(status: TuyaDeviceStatus[]) {
     super.onDeviceStatusUpdate(status);
 
-    const schema = this.getSchema(...SCHEMA_CODE.DOORBELL);
-    if (!schema) {
+    const doorbellSchema = this.getSchema(...SCHEMA_CODE.DOORBELL);
+    if (doorbellSchema) {
+      const doorbellStatus = status.find(_status => _status.code === doorbellSchema.code);
+      doorbellStatus && onProgrammableSwitchEvent(this, this.getDoorbellService(), doorbellStatus);
+    }
+
+    const motionSchema = this.getSchema(...SCHEMA_CODE.MOTION_DETECT);
+    if (motionSchema) {
+      const motionStatus = status.find(_status => _status.code === motionSchema.code);
+      motionStatus && this.onMotionDetected(motionStatus);
+    }
+  }
+
+  private timer?: NodeJS.Timeout;
+  onMotionDetected(status: TuyaDeviceStatus) {
+    if (!this.intialized) {
       return;
     }
 
-    const _status = status.find(_status => _status.code === schema.code);
-    if (!_status) {
+    const data = Buffer.from(status.value as string, 'base64').toString('binary');
+    if (data.length === 0) {
       return;
     }
 
-    onProgrammableSwitchEvent(this, this.getDoorbellService(), _status);
+    this.log.info('Motion event:', data);
+    const characteristic = this.getMotionService().getCharacteristic(this.Characteristic.MotionDetected);
+    characteristic.updateValue(true);
+
+    this.timer && clearTimeout(this.timer);
+    this.timer = setTimeout(() => characteristic.updateValue(false), 30 * 1000);
   }
 
 }
