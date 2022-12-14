@@ -4,12 +4,12 @@
 
 ### Added
 - Add scene support. (#118)
-- Add `sceneWhitelist` option for whitelisting scenes. (#118)
 - Add Wireless Switch support (`wxkg`).
 - Add Solar Light support (`tyndj`).
 - Add Dehumidifier support (`cs`).
 - Add Scene Switch support (`wxkg`).
-- Add Camera flood light, motion detect and doorbell support (`sp`).
+- Add device overriding config support. "non-standard" devices have possibility to be supported now.
+- Add Camera support (`sp`).
 
 
 ### Changed
