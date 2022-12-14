@@ -1,4 +1,6 @@
+
 import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
+import { TuyaStreamingDelegate } from '../util/TuyaStreamDelegate';
 import { limit, remap } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 import { configureOn } from './characteristic/On';
@@ -14,14 +16,17 @@ const SCHEMA_CODE = {
 
 export default class CameraAccessory extends BaseAccessory {
 
+  private stream: TuyaStreamingDelegate | undefined;
+
   requiredSchema() {
     return [];
   }
 
   configureServices() {
+    this.configureDoorbell();
+    this.configureCamera();
     this.configureFloodLight();
     this.configureMotion();
-    this.configureDoorbell();
   }
 
   configureFloodLight() {
@@ -78,9 +83,18 @@ export default class CameraAccessory extends BaseAccessory {
     configureProgrammableSwitchEvent(this, this.getDoorbellService(), schema);
   }
 
+  configureCamera() {
+    if (this.stream !== undefined) {
+      return;
+    }
+
+    this.stream = new TuyaStreamingDelegate(this);
+    this.accessory.configureController(this.stream.controller);
+  }
+
   getLightService() {
     return this.accessory.getService(this.Service.Lightbulb)
-      || this.accessory.addService(this.Service.Lightbulb);
+      || this.accessory.addService(this.Service.Lightbulb, this.accessory.displayName + ' Floodlight');
   }
 
   getDoorbellService() {
