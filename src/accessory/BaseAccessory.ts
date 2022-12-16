@@ -130,6 +130,9 @@ class BaseAccessory {
   }, 100);
 
   async sendCommands(commands: TuyaDeviceStatus[], debounce = false) {
+    if (commands.length === 0) {
+      return;
+    }
 
     // Update cache immediately
     for (const newStatus of commands) {
