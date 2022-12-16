@@ -20,7 +20,7 @@ const SCHEMA_CODE = {
   SPEED_LEVEL: ['fan_speed_enum', 'windspeed'],
   LOCK: ['lock'],
   SWING: ['switch_horizontal', 'switch_vertical'],
-  TEMP_UNIT_CONVERT: ['temp_unit_convert'],
+  TEMP_UNIT_CONVERT: ['temp_unit_convert', 'c_f'],
 };
 
 export default class AirConditionerAccessory extends BaseAccessory {

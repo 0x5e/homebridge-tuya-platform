@@ -15,7 +15,7 @@ const SCHEMA_CODE = {
   TARGET_TEMP: ['temp_set'],
   LOCK: ['lock'],
   SWING: ['shake'],
-  TEMP_UNIT_CONVERT: ['temp_unit_convert'],
+  TEMP_UNIT_CONVERT: ['temp_unit_convert', 'c_f'],
 };
 
 export default class HeaterAccessory extends BaseAccessory {

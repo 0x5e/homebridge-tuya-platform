@@ -10,7 +10,7 @@ const SCHEMA_CODE = {
   TARGET_MODE: ['mode'],
   CURRENT_TEMP: ['temp_current', 'temp_set'],
   TARGET_TEMP: ['temp_set'],
-  TEMP_UNIT_CONVERT: ['temp_unit_convert'],
+  TEMP_UNIT_CONVERT: ['temp_unit_convert', 'c_f'],
 };
 
 export default class ThermostatAccessory extends BaseAccessory {
