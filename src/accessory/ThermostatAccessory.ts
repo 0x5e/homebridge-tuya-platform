@@ -2,6 +2,7 @@ import { TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty, TuyaDevi
 import { limit } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 import { configureCurrentTemperature } from './characteristic/CurrentTemperature';
+import { configureTempDisplayUnits } from './characteristic/TemperatureDisplayUnits';
 
 const SCHEMA_CODE = {
   ON: ['switch'],
@@ -23,7 +24,7 @@ export default class ThermostatAccessory extends BaseAccessory {
     this.configureTargetState();
     configureCurrentTemperature(this, this.mainService(), this.getSchema(...SCHEMA_CODE.CURRENT_TEMP));
     this.configureTargetTemp();
-    this.configureTempDisplayUnits();
+    configureTempDisplayUnits(this, this.mainService(), this.getSchema(...SCHEMA_CODE.TEMP_UNIT_CONVERT));
   }
 
 
@@ -190,26 +191,6 @@ export default class ThermostatAccessory extends BaseAccessory {
       })
       .setProps(props);
 
-  }
-
-  configureTempDisplayUnits() {
-    const schema = this.getSchema(...SCHEMA_CODE.TEMP_UNIT_CONVERT);
-    if (!schema) {
-      return;
-    }
-
-    const { CELSIUS, FAHRENHEIT } = this.Characteristic.TemperatureDisplayUnits;
-    this.mainService().getCharacteristic(this.Characteristic.TemperatureDisplayUnits)
-      .onGet(() => {
-        const status = this.getStatus(schema.code)!;
-        return (status.value === 'c') ? CELSIUS : FAHRENHEIT;
-      })
-      .onSet(value => {
-        this.sendCommands([{
-          code: schema.code,
-          value: (value === CELSIUS) ? 'c':'f',
-        }]);
-      });
   }
 
 }
