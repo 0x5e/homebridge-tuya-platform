@@ -38,7 +38,7 @@ export default class AirConditionerAccessory extends BaseAccessory {
 
     // Optional Characteristics
     configureLockPhysicalControls(this, this.mainService(), this.getSchema(...SCHEMA_CODE.LOCK));
-    configureRotationSpeedLevel(this, this.mainService(), this.getSchema(...SCHEMA_CODE.SPEED_LEVEL));
+    configureRotationSpeedLevel(this, this.mainService(), this.getSchema(...SCHEMA_CODE.SPEED_LEVEL), ['auto']);
     configureSwingMode(this, this.mainService(), this.getSchema(...SCHEMA_CODE.SWING));
     this.configureCoolingThreshouldTemp();
     this.configureHeatingThreshouldTemp();

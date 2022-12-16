@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Service } from 'homebridge';
 import { TuyaDeviceSchema, TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty } from '../../device/TuyaDevice';
 import { limit, remap } from '../../util/util';
@@ -22,28 +23,40 @@ export function configureRotationSpeed(accessory: BaseAccessory, service: Servic
     });
 }
 
-export function configureRotationSpeedLevel(accessory: BaseAccessory, service: Service, schema?: TuyaDeviceSchema) {
+export function configureRotationSpeedLevel(accessory: BaseAccessory, service: Service, schema?: TuyaDeviceSchema, ignoreValues?: string[]) {
   if (!schema) {
     return;
   }
 
   const property = schema.property as TuyaDeviceSchemaEnumProperty;
+  const range: string[] = [];
+  for (const value of property.range) {
+    if (ignoreValues?.includes(value)) {
+      continue;
+    }
+    range.push(value);
+  }
+
   const props = { minValue: 0, maxValue: 100, minStep: 1 };
-  props.minStep = Math.floor(100 / (property.range.length - 1));
-  props.maxValue = props.minStep * (property.range.length - 1);
+  props.minStep = Math.floor(100 / (range.length - 1));
+  props.maxValue = props.minStep * (range.length - 1);
   accessory.log.debug('Set props for RotationSpeed:', props);
 
   service.getCharacteristic(accessory.Characteristic.RotationSpeed)
     .onGet(() => {
       const status = accessory.getStatus(schema.code)!;
-      const index = property.range.indexOf(status.value as string);
+      const index = range.indexOf(status.value as string);
       return props.minStep * index;
     })
     .onSet(value => {
       const index = value as number / props.minStep;
-      value = property.range[index].toString();
-      accessory.log.debug('Set RotationSpeed to:', value);
-      accessory.sendCommands([{ code: schema.code, value }], true);
+      if (index >= range.length) {
+        return;
+      }
+
+      const speedLevel = range[index];
+      accessory.log.debug('Set RotationSpeed to:', speedLevel);
+      accessory.sendCommands([{ code: schema.code, value: speedLevel }], true);
     })
     .setProps(props);
 }
