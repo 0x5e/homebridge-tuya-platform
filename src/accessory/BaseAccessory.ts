@@ -125,6 +125,9 @@ class BaseAccessory {
   private sendQueue = new Map<string, TuyaDeviceStatus>();
   private debounceSendCommands = debounce(async () => {
     const commands = [...this.sendQueue.values()];
+    if (commands.length === 0) {
+      return;
+    }
     await this.deviceManager.sendCommands(this.device.id, commands);
     this.sendQueue.clear();
   }, 100);
