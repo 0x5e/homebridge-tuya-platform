@@ -143,6 +143,7 @@ export default class AccessoryFactory {
         handler = new DehumidifierAccessory(platform, accessory);
         break;
       case 'kt':
+      case 'ktkzq':
         handler = new AirConditionerAccessory(platform, accessory);
         break;
       case 'sp':

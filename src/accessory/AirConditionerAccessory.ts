@@ -18,7 +18,7 @@ const SCHEMA_CODE = {
   CURRENT_TEMP: ['temp_current'],
   TARGET_TEMP: ['temp_set'],
   SPEED_LEVEL: ['fan_speed_enum', 'windspeed'],
-  LOCK: ['lock'],
+  LOCK: ['lock', 'child_lock'],
   TEMP_UNIT_CONVERT: ['temp_unit_convert', 'c_f'],
   SWING: ['switch_horizontal', 'switch_vertical'],
   // Dehumidifier
@@ -45,6 +45,7 @@ export default class AirConditionerAccessory extends BaseAccessory {
   configureAirConditioner() {
     const activeSchema = this.getSchema(...SCHEMA_CODE.ACTIVE)!;
     const modeSchema = this.getSchema(...SCHEMA_CODE.MODE)!;
+    const modeProperty = modeSchema.property as TuyaDeviceSchemaEnumProperty;
 
     const service = this.mainService();
 
@@ -64,7 +65,12 @@ export default class AirConditionerAccessory extends BaseAccessory {
 
         const modeStatus = this.getStatus(modeSchema.code)!;
         if (!AC_MODES.includes(modeStatus.value as string)) {
-          commands.push({ code: modeStatus.code, value:  AC_MODES[0] });
+          for (const mode of AC_MODES) {
+            if (modeProperty.range.includes(mode)) {
+              commands.push({ code: modeStatus.code, value: mode });
+              break;
+            }
+          }
         }
 
         this.sendCommands(commands, true);
@@ -196,9 +202,9 @@ export default class AirConditionerAccessory extends BaseAccessory {
     this.mainService().getCharacteristic(this.Characteristic.CurrentHeaterCoolerState)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        if (status.value === 'heating') {
+        if (status.value === 'heating' || status.value === 'hot') {
           return HEATING;
-        } else if (status.value === 'cooling') {
+        } else if (status.value === 'cooling' || status.value === 'cold') {
           return COOLING;
         } else {
           return INACTIVE;
@@ -214,13 +220,21 @@ export default class AirConditionerAccessory extends BaseAccessory {
 
     const { AUTO, HEAT, COOL } = this.Characteristic.TargetHeaterCoolerState;
 
-    const validValues = [ AUTO ];
+    const validValues: number[] = [];
     const property = schema.property as TuyaDeviceSchemaEnumProperty;
+    if (property.range.includes('auto')) {
+      validValues.push(AUTO);
+    }
     if (property.range.includes('hot')) {
       validValues.push(HEAT);
     }
     if (property.range.includes('cold')) {
       validValues.push(COOL);
+    }
+
+    if (validValues.length === 0) {
+      this.log.warn('Invalid mode range for TargetHeaterCoolerState:', property.range);
+      return;
     }
 
     this.mainService().getCharacteristic(this.Characteristic.TargetHeaterCoolerState)
@@ -230,9 +244,9 @@ export default class AirConditionerAccessory extends BaseAccessory {
           return HEAT;
         } else if (status.value === 'cold') {
           return COOL;
-        } else {
-          return AUTO;
         }
+
+        return validValues.includes(AUTO) ? AUTO : validValues[0];
       })
       .onSet(value => {
 
