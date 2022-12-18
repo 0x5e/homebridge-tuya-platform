@@ -1,27 +1,34 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty } from '../device/TuyaDevice';
+import { TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
 import { limit } from '../util/util';
 import BaseAccessory from './BaseAccessory';
-import { configureActive } from './characteristic/Active';
 import { configureCurrentRelativeHumidity } from './characteristic/CurrentRelativeHumidity';
 import { configureCurrentTemperature } from './characteristic/CurrentTemperature';
 import { configureLockPhysicalControls } from './characteristic/LockPhysicalControls';
+import { configureRelativeHumidityDehumidifierThreshold } from './characteristic/RelativeHumidityDehumidifierThreshold';
 import { configureRotationSpeedLevel } from './characteristic/RotationSpeed';
 import { configureSwingMode } from './characteristic/SwingMode';
 import { configureTempDisplayUnits } from './characteristic/TemperatureDisplayUnits';
 
 const SCHEMA_CODE = {
+  // AirConditioner
   ACTIVE: ['switch'],
   MODE: ['mode'],
   WORK_STATE: ['work_status', 'mode'],
   CURRENT_TEMP: ['temp_current'],
   TARGET_TEMP: ['temp_set'],
-  CURRENT_HUMIDITY: ['humidity_current'],
   SPEED_LEVEL: ['fan_speed_enum', 'windspeed'],
   LOCK: ['lock'],
-  SWING: ['switch_horizontal', 'switch_vertical'],
   TEMP_UNIT_CONVERT: ['temp_unit_convert', 'c_f'],
+  SWING: ['switch_horizontal', 'switch_vertical'],
+  // Dehumidifier
+  CURRENT_HUMIDITY: ['humidity_current'],
+  TARGET_HUMIDITY: ['humidity_set'],
 };
+
+const AC_MODES = ['auto', 'cold', 'hot'];
+const DEHUMIDIFIER_MODE = 'wet';
+const FAN_MODE = 'wind';
 
 export default class AirConditionerAccessory extends BaseAccessory {
 
@@ -30,28 +37,153 @@ export default class AirConditionerAccessory extends BaseAccessory {
   }
 
   configureServices() {
-    // Required Characteristics
-    configureActive(this, this.mainService(), this.getSchema(...SCHEMA_CODE.ACTIVE));
-    this.configureCurrentState();
-    this.configureTargetState();
-    configureCurrentTemperature(this, this.mainService(), this.getSchema(...SCHEMA_CODE.CURRENT_TEMP));
-
-    // Optional Characteristics
-    configureLockPhysicalControls(this, this.mainService(), this.getSchema(...SCHEMA_CODE.LOCK));
-    configureRotationSpeedLevel(this, this.mainService(), this.getSchema(...SCHEMA_CODE.SPEED_LEVEL), ['auto']);
-    configureSwingMode(this, this.mainService(), this.getSchema(...SCHEMA_CODE.SWING));
-    this.configureCoolingThreshouldTemp();
-    this.configureHeatingThreshouldTemp();
-    configureTempDisplayUnits(this, this.mainService(), this.getSchema(...SCHEMA_CODE.TEMP_UNIT_CONVERT));
-
-    // Other
-    configureCurrentRelativeHumidity(this, undefined, this.getSchema(...SCHEMA_CODE.CURRENT_HUMIDITY));
+    this.configureAirConditioner();
+    this.configureDehumidifier();
+    this.configureFan();
   }
 
+  configureAirConditioner() {
+    const activeSchema = this.getSchema(...SCHEMA_CODE.ACTIVE)!;
+    const modeSchema = this.getSchema(...SCHEMA_CODE.MODE)!;
+
+    const service = this.mainService();
+
+    // Required Characteristics
+    const { INACTIVE, ACTIVE } = this.Characteristic.Active;
+    service.getCharacteristic(this.Characteristic.Active)
+      .onGet(() => {
+        const activeStatus = this.getStatus(activeSchema.code)!;
+        const modeStatus = this.getStatus(modeSchema.code)!;
+        return (activeStatus.value === true && AC_MODES.includes(modeStatus.value as string)) ? ACTIVE : INACTIVE;
+      })
+      .onSet(value => {
+        const commands: TuyaDeviceStatus[] = [{
+          code: activeSchema.code,
+          value: (value === ACTIVE) ? true : false,
+        }];
+
+        const modeStatus = this.getStatus(modeSchema.code)!;
+        if (!AC_MODES.includes(modeStatus.value as string)) {
+          commands.push({ code: modeStatus.code, value:  AC_MODES[0] });
+        }
+
+        this.sendCommands(commands, true);
+      });
+
+    this.configureCurrentState();
+    this.configureTargetState();
+    configureCurrentTemperature(this, service, this.getSchema(...SCHEMA_CODE.CURRENT_TEMP));
+
+    // Optional Characteristics
+    configureLockPhysicalControls(this, service, this.getSchema(...SCHEMA_CODE.LOCK));
+    configureRotationSpeedLevel(this, service, this.getSchema(...SCHEMA_CODE.SPEED_LEVEL), ['auto']);
+    configureSwingMode(this, service, this.getSchema(...SCHEMA_CODE.SWING));
+    this.configureCoolingThreshouldTemp();
+    this.configureHeatingThreshouldTemp();
+    configureTempDisplayUnits(this, service, this.getSchema(...SCHEMA_CODE.TEMP_UNIT_CONVERT));
+  }
+
+  configureDehumidifier() {
+    const activeSchema = this.getSchema(...SCHEMA_CODE.ACTIVE)!;
+    const modeSchema = this.getSchema(...SCHEMA_CODE.MODE)!;
+    const property = modeSchema.property as TuyaDeviceSchemaEnumProperty;
+    if (!property.range.includes(DEHUMIDIFIER_MODE)) {
+      return;
+    }
+
+    const service = this.dehumidifierService();
+
+    // Required Characteristics
+    const { INACTIVE, ACTIVE } = this.Characteristic.Active;
+    service.getCharacteristic(this.Characteristic.Active)
+      .onGet(() => {
+        const activeStatus = this.getStatus(activeSchema.code)!;
+        const modeStatus = this.getStatus(modeSchema.code)!;
+        return (activeStatus.value === true && modeStatus.value === DEHUMIDIFIER_MODE) ? ACTIVE : INACTIVE;
+      })
+      .onSet(value => {
+        this.sendCommands([{
+          code: activeSchema.code,
+          value: (value === ACTIVE) ? true : false,
+        }, {
+          code: modeSchema.code,
+          value: DEHUMIDIFIER_MODE,
+        }], true);
+      });
+
+    const { DEHUMIDIFYING } = this.Characteristic.CurrentHumidifierDehumidifierState;
+    service.getCharacteristic(this.Characteristic.CurrentHumidifierDehumidifierState)
+      .onGet(() => {
+        return DEHUMIDIFYING;
+      });
+
+    const { DEHUMIDIFIER } = this.Characteristic.TargetHumidifierDehumidifierState;
+    service.getCharacteristic(this.Characteristic.TargetHumidifierDehumidifierState)
+      .onGet(() => {
+        return DEHUMIDIFIER;
+      })
+      .setProps({ validValues: [DEHUMIDIFIER] });
+
+    if (this.getSchema(...SCHEMA_CODE.CURRENT_HUMIDITY)) {
+      configureCurrentRelativeHumidity(this, service, this.getSchema(...SCHEMA_CODE.CURRENT_HUMIDITY));
+    } else {
+      service.setCharacteristic(this.Characteristic.CurrentRelativeHumidity, 0);
+    }
+
+    // Optional Characteristics
+    configureLockPhysicalControls(this, service, this.getSchema(...SCHEMA_CODE.LOCK));
+    configureRotationSpeedLevel(this, service, this.getSchema(...SCHEMA_CODE.SPEED_LEVEL), ['auto']);
+    configureRelativeHumidityDehumidifierThreshold(this, service, this.getSchema(...SCHEMA_CODE.TARGET_HUMIDITY));
+    configureSwingMode(this, service, this.getSchema(...SCHEMA_CODE.SWING));
+  }
+
+  configureFan() {
+    const activeSchema = this.getSchema(...SCHEMA_CODE.ACTIVE)!;
+    const modeSchema = this.getSchema(...SCHEMA_CODE.MODE)!;
+    const property = modeSchema.property as TuyaDeviceSchemaEnumProperty;
+    if (!property.range.includes(FAN_MODE)) {
+      return;
+    }
+
+    const service = this.fanService();
+
+    // Required Characteristics
+    const { INACTIVE, ACTIVE } = this.Characteristic.Active;
+    service.getCharacteristic(this.Characteristic.Active)
+      .onGet(() => {
+        const activeStatus = this.getStatus(activeSchema.code)!;
+        const modeStatus = this.getStatus(modeSchema.code)!;
+        return (activeStatus.value === true && modeStatus.value === FAN_MODE) ? ACTIVE : INACTIVE;
+      })
+      .onSet(value => {
+        this.sendCommands([{
+          code: activeSchema.code,
+          value: (value === ACTIVE) ? true : false,
+        }, {
+          code: modeSchema.code,
+          value: FAN_MODE,
+        }], true);
+      });
+
+    // Optional Characteristics
+    configureLockPhysicalControls(this, service, this.getSchema(...SCHEMA_CODE.LOCK));
+    configureRotationSpeedLevel(this, service, this.getSchema(...SCHEMA_CODE.SPEED_LEVEL), ['auto']);
+    configureSwingMode(this, service, this.getSchema(...SCHEMA_CODE.SWING));
+  }
 
   mainService() {
     return this.accessory.getService(this.Service.HeaterCooler)
       || this.accessory.addService(this.Service.HeaterCooler);
+  }
+
+  dehumidifierService() {
+    return this.accessory.getService(this.Service.HumidifierDehumidifier)
+      || this.accessory.addService(this.Service.HumidifierDehumidifier, this.accessory.displayName + ' Dehumidifier');
+  }
+
+  fanService() {
+    return this.accessory.getService(this.Service.Fanv2)
+      || this.accessory.addService(this.Service.Fanv2, this.accessory.displayName + ' Fan');
   }
 
   configureCurrentState() {
@@ -68,10 +200,9 @@ export default class AirConditionerAccessory extends BaseAccessory {
           return HEATING;
         } else if (status.value === 'cooling') {
           return COOLING;
-        } else if (status.value === 'ventilation') {
-          return IDLE;
+        } else {
+          return INACTIVE;
         }
-        return INACTIVE;
       });
   }
 
