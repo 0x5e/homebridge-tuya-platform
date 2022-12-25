@@ -1,10 +1,14 @@
-/* eslint-disable max-len */
 import { Service } from 'homebridge';
 import { TuyaDeviceSchema, TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty } from '../../device/TuyaDevice';
 import { limit, remap } from '../../util/util';
 import BaseAccessory from '../BaseAccessory';
 
-export function configureRotationSpeed(accessory: BaseAccessory, service: Service, schema?: TuyaDeviceSchema) {
+export function configureRotationSpeed(
+  accessory: BaseAccessory,
+  service: Service,
+  schema?: TuyaDeviceSchema,
+) {
+
   if (!schema) {
     return;
   }
@@ -23,7 +27,13 @@ export function configureRotationSpeed(accessory: BaseAccessory, service: Servic
     });
 }
 
-export function configureRotationSpeedLevel(accessory: BaseAccessory, service: Service, schema?: TuyaDeviceSchema, ignoreValues?: string[]) {
+export function configureRotationSpeedLevel(
+  accessory: BaseAccessory,
+  service: Service,
+  schema?: TuyaDeviceSchema,
+  ignoreValues?: string[],
+) {
+
   if (!schema) {
     return;
   }
@@ -60,7 +70,12 @@ export function configureRotationSpeedLevel(accessory: BaseAccessory, service: S
     .setProps(props);
 }
 
-export function configureRotationSpeedOn(accessory: BaseAccessory, service: Service, schema?: TuyaDeviceSchema) {
+export function configureRotationSpeedOn(
+  accessory: BaseAccessory,
+  service: Service,
+  schema?: TuyaDeviceSchema,
+) {
+
   if (!schema) {
     return;
   }
