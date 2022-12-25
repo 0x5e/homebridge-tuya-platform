@@ -38,23 +38,22 @@ export function configureRotationSpeedLevel(accessory: BaseAccessory, service: S
   }
 
   const props = { minValue: 0, maxValue: 100, minStep: 1 };
-  props.minStep = Math.floor(100 / (range.length - 1));
-  props.maxValue = props.minStep * (range.length - 1);
+  props.minStep = Math.floor(100 / range.length);
+  props.maxValue = props.minStep * range.length;
   accessory.log.debug('Set props for RotationSpeed:', props);
 
   service.getCharacteristic(accessory.Characteristic.RotationSpeed)
     .onGet(() => {
       const status = accessory.getStatus(schema.code)!;
       const index = range.indexOf(status.value as string);
-      return props.minStep * index;
+      return props.minStep * (index + 1);
     })
     .onSet(value => {
-      const index = value as number / props.minStep;
-      if (index >= range.length) {
+      const index = value as number / props.minStep - 1;
+      if (index < 0 || index >= range.length) {
         return;
       }
-
-      const speedLevel = range[index];
+      const speedLevel = range[index].toString();
       accessory.log.debug('Set RotationSpeed to:', speedLevel);
       accessory.sendCommands([{ code: schema.code, value: speedLevel }], true);
     })
