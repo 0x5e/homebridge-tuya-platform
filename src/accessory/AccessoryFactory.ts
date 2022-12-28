@@ -30,10 +30,11 @@ import HumidifierAccessory from './HumidifierAccessory';
 import DehumidifierAccessory from './DehumidifierAccessory';
 import DiffuserAccessory from './DiffuserAccessory';
 import AirPurifierAccessory from './AirPurifierAccessory';
-import IRControlHubAccessory from './IRControlHubAccessory';
 import CameraAccessory from './CameraAccessory';
 import SceneAccessory from './SceneAccessory';
 import AirConditionerAccessory from './AirConditionerAccessory';
+import IRControlHubAccessory from './IRControlHubAccessory';
+import IRGenericAccessory from './IRGenericAccessory';
 
 
 export default class AccessoryFactory {
@@ -161,9 +162,20 @@ export default class AccessoryFactory {
         handler = new HumanPresenceSensorAccessory(platform, accessory);
         break;
 
-      // Gateway Control & Other
+      // IR Remote Control
       case 'wnykq':
         handler = new IRControlHubAccessory(platform, accessory);
+        break;
+      case 'infrared_tv':
+      case 'infrared_stb':
+      case 'infrared_box':
+      case 'infrared_fan':
+      case 'infrared_light':
+      case 'infrared_amplifier':
+      case 'infrared_projector':
+      case 'infrared_waterheater':
+      case 'infrared_airpurifier':
+        handler = new IRGenericAccessory(platform, accessory);
         break;
 
       // Other

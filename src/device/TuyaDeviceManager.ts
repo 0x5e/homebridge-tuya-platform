@@ -101,9 +101,9 @@ export default class TuyaDeviceManager extends EventEmitter {
       const type = {
         'BOOLEAN': TuyaDeviceSchemaType.Boolean,
         'ENUM': TuyaDeviceSchemaType.Integer,
-        'STRING': TuyaDeviceSchemaType.Enum,
+        'STRING': TuyaDeviceSchemaType.String,
       }[rawType] || rawType;
-      const values = (rawType === 'STRING') ? JSON.stringify({ range: [rawValues] }) : rawValues;
+      const values = (rawType === 'STRING') ? JSON.stringify({ value: rawValues }) : rawValues;
 
       const read = (res.result.status).find(schema => schema.code === code) !== undefined;
       const write = (res.result.functions).find(schema => schema.code === code) !== undefined;

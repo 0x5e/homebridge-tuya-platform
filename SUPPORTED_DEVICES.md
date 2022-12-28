@@ -170,3 +170,20 @@ Most category code is pinyin abbreviation of Chinese name.
 | Name | Name (zh) | Code | Homebridge Service | Supported |
 | ---- | ---- | ---- | ---- | ---- |
 | Tracker | 定位器 | tracker | | |
+
+
+## IR Remote Control
+
+| Name | Name (zh) | Code | Homebridge Service | Supported |
+| ---- | ---- | ---- | ---- | ---- |
+| Universal Remote Control | 万能遥控器 | wnykq | | ✅ |
+| TV | 电视 | infrared_tv | Switch | ✅ |
+| STB | 机顶盒 | infrared_stb | Switch | ✅ |
+| TV Box | 电视盒子 | infrared_box | Switch | ✅ |
+| Air Conditioner | 空调 | infrared_ac | | |
+| Fan | 电风扇 | infrared_fan | Switch | ✅ |
+| Light | 灯 | infrared_light | Switch | ✅ |
+| Amplifier | 音响 | infrared_amplifier | Switch | ✅ |
+| Projector | 投影仪 | infrared_projector | Switch | ✅ |
+| Water Heater | 热水器 | infrared_waterheater | Switch | ✅ |
+| Air Purifier | 净化器 | infrared_airpurifier | Switch | ✅ |
