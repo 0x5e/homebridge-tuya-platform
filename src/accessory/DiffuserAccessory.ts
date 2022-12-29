@@ -1,4 +1,5 @@
 import BaseAccessory from './BaseAccessory';
+import { configureActive } from './characteristic/Active';
 import { configureLight } from './characteristic/Light';
 import { configureOn } from './characteristic/On';
 import { configureRotationSpeedLevel } from './characteristic/RotationSpeed';
@@ -46,35 +47,14 @@ export default class DiffuserAccessory extends BaseAccessory {
   }
 
   configureDiffuser() {
-    const onSchema = this.getSchema(...SCHEMA_CODE.ON);
     const sprayOnSchema = this.getSchema(...SCHEMA_CODE.SPRAY_ON)!;
 
     // Required Characteristics
-    const { INACTIVE, ACTIVE } = this.Characteristic.Active;
-    this.mainService().getCharacteristic(this.Characteristic.Active)
-      .onGet(() => {
-        if (onSchema && !this.getStatus(onSchema.code)!.value) {
-          return INACTIVE;
-        }
+    configureActive(this, this.mainService(), sprayOnSchema);
 
-        const status = this.getStatus(sprayOnSchema.code)!;
-        return (status.value as boolean) ? ACTIVE : INACTIVE;
-      })
-      .onSet(value => {
-        const commands = [{ code: sprayOnSchema.code, value: (value === ACTIVE) }];
-        if (onSchema && value === ACTIVE) {
-          commands.push({ code: onSchema.code, value: true });
-        }
-        this.sendCommands(commands, true);
-      });
-
-    const { PURIFYING_AIR } = this.Characteristic.CurrentAirPurifierState;
+    const { INACTIVE, PURIFYING_AIR } = this.Characteristic.CurrentAirPurifierState;
     this.mainService().getCharacteristic(this.Characteristic.CurrentAirPurifierState)
       .onGet(() => {
-        if (onSchema && this.getStatus(onSchema.code)!.value !== true) {
-          return INACTIVE;
-        }
-
         const status = this.getStatus(sprayOnSchema.code)!;
         return (status.value as boolean) ? PURIFYING_AIR : INACTIVE;
       });
