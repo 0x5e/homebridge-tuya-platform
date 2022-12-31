@@ -69,7 +69,6 @@ function createAmperesCharacteristic(api: API) {
         format: api.hap.Formats.FLOAT,
         perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_READ],
         unit: 'A',
-        minStep: 0.01,
       });
     }
   };
@@ -84,7 +83,6 @@ function createWattsCharacteristic(api: API) {
         format: api.hap.Formats.FLOAT,
         perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_READ],
         unit: 'W',
-        minStep: 0.01,
       });
     }
   };
@@ -99,7 +97,6 @@ function createVoltsCharacteristic(api: API) {
         format: api.hap.Formats.FLOAT,
         perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_READ],
         unit: 'V',
-        minStep: 0.01,
       });
     }
   };
