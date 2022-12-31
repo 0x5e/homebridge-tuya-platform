@@ -1,9 +1,13 @@
 import { TuyaDeviceSchema, TuyaDeviceSchemaType } from '../device/TuyaDevice';
 import BaseAccessory from './BaseAccessory';
 import { configureOn } from './characteristic/On';
+import { configureEnergyUsage } from './characteristic/EnergyUsage';
 
 const SCHEMA_CODE = {
   ON: ['switch', 'switch_1'],
+  CURRENT: ['cur_current'],
+  POWER: ['cur_power'],
+  VOLTAGE: ['cur_voltage'],
 };
 
 export default class SwitchAccessory extends BaseAccessory {
@@ -44,6 +48,14 @@ export default class SwitchAccessory extends BaseAccessory {
     }
 
     configureOn(this, service, schema);
+    configureEnergyUsage(
+      this.platform.api,
+      this,
+      service,
+      this.getSchema(...SCHEMA_CODE.CURRENT),
+      this.getSchema(...SCHEMA_CODE.POWER),
+      this.getSchema(...SCHEMA_CODE.VOLTAGE),
+    );
   }
 
 }
