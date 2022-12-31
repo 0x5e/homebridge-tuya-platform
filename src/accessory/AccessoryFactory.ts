@@ -166,22 +166,22 @@ export default class AccessoryFactory {
       case 'wnykq':
         handler = new IRControlHubAccessory(platform, accessory);
         break;
-      case 'infrared_tv':
-      case 'infrared_stb':
-      case 'infrared_box':
-      case 'infrared_fan':
-      case 'infrared_light':
-      case 'infrared_amplifier':
-      case 'infrared_projector':
-      case 'infrared_waterheater':
-      case 'infrared_airpurifier':
-        handler = new IRGenericAccessory(platform, accessory);
-        break;
 
       // Other
       case 'scene':
         handler = new SceneAccessory(platform, accessory);
         break;
+    }
+
+    // IR Remote Control
+    if (device.remote_keys) {
+      switch (device.remote_keys.category_id) {
+        case 5: // AC
+          break;
+        default:
+          handler = new IRGenericAccessory(platform, accessory);
+          break;
+      }
     }
 
     if (handler && handler.checkRequirements()) {

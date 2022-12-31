@@ -185,5 +185,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Light | 灯 | infrared_light | Switch | ✅ |
 | Amplifier | 音响 | infrared_amplifier | Switch | ✅ |
 | Projector | 投影仪 | infrared_projector | Switch | ✅ |
+| DVD | DVD | qt | Switch | ✅ |
+| Camera | 相机 | qt | Switch | ✅ |
 | Water Heater | 热水器 | infrared_waterheater | Switch | ✅ |
 | Air Purifier | 净化器 | infrared_airpurifier | Switch | ✅ |

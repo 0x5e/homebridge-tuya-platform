@@ -1,38 +1,24 @@
-import { TuyaDeviceSchema, TuyaDeviceSchemaMode, TuyaDeviceSchemaType } from '../device/TuyaDevice';
+import { TuyaIRRemoteKeyListItem } from '../device/TuyaDevice';
 import BaseAccessory from './BaseAccessory';
 import { configureName } from './characteristic/Name';
 
 export default class IRGenericAccessory extends BaseAccessory {
 
-  requiredSchema() {
-    return [];
-  }
-
   configureServices() {
-    for (const schema of this.device.schema) {
-      if (schema.mode === TuyaDeviceSchemaMode.READ_ONLY) {
-        continue;
-      }
-
-      if (schema.type === TuyaDeviceSchemaType.String) {
-        this.configureSwitch(schema);
-      } else {
-        this.log.warn('Unsupported schema:', schema);
-      }
-    }
-  }
-
-  configureSwitch(schema: TuyaDeviceSchema) {
-    const command: string = schema.property['value'];
-    if (!command) {
-      this.log.warn('Invalid schema:', schema);
+    if (!this.device.remote_keys) {
       return;
     }
 
-    const service = this.accessory.getService(schema.code)
-      || this.accessory.addService(this.Service.Switch, schema.code, schema.code);
+    for (const key of this.device.remote_keys.key_list) {
+      this.configureSwitch(key);
+    }
+  }
 
-    configureName(this, service, schema.code);
+  configureSwitch(key: TuyaIRRemoteKeyListItem) {
+    const service = this.accessory.getService(key.key)
+      || this.accessory.addService(this.Service.Switch, key.key, key.key);
+
+    configureName(this, service, key.key_name);
 
     service.getCharacteristic(this.Characteristic.On)
       .onGet(() => false)
@@ -41,12 +27,19 @@ export default class IRGenericAccessory extends BaseAccessory {
           return;
         }
 
-        this.sendCommands([{ code: schema.code, value: command }]);
+        this.sendInfraredCommands(key);
         setTimeout(() => {
           service.getCharacteristic(this.Characteristic.On).updateValue(false);
         }, 150);
 
       });
+  }
+
+  async sendInfraredCommands(key: TuyaIRRemoteKeyListItem) {
+    const { parent_id, id } = this.device;
+    const { category_id, remote_index } = this.device.remote_keys;
+    const res = await this.deviceManager.sendInfraredCommands(parent_id, id, category_id, remote_index, key.key, key.key_id);
+    return res;
   }
 
 }
