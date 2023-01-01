@@ -4,7 +4,7 @@ import { configureOn } from './characteristic/On';
 import { configureEnergyUsage } from './characteristic/EnergyUsage';
 
 const SCHEMA_CODE = {
-  ON: ['switch', 'switch_1'],
+  ON: ['switch', 'switch_1'], // switch_2, switch_3, switch_4, ..., switch_usb1, switch_usb2, switch_usb3, ..., switch_backlight
   CURRENT: ['cur_current'],
   POWER: ['cur_power'],
   VOLTAGE: ['cur_voltage'],
@@ -25,12 +25,12 @@ export default class SwitchAccessory extends BaseAccessory {
     }
 
     const schemata = this.device.schema.filter(
-      (schema) => SCHEMA_CODE.ON.includes(schema.code) && schema.type === TuyaDeviceSchemaType.Boolean,
+      (schema) => schema.code.startsWith('switch') && schema.type === TuyaDeviceSchemaType.Boolean,
     );
 
-    schemata.forEach((schema, schemaKey) => {
+    schemata.forEach((schema) => {
       const name = (schemata.length === 1) ? this.device.name : schema.code;
-      this.configureSwitch(schema, name, schemaKey === 0);
+      this.configureSwitch(schema, name);
     });
   }
 
@@ -39,7 +39,7 @@ export default class SwitchAccessory extends BaseAccessory {
     return this.Service.Switch;
   }
 
-  configureSwitch(schema: TuyaDeviceSchema, name: string, energyUsage: boolean) {
+  configureSwitch(schema: TuyaDeviceSchema, name: string) {
 
     const service = this.accessory.getService(schema.code)
       || this.accessory.addService(this.mainService(), name, schema.code);
@@ -52,7 +52,7 @@ export default class SwitchAccessory extends BaseAccessory {
 
     configureOn(this, service, schema);
 
-    if (energyUsage) {
+    if (schema.code === this.getSchema(...SCHEMA_CODE.ON)?.code) {
       configureEnergyUsage(
         this.platform.api,
         this,
