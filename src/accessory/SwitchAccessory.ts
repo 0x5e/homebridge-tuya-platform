@@ -24,10 +24,13 @@ export default class SwitchAccessory extends BaseAccessory {
       this.accessory.removeService(oldService);
     }
 
-    const schema = this.device.schema.filter((schema) => schema.code.startsWith('switch') && schema.type === TuyaDeviceSchemaType.Boolean);
-    for (const _schema of schema) {
-      const name = (schema.length === 1) ? this.device.name : _schema.code;
-      this.configureSwitch(_schema, name);
+    const schemata = this.device.schema.filter(
+      (schema) => SCHEMA_CODE.ON.includes(schema.code) && schema.type === TuyaDeviceSchemaType.Boolean,
+    );
+
+    for (const schema of schemata) {
+      const name = (schemata.length === 1) ? this.device.name : schema.code;
+      this.configureSwitch(schema, name);
     }
   }
 
