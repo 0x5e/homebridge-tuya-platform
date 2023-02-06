@@ -1,7 +1,8 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 import { Validator } from 'jsonschema';
+import path from 'path';
+import fs from 'fs';
 
-import TuyaOpenMQ from './core/TuyaOpenMQ';
 import TuyaDevice, { TuyaDeviceStatus } from './device/TuyaDevice';
 import TuyaDeviceManager from './device/TuyaDeviceManager';
 import TuyaCustomDeviceManager from './device/TuyaCustomDeviceManager';
@@ -102,8 +103,15 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       return;
     }
 
+    this.log.info(`Got ${devices.length} device(s) and scene(s).`);
+    const file = path.join(this.api.user.persistPath(), `TuyaDeviceList.${this.deviceManager!.api.tokenInfo.uid}.json`);
+    this.log.info('Device list saved at %s', file);
+    if (!fs.existsSync(this.api.user.persistPath())) {
+      await fs.promises.mkdir(this.api.user.persistPath());
+    }
+    await fs.promises.writeFile(file, JSON.stringify(devices, null, 2));
+
     // add accessories
-    this.log.info(`Got ${devices.length} device(s).`);
     for (const device of devices) {
       this.addAccessory(device);
     }
@@ -122,6 +130,32 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
 
   }
 
+  getDeviceConfig(device: TuyaDevice) {
+    if (!this.options.deviceOverrides) {
+      return undefined;
+    }
+
+    const deviceConfig = this.options.deviceOverrides.find(config => config.id === device.id || config.id === device.uuid);
+    const productConfig = this.options.deviceOverrides.find(config => config.id === device.product_id);
+    const globalConfig = this.options.deviceOverrides.find(config => config.id === 'global');
+
+    return deviceConfig || productConfig || globalConfig;
+  }
+
+  getDeviceSchemaConfig(device: TuyaDevice, code: string) {
+    const deviceConfig = this.getDeviceConfig(device);
+    if (!deviceConfig || !deviceConfig.schema) {
+      return undefined;
+    }
+
+    const schemaConfig = deviceConfig.schema.find(item => item.code === code);
+    if (!schemaConfig) {
+      return undefined;
+    }
+
+    return schemaConfig;
+  }
+
   async initCustomProject() {
     if (this.options.projectType !== '1') {
       return null;
@@ -133,8 +167,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     let res;
     const { endpoint, accessId, accessKey } = this.options;
     const api = new TuyaOpenAPI(endpoint, accessId, accessKey, this.log);
-    const mq = new TuyaOpenMQ(api, '2.0', this.log);
-    const deviceManager = new TuyaCustomDeviceManager(api, mq);
+    const deviceManager = new TuyaCustomDeviceManager(api);
 
     this.log.info('Get token.');
     res = await api.getToken();
@@ -204,9 +237,10 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     }
 
     this.log.info('Start MQTT connection.');
-    mq.start();
+    deviceManager.mq.start();
 
     this.log.info('Fetching device list.');
+    deviceManager.ownerIDs = assetIDList;
     const devices = await deviceManager.updateDevices(assetIDList);
 
     this.deviceManager = deviceManager;
@@ -221,8 +255,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     let res;
     const { accessId, accessKey, countryCode, username, password, appSchema } = this.options;
     const api = new TuyaOpenAPI(TuyaOpenAPI.Endpoints.AMERICA, accessId, accessKey, this.log);
-    const mq = new TuyaOpenMQ(api, '1.0', this.log);
-    const deviceManager = new TuyaHomeDeviceManager(api, mq);
+    const deviceManager = new TuyaHomeDeviceManager(api);
 
     this.log.info('Log in to Tuya Cloud.');
     res = await api.homeLogin(countryCode, username, password, appSchema);
@@ -235,7 +268,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     }
 
     this.log.info('Start MQTT connection.');
-    mq.start();
+    deviceManager.mq.start();
 
     this.log.info('Fetching home list.');
     res = await deviceManager.getHomeList();
@@ -247,22 +280,49 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     const homeIDList: number[] = [];
     for (const { home_id, name } of res.result) {
       this.log.info(`Got home_id=${home_id}, name=${name}`);
-      homeIDList.push(home_id);
+      if (this.options.homeWhitelist) {
+        if (this.options.homeWhitelist.includes(home_id)) {
+          this.log.info(`Found home_id=${home_id} in whitelist; including devices from this home.`);
+          homeIDList.push(home_id);
+        } else {
+          this.log.info(`Did not find home_id=${home_id} in whitelist; excluding devices from this home.`);
+        }
+      } else {
+        homeIDList.push(home_id);
+      }
     }
 
     if (homeIDList.length === 0) {
-      this.log.warn('Home list is empty. exit.');
-      return null;
+      this.log.warn('Home list is empty.');
     }
 
     this.log.info('Fetching device list.');
+    deviceManager.ownerIDs = homeIDList.map(homeID =>homeID.toString());
     const devices = await deviceManager.updateDevices(homeIDList);
+
+    this.log.info('Fetching scene list.');
+    for (const homeID of homeIDList) {
+      const scenes = await deviceManager.getSceneList(homeID);
+      for (const scene of scenes) {
+        this.log.info(`Got scene_id=${scene.id}, name=${scene.name}`);
+      }
+      devices.push(...scenes);
+    }
 
     this.deviceManager = deviceManager;
     return devices;
   }
 
   addAccessory(device: TuyaDevice) {
+    const deviceConfig = this.getDeviceConfig(device);
+    if (deviceConfig?.category) {
+      this.log.warn('Override %o category to %o', device.name, deviceConfig.category);
+      device.category = deviceConfig.category;
+      if (deviceConfig.category === 'hidden') {
+        this.log.info('Hide Accessory:', device.name);
+        return;
+      }
+    }
 
     const uuid = this.api.hap.uuid.generate(device.id);
     const existingAccessory = this.cachedAccessories.find(accessory => accessory.UUID === uuid);
@@ -308,7 +368,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       return;
     }
 
-    this.log.debug(`onDeviceInfoUpdate devId=${device.id}, info=${JSON.stringify(info)}`);
+    // this.log.debug('onDeviceInfoUpdate devId = %s, status = %o}', device.id, info);
     handler.onDeviceInfoUpdate(info);
   }
 
@@ -318,7 +378,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       return;
     }
 
-    this.log.debug(`onDeviceStatusUpdate devId=${device.id}, status=${JSON.stringify(status)}`);
+    // this.log.debug('onDeviceStatusUpdate devId = %s, status = %o}', device.id, status);
     handler.onDeviceStatusUpdate(status);
   }
 

@@ -1,15 +1,15 @@
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import axios, { Method } from 'axios';
-import Crypto from 'crypto-js';
+import https from 'https';
+import Crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
 // eslint-disable-next-line
 // @ts-ignore
 import { version } from '../../package.json';
 
-import Logger from '../util/Logger';
+import Logger, { PrefixLogger } from '../util/Logger';
 
 enum Endpoints {
   AMERICA = 'https://openapi.tuyaus.com',
@@ -29,22 +29,26 @@ const DEFAULT_ENDPOINTS = {
 
 export const LOGIN_ERROR_MESSAGES = {
   1004: 'Please make sure your endpoint, accessId, accessKey is right.',
-  1104: 'Please make sure your endpoint, accessId, accessKey is right.',
   1106: 'Please make sure your countryCode, username, password, appSchema is correct, and app account is linked with cloud project.',
+  1114: 'Please make sure your endpoint, accessId, accessKey is right.',
   2401: 'Username or password is wrong.',
-  2406: 'Please make sure your cloud project is created after May 25, 2021.',
+  2406: 'Please make sure you selected the right data center where your app account located, and the app account is linked with cloud project.',
 };
 
-export const API_ERROR_MESSAGES = {
-  28841002: 'API subscription expired. Please renew the API subscription at Tuya IoT Platform.',
-  28841105: `
-API not authorized. Please go to "Tuya IoT Platform -> Cloud -> Development -> Project -> Service API",
+const API_NOT_SUBSCRIBED_ERROR = `
+API not subscribed. Please go to "Tuya IoT Platform -> Cloud -> Development -> Project -> Service API",
 and Authorize the following APIs before using:
 - Authorization Token Management
 - Device Status Notification
 - IoT Core
-- Industry Project Client Service (for "Custom" project type)
-`,
+- Industry Project Client Service (for "Custom" project)
+`;
+
+const API_ERROR_MESSAGES = {
+  1010: 'Token expired. Tuya Cloud don\'t support running multiple HomeBridge/HomeAssistant instance with same tuya account.',
+  28841002: 'API subscription expired. Please renew the API subscription at Tuya IoT Platform.',
+  28841101: API_NOT_SUBSCRIBED_ERROR,
+  28841105: API_NOT_SUBSCRIBED_ERROR,
 };
 
 type TuyaOpenAPIResponseSuccess = {
@@ -82,7 +86,7 @@ export default class TuyaOpenAPI {
     public log: Logger = console,
     public lang = 'en',
   ) {
-
+    this.log = new PrefixLogger(log, TuyaOpenAPI.name);
   }
 
   isLogin() {
@@ -113,10 +117,10 @@ export default class TuyaOpenAPI {
       return;
     }
 
-    this.log.debug('Refresh access_token');
+    this.log.debug('Refreshing access_token');
     const res = await this.get(`/v1.0/token/${this.tokenInfo.refresh_token}`);
     if (res.success === false) {
-      this.log.error(`Refresh access_token failed. code=${res.code}, msg=${res.msg}`);
+      this.log.error('Refresh access_token failed. code = %s, msg = %s', res.code, res.msg);
       return;
     }
 
@@ -160,6 +164,12 @@ export default class TuyaOpenAPI {
    */
   async homeLogin(countryCode: number, username: string, password: string, appSchema: string) {
 
+    if (this._isSaltedPassword(password)) {
+      this.log.info('Login with md5 salted password.');
+    } else {
+      password = Crypto.createHash('md5').update(password).digest('hex');
+    }
+
     for (const _endpoint of Object.keys(DEFAULT_ENDPOINTS)) {
       const countryCodeList = DEFAULT_ENDPOINTS[_endpoint];
       if (countryCodeList.includes(countryCode)) {
@@ -171,7 +181,7 @@ export default class TuyaOpenAPI {
     const res = await this.post('/v1.0/iot-01/associated-users/actions/authorized-login', {
       country_code: countryCode,
       username: username,
-      password: Crypto.MD5(password).toString(),
+      password: password,
       schema: appSchema,
     });
 
@@ -209,7 +219,7 @@ export default class TuyaOpenAPI {
   async customCreateUser(username: string, password: string, country_code = 1) {
     const res = await this.post('/v1.0/iot-02/users', {
       username,
-      password: Crypto.SHA256(password).toString().toLowerCase(),
+      password: Crypto.createHash('sha256').update(password).digest('hex'),
       country_code,
     });
     return res;
@@ -225,7 +235,7 @@ export default class TuyaOpenAPI {
     this.tokenInfo = { access_token: '', refresh_token: '', uid: '', expire: 0 };
     const res = await this.post('/v1.0/iot-03/users/login', {
       username: username,
-      password: Crypto.SHA256(password).toString().toLowerCase(),
+      password: Crypto.createHash('sha256').update(password).digest('hex'),
     });
 
     if (res.success) {
@@ -241,7 +251,7 @@ export default class TuyaOpenAPI {
     return res;
   }
 
-  async request(method: Method, path: string, params?, body?) {
+  async request(method: string, path: string, params?, body?) {
     await this._refreshAccessTokenIfNeed(path);
 
     const now = new Date().getTime();
@@ -261,24 +271,49 @@ export default class TuyaOpenAPI {
       'dev_channel': 'homebridge',
       'devVersion': version,
     };
-    // eslint-disable-next-line max-len
-    this.log.debug(`TuyaOpenAPI request: method = ${method}, endpoint = ${this.endpoint}, path = ${path}, params = ${JSON.stringify(params)}, body = ${JSON.stringify(body)}, headers = ${JSON.stringify(headers)}`);
+    this.log.debug('Request:\nmethod = %s\nendpoint = %s\npath = %s\nquery = %s\nheaders = %s\nbody = %s',
+      method, this.endpoint, path, JSON.stringify(params, null, 2), JSON.stringify(headers, null, 2), JSON.stringify(body, null, 2));
 
-    const res = await axios({
-      baseURL: this.endpoint,
-      url: path,
-      method: method,
-      headers: headers,
-      params: params,
-      data: body,
-    });
-
-    this.log.debug(`TuyaOpenAPI response: path = ${path}, data = ${JSON.stringify(res.data)}`);
-    if (res.data && API_ERROR_MESSAGES[res.data.code]) {
-      this.log.error(API_ERROR_MESSAGES[res.data.code]);
+    if (params) {
+      path += '?' + new URLSearchParams(params).toString();
     }
 
-    return res.data as TuyaOpenAPIResponse;
+    const res: TuyaOpenAPIResponse = await new Promise((resolve, reject) => {
+
+      const req = https.request({
+        host: new URL(this.endpoint).host,
+        method,
+        headers,
+        path,
+      }, res => {
+        if (res.statusCode !== 200) {
+          this.log.warn('Status: %d %s', res.statusCode, res.statusMessage);
+          return;
+        }
+        res.setEncoding('utf8');
+        let rawData = '';
+        res.on('data', (chunk) => {
+          rawData += chunk;
+        });
+        res.on('end', () => {
+          resolve(JSON.parse(rawData));
+        });
+      });
+
+      if (body) {
+        req.write(JSON.stringify(body));
+      }
+
+      req.on('error', e => reject(e));
+      req.end();
+    });
+
+    this.log.debug('Response:\npath = %s\ndata = %s', path, JSON.stringify(res, null, 2));
+    if (res && res.success !== true && API_ERROR_MESSAGES[res.code]) {
+      this.log.error(API_ERROR_MESSAGES[res.code]);
+    }
+
+    return res;
   }
 
   async get(path: string, params?) {
@@ -295,15 +330,14 @@ export default class TuyaOpenAPI {
 
   _getSign(accessId: string, accessKey: string, accessToken = '', timestamp = 0, nonce: string, stringToSign: string) {
     const message = [accessId, accessToken, timestamp, nonce, stringToSign].join('');
-    const hash = Crypto.HmacSHA256(message, accessKey);
-    const sign = hash.toString().toUpperCase();
+    const sign = Crypto.createHmac('SHA256', accessKey).update(message).digest('hex').toUpperCase();
     return sign;
   }
 
-  _getStringToSign(method: Method, path: string, params, body) {
+  _getStringToSign(method: string, path: string, params, body) {
     const httpMethod = method.toUpperCase();
     const bodyStream = body ? JSON.stringify(body) : '';
-    const contentSHA256 = Crypto.SHA256(bodyStream);
+    const contentSHA256 = Crypto.createHash('sha256').update(bodyStream).digest('hex');
     const headers = `client_id:${this.accessId}\n`;
     const url = this._getSignUrl(path, params);
     const result = [httpMethod, contentSHA256, headers, url].join('\n');
@@ -325,6 +359,10 @@ export default class TuyaOpenAPI {
     const url = `${path}?${kv.join('&')}`;
 
     return url;
+  }
+
+  _isSaltedPassword(password: string) {
+    return Buffer.from(password, 'hex').length === 16;
   }
 
 }

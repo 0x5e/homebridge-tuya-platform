@@ -1,5 +1,12 @@
 
-export enum TuyaDeviceFunctionType {
+export enum TuyaDeviceSchemaMode {
+  UNKNOWN = '',
+  READ_WRITE = 'rw',
+  READ_ONLY = 'ro',
+  WRITE_ONLY = 'wo',
+}
+
+export enum TuyaDeviceSchemaType {
   Boolean = 'Boolean',
   Integer = 'Integer',
   Enum = 'Enum',
@@ -8,7 +15,7 @@ export enum TuyaDeviceFunctionType {
   Raw = 'Raw',
 }
 
-export type TuyaDeviceFunctionIntegerProperty = {
+export type TuyaDeviceSchemaIntegerProperty = {
   min: number;
   max: number;
   scale: number;
@@ -16,22 +23,25 @@ export type TuyaDeviceFunctionIntegerProperty = {
   unit: string;
 };
 
-export type TuyaDeviceFunctionEnumProperty = {
+export type TuyaDeviceSchemaEnumProperty = {
   range: string[];
 };
 
-export type TuyaDeviceFunctionJSONProperty = object;
+export type TuyaDeviceSchemaStringProperty = string;
 
-export type TuyaDeviceFunctionProperty = TuyaDeviceFunctionIntegerProperty
-  | TuyaDeviceFunctionEnumProperty
-  | TuyaDeviceFunctionJSONProperty;
+export type TuyaDeviceSchemaJSONProperty = object;
 
-export type TuyaDeviceFunction = {
+export type TuyaDeviceSchemaProperty = TuyaDeviceSchemaIntegerProperty
+  | TuyaDeviceSchemaEnumProperty
+  | TuyaDeviceSchemaStringProperty
+  | TuyaDeviceSchemaJSONProperty;
+
+export type TuyaDeviceSchema = {
   code: string;
-  name: string;
-  desc: string;
-  type: TuyaDeviceFunctionType;
-  values: string;
+  // name: string;
+  mode: TuyaDeviceSchemaMode;
+  type: TuyaDeviceSchemaType;
+  property: TuyaDeviceSchemaProperty;
 };
 
 export type TuyaDeviceStatus = {
@@ -46,13 +56,14 @@ export default class TuyaDevice {
   uuid!: string;
   name!: string;
   online!: boolean;
+  owner_id!: string; // homeID or assetID
 
   // product
   product_id!: string;
   product_name!: string;
   icon!: string;
   category!: string;
-  functions!: TuyaDeviceFunction[];
+  schema!: TuyaDeviceSchema[];
 
   // status
   status!: TuyaDeviceStatus[];
@@ -72,22 +83,11 @@ export default class TuyaDevice {
 
   constructor(obj: Partial<TuyaDevice>) {
     Object.assign(this, obj);
+    this.status.sort((a, b) => a.code > b.code ? 1 : -1);
   }
 
-  getDeviceFunction(code: string) {
-    return this.functions.find(_function => _function.code === code);
-  }
-
-  getDeviceFunctionProperty(code: string) {
-    const deviceFunction = this.getDeviceFunction(code);
-    if (!deviceFunction) {
-      return;
-    }
-    return JSON.parse(deviceFunction.values) as TuyaDeviceFunctionProperty;
-  }
-
-  getDeviceStatus(code: string) {
-    return this.status.find(status => status.code === code);
+  isVirtualDevice() {
+    return this.id.startsWith('vdevo');
   }
 
 }

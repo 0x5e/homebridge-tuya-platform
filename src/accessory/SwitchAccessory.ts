@@ -1,33 +1,76 @@
-import { TuyaDeviceFunction, TuyaDeviceFunctionType } from '../device/TuyaDevice';
+import { TuyaDeviceSchema, TuyaDeviceSchemaType } from '../device/TuyaDevice';
 import BaseAccessory from './BaseAccessory';
+import { configureOn } from './characteristic/On';
+import { configureEnergyUsage } from './characteristic/EnergyUsage';
+import { configureCurrentTemperature } from './characteristic/CurrentTemperature';
+import { configureCurrentRelativeHumidity } from './characteristic/CurrentRelativeHumidity';
+
+const SCHEMA_CODE = {
+  ON: ['switch', 'switch_1'], // switch_2, switch_3, switch_4, ..., switch_usb1, switch_usb2, switch_usb3, ..., switch_backlight
+  CURRENT: ['cur_current'],
+  POWER: ['cur_power'],
+  VOLTAGE: ['cur_voltage'],
+  CURRENT_TEMP: ['va_temperature', 'temp_current'],
+  CURRENT_HUMIDITY: ['va_humidity', 'humidity_value'],
+};
 
 export default class SwitchAccessory extends BaseAccessory {
+
+  requiredSchema() {
+    return [SCHEMA_CODE.ON];
+  }
+
+  configureServices() {
+
+    const oldService = this.accessory.getService(this.mainService());
+    if (oldService && oldService?.subtype === undefined) {
+      this.platform.log.warn('Remove old service:', oldService.UUID);
+      this.accessory.removeService(oldService);
+    }
+
+    const schemata = this.device.schema.filter(
+      (schema) => schema.code.startsWith('switch') && schema.type === TuyaDeviceSchemaType.Boolean,
+    );
+
+    schemata.forEach((schema) => {
+      const name = (schemata.length === 1) ? this.device.name : schema.code;
+      this.configureSwitch(schema, name);
+    });
+
+
+    // Other
+    configureCurrentTemperature(this, undefined, this.getSchema(...SCHEMA_CODE.CURRENT_TEMP));
+    configureCurrentRelativeHumidity(this, undefined, this.getSchema(...SCHEMA_CODE.CURRENT_HUMIDITY));
+  }
+
 
   mainService() {
     return this.Service.Switch;
   }
 
-  configureService(deviceFunction: TuyaDeviceFunction) {
-    if (deviceFunction.type !== TuyaDeviceFunctionType.Boolean) {
-      return;
+  configureSwitch(schema: TuyaDeviceSchema, name: string) {
+
+    const service = this.accessory.getService(schema.code)
+      || this.accessory.addService(this.mainService(), name, schema.code);
+
+    service.setCharacteristic(this.Characteristic.Name, name);
+    if (!service.testCharacteristic(this.Characteristic.ConfiguredName)) {
+      service.addOptionalCharacteristic(this.Characteristic.ConfiguredName); // silence warning
+      service.setCharacteristic(this.Characteristic.ConfiguredName, name);
     }
 
-    const service = this.accessory.getService(deviceFunction.code)
-      || this.accessory.addService(this.mainService(), deviceFunction.name, deviceFunction.code);
+    configureOn(this, service, schema);
 
-    service.setCharacteristic(this.Characteristic.Name, deviceFunction.name);
-
-    service.getCharacteristic(this.Characteristic.On)
-      .onGet(async () => {
-        const status = this.device.getDeviceStatus(deviceFunction.code);
-        return status!.value as boolean;
-      })
-      .onSet(async (value) => {
-        await this.deviceManager.sendCommands(this.device.id, [{
-          code: deviceFunction.code,
-          value: value as boolean,
-        }]);
-      });
+    if (schema.code === this.getSchema(...SCHEMA_CODE.ON)?.code) {
+      configureEnergyUsage(
+        this.platform.api,
+        this,
+        service,
+        this.getSchema(...SCHEMA_CODE.CURRENT),
+        this.getSchema(...SCHEMA_CODE.POWER),
+        this.getSchema(...SCHEMA_CODE.VOLTAGE),
+      );
+    }
   }
 
 }

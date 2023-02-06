@@ -81,6 +81,111 @@
 						"condition": {
 							"functionBody": "return model.options.projectType === '2';"
 						}
+					},
+					"homeWhitelist": {
+						"title": "Whitelisted Home IDs",
+						"description": "An optional list of Home IDs to match. If blank, all homes are matched.",
+						"type": "array",
+						"items": {
+							"title": "Home ID",
+							"type": "integer"
+						},
+						"condition": {
+							"functionBody": "return model.options.projectType === '2';"
+						}
+					},
+					"deviceOverrides": {
+						"title": "Device Overriding Configs",
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"title": "ID",
+									"description": "Device ID or Product ID or `global`",
+									"type": "string",
+									"required": true
+								},
+								"category": {
+									"title": "Category",
+									"description": "Category Code or `hidden`",
+									"type": "string"
+								},
+								"schema": {
+									"title": "Schema Overriding Configs",
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"oldCode": {
+												"title": "Original Schema Code",
+												"type": "string",
+												"required": true
+											},
+											"code": {
+												"title": "New Schema Code",
+												"type": "string",
+												"required": true
+											},
+											"type": {
+												"title": "New Schema Type",
+												"type": "string",
+												"default": "Boolean",
+												"oneOf": [{
+													"title": "Boolean",
+													"enum": ["Boolean"]
+												}, {
+													"title": "Integer",
+													"enum": ["Integer"]
+												}, {
+													"title": "Enum",
+													"enum": ["Enum"]
+												}, {
+													"title": "String",
+													"enum": ["String"]
+												}, {
+													"title": "Json",
+													"enum": ["Json"]
+												}, {
+													"title": "Raw",
+													"enum": ["Raw"]
+												}]
+											},
+											"property": {
+												"title": "New Schema Property",
+												"type": "object",
+												"properties": {
+													"min": {
+														"title": "min",
+														"type": "integer"
+													},
+													"max": {
+														"title": "max",
+														"type": "integer"
+													},
+													"scale": {
+														"title": "scale",
+														"type": "integer"
+													},
+													"step": {
+														"title": "step",
+														"type": "integer"
+													},
+													"range": {
+														"title": "range",
+														"type": "array",
+														"items": {
+															"title": "value",
+															"type": "string"
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}

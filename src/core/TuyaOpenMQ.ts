@@ -4,7 +4,7 @@ import Crypto from 'crypto';
 import CryptoJS from 'crypto-js';
 
 import TuyaOpenAPI from './TuyaOpenAPI';
-import Logger from '../util/Logger';
+import Logger, { PrefixLogger } from '../util/Logger';
 
 const GCM_TAG_LENGTH = 16;
 
@@ -26,9 +26,9 @@ type TuyaMQTTCallback = (topic: string, protocol: number, data) => void;
 
 export default class TuyaOpenMQ {
 
-  public running = false;
   public client?: mqtt.MqttClient;
   public config?: TuyaMQTTConfig;
+  public version = '1.0';
   public messageListeners = new Set<TuyaMQTTCallback>();
   public linkId = uuid_v4();
 
@@ -36,19 +36,16 @@ export default class TuyaOpenMQ {
 
   constructor(
     public api: TuyaOpenAPI,
-    public type: string,
     public log: Logger = console,
   ) {
-
+    this.log = new PrefixLogger(log, TuyaOpenMQ.name);
   }
 
   start() {
-    this.running = true;
-    this._loop();
+    this._connect();
   }
 
   stop() {
-    this.running = false;
     if (this.timer) {
       clearTimeout(this.timer);
     }
@@ -58,21 +55,17 @@ export default class TuyaOpenMQ {
     }
   }
 
-  async _loop() {
+  async _connect() {
+    this.stop();
 
     const res = await this._getMQConfig('mqtt');
     if (res.success === false) {
-      this.stop();
+      this.log.warn('Get MQTT config failed. code = %s, msg = %s', res.code, res.msg);
       return;
     }
 
-    if (this.client) {
-      this.client.removeAllListeners();
-      this.client.end();
-    }
-
     const { url, client_id, username, password, expire_time, source_topic } = res.result;
-    this.log.debug(`TuyaOpenMQ connecting: ${url}`);
+    this.log.debug('Connecting to:', url);
     const client = mqtt.connect(url, {
       clientId: client_id,
       username: username,
@@ -89,7 +82,7 @@ export default class TuyaOpenMQ {
     this.config = res.result;
 
     // reconnect every 2 hours required
-    this.timer = setTimeout(this._loop.bind(this), (expire_time - 60) * 1000);
+    this.timer = setTimeout(this._connect.bind(this), (expire_time - 60) * 1000);
 
   }
 
@@ -99,41 +92,93 @@ export default class TuyaOpenMQ {
       'link_id': this.linkId,
       'link_type': linkType,
       'topics': 'device',
-      'msg_encrypted_version': this.type,
+      'msg_encrypted_version': this.version,
     });
     return res;
   }
 
   _onConnect() {
-    this.log.debug('TuyaOpenMQ connected');
+    this.log.debug('Connected');
   }
 
   _onError(error: Error) {
-    this.log.error('TuyaOpenMQ error:', error);
+    this.log.error('Error:', error);
   }
 
   _onEnd() {
-    this.log.debug('TuyaOpenMQ end');
+    this.log.debug('End');
   }
 
-  private lastPayload?;
-  _onMessage(topic: string, payload: Buffer) {
+  async _onMessage(topic: string, payload: Buffer) {
     const { protocol, data, t } = JSON.parse(payload.toString());
-    let message = this._decodeMQMessage(data, this.config!.password, t);
-    this.log.debug(`TuyaOpenMQ onMessage: topic = ${topic}, protocol = ${protocol}, message = ${message}`);
-    message = JSON.parse(message);
-
-    // Check message order
-    const currentPayload = { protocol, message, t };
-    if (this.lastPayload && t < this.lastPayload.t) {
-      this.log.warn(`TuyaOpenMQ warning: message received with wrong order.
-lastMessage: dataId=${this.lastPayload.message['dataId']}, t=${this.lastPayload.t}, ${new Date(this.lastPayload.t).toISOString()}
-currentMessage: dataId=${message['dataId']}, t=${t}, ${new Date(t).toISOString()}`);
+    const messageData = this._decodeMQMessage(data, this.config!.password, t);
+    if (!messageData) {
+      this.log.warn('Message decode failed:', payload.toString());
+      return;
     }
-    this.lastPayload = currentPayload;
+    const message = JSON.parse(messageData);
+    this.log.debug('onMessage:\ntopic = %s\nprotocol = %s\nmessage = %s\nt = %s', topic, protocol, JSON.stringify(message, null, 2), t);
+
+    this._fixWrongOrderMessage(protocol, message, t);
 
     for (const listener of this.messageListeners) {
       listener(topic, protocol, message);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private consumedQueue: any[] = [];
+  _fixWrongOrderMessage(protocol: number, message, t: number) {
+    if (protocol !== 4) {
+      return;
+    }
+
+    const currentPayload = { protocol, message, t };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const lastPayload : any = this.consumedQueue[this.consumedQueue.length - 1];
+    if (lastPayload && currentPayload.t < lastPayload.t) {
+      this.log.debug('Message received with wrong order.');
+      this.log.debug('LastMessage: dataId = %s, t = %s', lastPayload.message.dataId, lastPayload.t);
+      this.log.debug('CurrentMessage: dataId = %s, t = %s', message.dataId, t);
+      this.log.debug('This may cause outdated device status update.');
+
+      // Use newer status to override current status.
+      for (const _status of message.status) {
+        for (const payload of this.consumedQueue.reverse()) {
+          if (message.devId !== payload.message.devId) {
+            continue;
+          }
+
+          const latestStatus = payload.message.status.find(item => item.code === _status.code);
+          if (latestStatus) {
+            if (latestStatus.value !== _status.value) {
+              this.log.debug('Override status %o => %o', latestStatus, _status);
+              _status.value = latestStatus.value;
+              _status.t = latestStatus.t;
+            }
+            break;
+          }
+        }
+      }
+
+      return;
+    }
+
+    this.consumedQueue.push(currentPayload);
+
+    while (this.consumedQueue.length > 0) {
+      let t = this.consumedQueue[0].t as number;
+      if (t > Math.pow(10, 12)) { // timestamp format always changing, seconds or milliseconds is not certain :(
+        t = t / 1000;
+      }
+
+      // Remove message older than 30 seconds
+      if (Date.now() / 1000 > t + 30) {
+        this.consumedQueue.shift();
+      } else {
+        break;
+      }
     }
   }
 
@@ -168,7 +213,7 @@ currentMessage: dataId=${message['dataId']}, t=${t}, ${new Date(t).toISOString()
   }
 
   _decodeMQMessage(data: string, password: string, t: number) {
-    if (this.type === '2.0') {
+    if (this.version === '2.0') {
       return this._decodeMQMessage_2_0(data, password, t);
     } else {
       return this._decodeMQMessage_1_0(data, password);

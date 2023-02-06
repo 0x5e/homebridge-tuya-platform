@@ -1,12 +1,13 @@
 {
   "name": "@0x5e/homebridge-tuya-platform",
-  "version": "1.6.0-beta.14",
-  "description": "Tuya plugin for Hombridge, maintained by @0x5e, former employee of Tuya.",
+  "version": "1.7.0-beta.24",
+  "description": "Fork version of official Tuya Homebridge plugin. Brings a bunch of bug fix and new device support.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/0x5e/homebridge-tuya-platform"
   },
+  "homepage": "https://github.com/0x5e/homebridge-tuya-platform#readme",
   "bugs": {
     "url": "https://github.com/0x5e/homebridge-tuya-platform/issues"
   },
@@ -22,28 +23,34 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/**/**.ts --max-warnings=0",
+    "lint": "eslint src/**/*.ts --max-warnings=0",
     "test": "jest",
     "watch": "npm run build && npm link && nodemon",
+    "launch": "tsc && homebridge -I -D",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "homekit",
+    "tuya"
   ],
   "dependencies": {
-    "axios": "^0.21.1",
-    "crypto-js": "^4.0.0",
+    "@homebridge/camera-utils": "^2.2.0",
+    "color-convert": "^2.0.1",
+    "crypto-js": "^4.1.1",
     "debounce": "^1.2.1",
     "jsonschema": "^1.4.1",
+    "kelvin-to-rgb": "^1.0.2",
     "mqtt": "^4.2.6",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/color-convert": "^2.0.0",
     "@types/crypto-js": "^4.1.1",
     "@types/debounce": "^1.2.1",
     "@types/jest": "^29.1.2",
-    "@types/node": "^16.10.9",
+    "@types/node": "^18.11.9",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

@@ -1,7 +1,14 @@
 import EventEmitter from 'events';
 import TuyaOpenAPI from '../core/TuyaOpenAPI';
 import TuyaOpenMQ from '../core/TuyaOpenMQ';
-import TuyaDevice, { TuyaDeviceStatus } from './TuyaDevice';
+import Logger, { PrefixLogger } from '../util/Logger';
+import TuyaDevice, {
+  TuyaDeviceSchema,
+  TuyaDeviceSchemaMode,
+  TuyaDeviceSchemaProperty,
+  TuyaDeviceSchemaType,
+  TuyaDeviceStatus,
+} from './TuyaDevice';
 
 enum Events {
   DEVICE_ADD = 'DEVICE_ADD',
@@ -19,15 +26,21 @@ export default class TuyaDeviceManager extends EventEmitter {
 
   static readonly Events = Events;
 
+  public mq: TuyaOpenMQ;
+  public ownerIDs: string[] = [];
   public devices: TuyaDevice[] = [];
-  public log = this.api.log;
+  public log: Logger;
 
   constructor(
     public api: TuyaOpenAPI,
-    public mq: TuyaOpenMQ,
   ) {
     super();
-    mq.addMessageListener(this.onMQTTMessage.bind(this));
+
+    const log = (this.api.log as PrefixLogger).log;
+    this.log = new PrefixLogger(log, TuyaDeviceManager.name);
+
+    this.mq = new TuyaOpenMQ(api, log);
+    this.mq.addMessageListener(this.onMQTTMessage.bind(this));
   }
 
   getDevice(deviceID: string) {
@@ -35,25 +48,19 @@ export default class TuyaDeviceManager extends EventEmitter {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async updateDevices(areaIDList: []): Promise<TuyaDevice[]> {
+  async updateDevices(ownerIDs: []): Promise<TuyaDevice[]> {
     return [];
   }
 
   async updateDevice(deviceID: string) {
 
-    let res = await this.getDeviceInfo(deviceID);
+    const res = await this.getDeviceInfo(deviceID);
     if (!res.success) {
       return null;
     }
-    const device = new TuyaDevice(res.result);
 
-    res = await this.getDeviceFunctions(deviceID);
-    if (res.success) {
-      device.functions = res.result['functions'];
-    } else {
-      this.log.warn(`Get device functions failed. code=${res.code}, msg=${res.msg}`);
-      device.functions = [];
-    }
+    const device = new TuyaDevice(res.result);
+    device.schema = await this.getDeviceSchema(deviceID);
 
     const oldDevice = this.getDevice(deviceID);
     if (oldDevice) {
@@ -70,30 +77,56 @@ export default class TuyaDeviceManager extends EventEmitter {
     return res;
   }
 
-  async getDeviceListInfo(devIds: string[] = []) {
-    const res = await this.api.get('/v1.0/devices', { 'device_ids': devIds.join(',') });
+  async getDeviceListInfo(deviceIDs: string[] = []) {
+    const res = await this.api.get('/v1.0/devices', { 'device_ids': deviceIDs.join(',') });
     return res;
   }
 
-  async getDeviceFunctions(deviceID: string) {
-    const res = await this.api.get(`/v1.0/devices/${deviceID}/functions`);
-    return res;
-  }
+  async getDeviceSchema(deviceID: string) {
+    // const res = await this.api.get(`/v1.2/iot-03/devices/${deviceID}/specification`);
+    const res = await this.api.get(`/v1.0/devices/${deviceID}/specifications`);
+    if (res.success === false) {
+      this.log.warn('Get device specification failed. devId = %s, code = %s, msg = %s', deviceID, res.code, res.msg);
+      return [];
+    }
 
-  async getDeviceListFunctions(devIds: string[] = []) {
-    const PAGE_COUNT = 20;
+    // Combine functions and status together, as it used to be.
+    const schemas = new Map<string, TuyaDeviceSchema>();
+    for (const { code, type: rawType, values: rawValues } of [...res.result.status, ...res.result.functions]) {
+      if (schemas[code]) {
+        continue;
+      }
 
-    let index = 0;
-    const results: object[] = [];
-    while(index < devIds.length) {
-      const res = await this.api.get('/v1.0/devices/functions', { 'device_ids': devIds.slice(index, index += PAGE_COUNT).join(',') });
-      if (res.result) {
-        results.push(...res.result);
+      // Transform IR device's special schema.
+      const type = {
+        'BOOLEAN': TuyaDeviceSchemaType.Boolean,
+        'ENUM': TuyaDeviceSchemaType.Integer,
+        'STRING': TuyaDeviceSchemaType.Enum,
+      }[rawType] || rawType;
+      const values = (rawType === 'STRING') ? JSON.stringify({ range: [rawValues] }) : rawValues;
+
+      const read = (res.result.status).find(schema => schema.code === code) !== undefined;
+      const write = (res.result.functions).find(schema => schema.code === code) !== undefined;
+      let mode = TuyaDeviceSchemaMode.UNKNOWN;
+      if (read && write) {
+        mode = TuyaDeviceSchemaMode.READ_WRITE;
+      } else if (read && !write) {
+        mode = TuyaDeviceSchemaMode.READ_ONLY;
+      } else if (!read && write) {
+        mode = TuyaDeviceSchemaMode.WRITE_ONLY;
+      }
+      let property: TuyaDeviceSchemaProperty;
+      try {
+        property = JSON.parse(values);
+        schemas[code] = { code, mode, type, property };
+      } catch (error) {
+        this.log.error(error);
       }
     }
 
-    return results;
+    return Object.values(schemas).sort((a, b) => a.code > b.code ? 1 : -1) as TuyaDeviceSchema[];
   }
+
 
   async sendCommands(deviceID: string, commands: TuyaDeviceStatus[]) {
     const res = await this.api.post(`/v1.0/devices/${deviceID}/commands`, { commands });
@@ -124,9 +157,20 @@ export default class TuyaDeviceManager extends EventEmitter {
       case TuyaMQTTProtocol.DEVICE_INFO_UPDATE: {
         const { bizCode, bizData, devId } = message;
         if (bizCode === 'bindUser') {
+          const { ownerId } = bizData;
+          if (!this.ownerIDs.includes(ownerId)) {
+            this.log.warn('Update devId = %s not included in your ownerIDs. Skip.', devId);
+            return;
+          }
+
           // TODO failed if request to quickly
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          await new Promise(resolve => setTimeout(resolve, 10000));
+
           const device = await this.updateDevice(devId);
+          if (!device) {
+            return;
+          }
+          this.mq.start(); // Force reconnect, unless new device status update won't get received
           this.emit(Events.DEVICE_ADD, device);
         } else if (bizCode === 'nameUpdate') {
           const { name } = bizData;
@@ -136,15 +180,37 @@ export default class TuyaDeviceManager extends EventEmitter {
           }
           device.name = name;
           this.emit(Events.DEVICE_INFO_UPDATE, device, bizData);
+        } else if (bizCode === 'online' || bizCode === 'offline') {
+          const device = this.getDevice(devId);
+          if (!device) {
+            return;
+          }
+          device.online = (bizCode === 'online') ? true : false;
+          this.emit(Events.DEVICE_INFO_UPDATE, device, bizData);
         } else if (bizCode === 'delete') {
+          const { ownerId } = bizData;
+          if (!this.ownerIDs.includes(ownerId)) {
+            this.log.warn('Remove devId = %s not included in your ownerIDs. Skip.', devId);
+            return;
+          }
+
+          const device = this.getDevice(devId);
+          if (!device) {
+            return;
+          }
+          this.devices.splice(this.devices.indexOf(device), 1);
           this.emit(Events.DEVICE_DELETE, devId);
+        } else if (bizCode === 'event_notify') {
+          // doorbell event
+        } else if (bizCode === 'p2pSignal') {
+          // p2p signal
         } else {
-          this.log.warn(`Unhandled mqtt message: bizCode=${bizCode}, bizData=${JSON.stringify(bizData)}`);
+          this.log.warn('Unhandled mqtt message: bizCode = %s, bizData = %o', bizCode, bizData);
         }
         break;
       }
       default:
-        this.log.warn(`Unhandled mqtt message: protocol=${protocol}, message=${JSON.stringify(message)}`);
+        this.log.warn('Unhandled mqtt message: protocol = %s, message = %o', protocol, message);
         break;
     }
   }

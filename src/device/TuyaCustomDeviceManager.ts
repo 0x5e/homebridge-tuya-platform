@@ -1,7 +1,15 @@
-import TuyaDevice, { TuyaDeviceFunction } from './TuyaDevice';
+import TuyaOpenAPI from '../core/TuyaOpenAPI';
+import TuyaDevice from './TuyaDevice';
 import TuyaDeviceManager from './TuyaDeviceManager';
 
 export default class TuyaCustomDeviceManager extends TuyaDeviceManager {
+
+  constructor(
+    public api: TuyaOpenAPI,
+  ) {
+    super(api);
+    this.mq.version = '2.0';
+  }
 
   async getAssetList(parent_asset_id = -1) {
     // const res = await this.api.get('/v1.0/iot-03/users/assets', {
@@ -50,18 +58,12 @@ export default class TuyaCustomDeviceManager extends TuyaDeviceManager {
 
     const res = await this.getDeviceListInfo(deviceIDs);
     const devices = (res.result.devices as []).map(obj => new TuyaDevice(obj));
-    const functions = await this.getDeviceListFunctions(deviceIDs);
 
     for (const device of devices) {
-      for (const item of functions) {
-        if (device.product_id === item['product_id']) {
-          device.functions = item['functions'] as TuyaDeviceFunction[];
-          break;
-        }
-      }
-      device.functions = device.functions || [];
+      device.schema = await this.getDeviceSchema(device.id);
     }
 
+    // this.log.debug('Devices updated.\n', JSON.stringify(devices, null, 2));
     this.devices = devices;
     return devices;
   }

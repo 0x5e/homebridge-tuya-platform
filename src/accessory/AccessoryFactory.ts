@@ -4,12 +4,19 @@ import { TuyaPlatform } from '../platform';
 
 import BaseAccessory from './BaseAccessory';
 import LightAccessory from './LightAccessory';
+import DimmerAccessory from './DimmerAccessory';
 import OutletAccessory from './OutletAccessory';
 import SwitchAccessory from './SwitchAccessory';
+import WirelessSwitchAccessory from './WirelessSwitchAccessory';
+import SceneSwitchAccessory from './SceneSwitchAccessory';
+import FanAccessory from './FanAccessory';
 import GarageDoorAccessory from './GarageDoorAccessory';
 import WindowAccessory from './WindowAccessory';
 import WindowCoveringAccessory from './WindowCoveringAccessory';
 import LockAccessory from './LockAccessory';
+import ThermostatAccessory from './ThermostatAccessory';
+import HeaterAccessory from './HeaterAccessory';
+import ValveAccessory from './ValveAccessory';
 import ContactSensorAccessory from './ContactSensorAccessory';
 import LeakSensorAccessory from './LeakSensorAccessory';
 import CarbonMonoxideSensorAccessory from './CarbonMonoxideSensorAccessory';
@@ -19,8 +26,16 @@ import TemperatureHumiditySensorAccessory from './TemperatureHumiditySensorAcces
 import LightSensorAccessory from './LightSensorAccessory';
 import MotionSensorAccessory from './MotionSensorAccessory';
 import AirQualitySensorAccessory from './AirQualitySensorAccessory';
+import HumanPresenceSensorAccessory from './HumanPresenceSensorAccessory';
+import HumidifierAccessory from './HumidifierAccessory';
+import DehumidifierAccessory from './DehumidifierAccessory';
+import DiffuserAccessory from './DiffuserAccessory';
+import AirPurifierAccessory from './AirPurifierAccessory';
+import CameraAccessory from './CameraAccessory';
+import SceneAccessory from './SceneAccessory';
+import AirConditionerAccessory from './AirConditionerAccessory';
+import IRControlHubAccessory from './IRControlHubAccessory';
 
-import LegacyAccessoryFactory from './LegacyAccessoryFactory';
 
 export default class AccessoryFactory {
   static createAccessory(
@@ -29,50 +44,96 @@ export default class AccessoryFactory {
     device: TuyaDevice,
   ): BaseAccessory {
 
-    let handler;
+    let handler : BaseAccessory | undefined;
     switch (device.category) {
-      case 'kj':
-        // TODO AirPurifierAccessory
-        break;
+
+      // Lighting
       case 'dj':
-      case 'dd':
-      case 'fwd':
-      case 'tgq':
+      case 'dsd':
       case 'xdd':
+      case 'fwd':
       case 'dc':
-      case 'tgkg':
+      case 'dd':
+      case 'gyd':
+      case 'tyndj':
+      case 'sxd':
         handler = new LightAccessory(platform, accessory);
+        break;
+      case 'tgq':
+      case 'tgkg':
+        handler = new DimmerAccessory(platform, accessory);
+        break;
+
+      // Electrical Products
+      case 'kg':
+      case 'tdq':
+      case 'qjdcz':
+        handler = new SwitchAccessory(platform, accessory);
         break;
       case 'cz':
       case 'pc':
+      case 'wkcz':
         handler = new OutletAccessory(platform, accessory);
         break;
-      case 'kg':
-      case 'tdq':
-        handler = new SwitchAccessory(platform, accessory);
+      case 'wxkg':
+        handler = new WirelessSwitchAccessory(platform, accessory);
         break;
-      case 'fs':
-      case 'fskg':
-        // TODO Fanv2Accessory
+      case 'cjkg':
+        handler = new SceneSwitchAccessory(platform, accessory);
+        break;
+
+      // Large Home Appliances
+      case 'kt':
+      case 'ktkzq':
+        handler = new AirConditionerAccessory(platform, accessory);
+        break;
+
+      // Small Home Appliances
+      case 'qn':
+        handler = new HeaterAccessory(platform, accessory);
+        break;
+      case 'kj':
+        handler = new AirPurifierAccessory(platform, accessory);
+        break;
+      case 'xxj':
+        handler = new DiffuserAccessory(platform, accessory);
         break;
       case 'ckmkzq':
         handler = new GarageDoorAccessory(platform, accessory);
-        break;
-      case 'mc':
-        handler = new WindowAccessory(platform, accessory);
         break;
       case 'cl':
       case 'clkg':
         handler = new WindowCoveringAccessory(platform, accessory);
         break;
-      case 'ms':
-        handler = new LockAccessory(platform, accessory);
+      case 'mc':
+        handler = new WindowAccessory(platform, accessory);
+        break;
+      case 'wk':
+      case 'wkf':
+        handler = new ThermostatAccessory(platform, accessory);
+        break;
+      case 'ggq':
+      case 'sfkzq':
+        handler = new ValveAccessory(platform, accessory);
+        break;
+      case 'jsq':
+        handler = new HumidifierAccessory(platform, accessory);
+        break;
+      case 'cs':
+        handler = new DehumidifierAccessory(platform, accessory);
+        break;
+      case 'fs':
+      case 'fsd':
+      case 'fskg':
+        handler = new FanAccessory(platform, accessory);
+        break;
+
+      // Security & Video Surveillance
+      case 'sp':
+        handler = new CameraAccessory(platform, accessory);
         break;
       case 'ywbj':
         handler = new SmokeSensorAccessory(platform, accessory);
-        break;
-      case 'qn':
-        // TODO HeaterAccessory
         break;
       case 'mcs':
         handler = new ContactSensorAccessory(platform, accessory);
@@ -83,9 +144,11 @@ export default class AccessoryFactory {
         handler = new LeakSensorAccessory(platform, accessory);
         break;
       case 'cobj':
+      case 'cocgq':
         handler = new CarbonMonoxideSensorAccessory(platform, accessory);
         break;
       case 'co2bj':
+      case 'co2cgq':
         handler = new CarbonDioxideSensorAccessory(platform, accessory);
         break;
       case 'wsdcg':
@@ -98,19 +161,42 @@ export default class AccessoryFactory {
         handler = new MotionSensorAccessory(platform, accessory);
         break;
       case 'pm25':
+      case 'pm2.5':
+      case 'pm25cgq':
+      case 'hjjcy':
         handler = new AirQualitySensorAccessory(platform, accessory);
+        break;
+      case 'hps':
+        handler = new HumanPresenceSensorAccessory(platform, accessory);
+        break;
+      case 'ms':
+        handler = new LockAccessory(platform, accessory);
+        break;
+
+      // IR Remote Control
+      case 'wnykq':
+        handler = new IRControlHubAccessory(platform, accessory);
+        break;
+
+      // Other
+      case 'scene':
+        handler = new SceneAccessory(platform, accessory);
         break;
     }
 
-    if (!handler) {
-      platform.log.warn(`Create accessory using legacy mode: ${device.name}.`);
-      handler = LegacyAccessoryFactory.createAccessory(platform, accessory, device);
+    if (handler && !handler.checkRequirements()) {
+      handler = undefined;
     }
 
     if (!handler) {
       platform.log.warn(`Unsupported device: ${device.name}.`);
       handler = new BaseAccessory(platform, accessory);
     }
+
+    handler.configureServices();
+    handler.configureStatusActive();
+    handler.updateAllValues();
+    handler.intialized = true;
 
     return handler;
   }
