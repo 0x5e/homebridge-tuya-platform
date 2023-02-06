@@ -1,11 +1,15 @@
+import { TuyaDeviceSchemaEnumProperty } from '../device/TuyaDevice';
 import { limit } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 
 const SCHEMA_CODE = {
   CURRENT_POSITION: ['percent_state'],
-  TARGET_POSITION_CONTROL: ['control'],
+  TARGET_POSITION_CONTROL: ['control', 'mach_operate'],
   TARGET_POSITION_PERCENT: ['percent_control', 'position'],
   // POSITION_STATE: ['work_state'],
+
+  // conflit in different products, see: https://github.com/0x5e/homebridge-tuya-platform/issues/179#issuecomment-1367922879
+  // REVERSE_MODE: ['control_back_mode', 'control_back'],
 };
 
 export default class WindowCoveringAccessory extends BaseAccessory {
@@ -46,11 +50,11 @@ export default class WindowCoveringAccessory extends BaseAccessory {
         }
 
         const status = this.getStatus(targetControlSchema.code)!;
-        if (status.value === 'close') {
+        if (status.value === 'close' || status.value === 'FZ') {
           return 0;
-        } else if (status.value === 'stop') {
+        } else if (status.value === 'stop' || status.value === 'STOP') {
           return 50;
-        } else if (status.value === 'open') {
+        } else if (status.value === 'open' || status.value === 'ZZ') {
           return 100;
         }
 
@@ -104,14 +108,16 @@ export default class WindowCoveringAccessory extends BaseAccessory {
       return;
     }
 
+    const isOldSchema = !(schema.property as TuyaDeviceSchemaEnumProperty).range.includes('open');
+
     this.mainService().getCharacteristic(this.Characteristic.TargetPosition)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        if (status.value === 'close') {
+        if (status.value === 'close' || status.value === 'FZ') {
           return 0;
-        } else if (status.value === 'stop') {
+        } else if (status.value === 'stop' || status.value === 'STOP') {
           return 50;
-        } else if (status.value === 'open') {
+        } else if (status.value === 'open' || status.value === 'ZZ') {
           return 100;
         }
 
@@ -121,30 +127,17 @@ export default class WindowCoveringAccessory extends BaseAccessory {
       .onSet(value => {
         let control: string;
         if (value === 0) {
-          control = 'close';
+          control = isOldSchema ? 'FZ' : 'close';
         } else if (value === 100) {
-          control = 'open';
+          control = isOldSchema ? 'ZZ' : 'open';
         } else {
-          control = 'stop';
+          control = isOldSchema ? 'STOP' :'stop';
         }
-        this.sendCommands([{ code: 'control', value: control }], true);
+        this.sendCommands([{ code: schema.code, value: control }], true);
       })
       .setProps({
         minStep: 50,
       });
   }
-
-  /*
-  isMotorReversed() {
-    const state = this.getStatus('control_back_mode')
-      || this.getStatus('control_back')
-      || this.getStatus('opposite');
-    if (!state) {
-      return false;
-    }
-
-    return (state.value === 'back' || state.value === true);
-  }
-  */
 
 }

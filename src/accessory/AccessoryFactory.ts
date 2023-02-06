@@ -49,6 +49,7 @@ export default class AccessoryFactory {
 
       // Lighting
       case 'dj':
+      case 'dsd':
       case 'xdd':
       case 'fwd':
       case 'dc':
@@ -71,6 +72,7 @@ export default class AccessoryFactory {
         break;
       case 'cz':
       case 'pc':
+      case 'wkcz':
         handler = new OutletAccessory(platform, accessory);
         break;
       case 'wxkg':
@@ -111,6 +113,7 @@ export default class AccessoryFactory {
         handler = new ThermostatAccessory(platform, accessory);
         break;
       case 'ggq':
+      case 'sfkzq':
         handler = new ValveAccessory(platform, accessory);
         break;
       case 'jsq':
@@ -141,9 +144,11 @@ export default class AccessoryFactory {
         handler = new LeakSensorAccessory(platform, accessory);
         break;
       case 'cobj':
+      case 'cocgq':
         handler = new CarbonMonoxideSensorAccessory(platform, accessory);
         break;
       case 'co2bj':
+      case 'co2cgq':
         handler = new CarbonDioxideSensorAccessory(platform, accessory);
         break;
       case 'wsdcg':
@@ -156,6 +161,9 @@ export default class AccessoryFactory {
         handler = new MotionSensorAccessory(platform, accessory);
         break;
       case 'pm25':
+      case 'pm2.5':
+      case 'pm25cgq':
+      case 'hjjcy':
         handler = new AirQualitySensorAccessory(platform, accessory);
         break;
       case 'hps':
@@ -184,17 +192,19 @@ export default class AccessoryFactory {
       }
     }
 
-    if (handler && handler.checkRequirements()) {
-      handler.configureServices();
-      handler.configureStatusActive();
-      handler.onDeviceStatusUpdate(handler.device.status);
-      handler.intialized = true;
+    if (handler && !handler.checkRequirements()) {
+      handler = undefined;
     }
 
     if (!handler) {
       platform.log.warn(`Unsupported device: ${device.name}.`);
       handler = new BaseAccessory(platform, accessory);
     }
+
+    handler.configureServices();
+    handler.configureStatusActive();
+    handler.updateAllValues();
+    handler.intialized = true;
 
     return handler;
   }

@@ -13,7 +13,10 @@
 - Add Air Conditioner support (`kt`). (#160)
 - Add Air Conditioner Controller support (`ktkzq`). (#160)
 - Add Diffuser support (`xxj`). (#175)
-- Add generic infrared remote support (ac not included yet).
+- Add Temperature Control Socket support (`wkcz`).
+- Add Environmental Detector support (`hjjcy`).
+- Add Water Valve Controller support (`sfkzq`).
+- Add Generic IR/RF Remote support (AC not included yet).
 
 
 ### Fixed
@@ -30,6 +33,10 @@
 - Update support for RGB Power Switch (`dj`).
 - Support showing device online status via `StatusActive`. (#172)
 - Update unit and range of `RotationSpeed` with level, need clean accessory cache to take effect. (#174)
+- Support Diffuser RGB light. (#184)
+- Support Fan light temperature and color. (#184)
+- Support Humidifier light. (#184)
+- Expose energy usage for outlets/switches. (#190) Thanks @lstrojny for the contribution
 
 
 ## [1.6.0] - (2022.12.3)

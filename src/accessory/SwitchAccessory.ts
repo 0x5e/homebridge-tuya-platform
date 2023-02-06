@@ -2,9 +2,17 @@ import { TuyaDeviceSchema, TuyaDeviceSchemaType } from '../device/TuyaDevice';
 import BaseAccessory from './BaseAccessory';
 import { configureName } from './characteristic/Name';
 import { configureOn } from './characteristic/On';
+import { configureEnergyUsage } from './characteristic/EnergyUsage';
+import { configureCurrentTemperature } from './characteristic/CurrentTemperature';
+import { configureCurrentRelativeHumidity } from './characteristic/CurrentRelativeHumidity';
 
 const SCHEMA_CODE = {
-  ON: ['switch', 'switch_1'],
+  ON: ['switch', 'switch_1'], // switch_2, switch_3, switch_4, ..., switch_usb1, switch_usb2, switch_usb3, ..., switch_backlight
+  CURRENT: ['cur_current'],
+  POWER: ['cur_power'],
+  VOLTAGE: ['cur_voltage'],
+  CURRENT_TEMP: ['va_temperature', 'temp_current'],
+  CURRENT_HUMIDITY: ['va_humidity', 'humidity_value'],
 };
 
 export default class SwitchAccessory extends BaseAccessory {
@@ -21,11 +29,19 @@ export default class SwitchAccessory extends BaseAccessory {
       this.accessory.removeService(oldService);
     }
 
-    const schema = this.device.schema.filter((schema) => schema.code.startsWith('switch') && schema.type === TuyaDeviceSchemaType.Boolean);
-    for (const _schema of schema) {
-      const name = (schema.length === 1) ? this.device.name : _schema.code;
-      this.configureSwitch(_schema, name);
-    }
+    const schemata = this.device.schema.filter(
+      (schema) => schema.code.startsWith('switch') && schema.type === TuyaDeviceSchemaType.Boolean,
+    );
+
+    schemata.forEach((schema) => {
+      const name = (schemata.length === 1) ? this.device.name : schema.code;
+      this.configureSwitch(schema, name);
+    });
+
+
+    // Other
+    configureCurrentTemperature(this, undefined, this.getSchema(...SCHEMA_CODE.CURRENT_TEMP));
+    configureCurrentRelativeHumidity(this, undefined, this.getSchema(...SCHEMA_CODE.CURRENT_HUMIDITY));
   }
 
 
@@ -40,6 +56,17 @@ export default class SwitchAccessory extends BaseAccessory {
 
     configureName(this, service, name);
     configureOn(this, service, schema);
+
+    if (schema.code === this.getSchema(...SCHEMA_CODE.ON)?.code) {
+      configureEnergyUsage(
+        this.platform.api,
+        this,
+        service,
+        this.getSchema(...SCHEMA_CODE.CURRENT),
+        this.getSchema(...SCHEMA_CODE.POWER),
+        this.getSchema(...SCHEMA_CODE.VOLTAGE),
+      );
+    }
   }
 
 }

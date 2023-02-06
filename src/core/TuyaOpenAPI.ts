@@ -29,31 +29,26 @@ const DEFAULT_ENDPOINTS = {
 
 export const LOGIN_ERROR_MESSAGES = {
   1004: 'Please make sure your endpoint, accessId, accessKey is right.',
-  1010: 'Please make sure you are not running multiple HomeBridge or HomeAssistant instance with same tuya account.',
   1106: 'Please make sure your countryCode, username, password, appSchema is correct, and app account is linked with cloud project.',
   1114: 'Please make sure your endpoint, accessId, accessKey is right.',
   2401: 'Username or password is wrong.',
   2406: 'Please make sure you selected the right data center where your app account located, and the app account is linked with cloud project.',
 };
 
-export const API_ERROR_MESSAGES = {
-  28841002: 'API subscription expired. Please renew the API subscription at Tuya IoT Platform.',
-  28841101: `
+const API_NOT_SUBSCRIBED_ERROR = `
 API not subscribed. Please go to "Tuya IoT Platform -> Cloud -> Development -> Project -> Service API",
 and Authorize the following APIs before using:
 - Authorization Token Management
 - Device Status Notification
 - IoT Core
 - Industry Project Client Service (for "Custom" project)
-`,
-  28841105: `
-API not authorized. Please go to "Tuya IoT Platform -> Cloud -> Development -> Project -> Service API",
-and Authorize the following APIs before using:
-- Authorization Token Management
-- Device Status Notification
-- IoT Core
-- Industry Project Client Service (for "Custom" project)
-`,
+`;
+
+const API_ERROR_MESSAGES = {
+  1010: 'Token expired. Tuya Cloud don\'t support running multiple HomeBridge/HomeAssistant instance with same tuya account.',
+  28841002: 'API subscription expired. Please renew the API subscription at Tuya IoT Platform.',
+  28841101: API_NOT_SUBSCRIBED_ERROR,
+  28841105: API_NOT_SUBSCRIBED_ERROR,
 };
 
 type TuyaOpenAPIResponseSuccess = {
@@ -169,6 +164,12 @@ export default class TuyaOpenAPI {
    */
   async homeLogin(countryCode: number, username: string, password: string, appSchema: string) {
 
+    if (this._isSaltedPassword(password)) {
+      this.log.info('Login with md5 salted password.');
+    } else {
+      password = Crypto.createHash('md5').update(password).digest('hex');
+    }
+
     for (const _endpoint of Object.keys(DEFAULT_ENDPOINTS)) {
       const countryCodeList = DEFAULT_ENDPOINTS[_endpoint];
       if (countryCodeList.includes(countryCode)) {
@@ -180,7 +181,7 @@ export default class TuyaOpenAPI {
     const res = await this.post('/v1.0/iot-01/associated-users/actions/authorized-login', {
       country_code: countryCode,
       username: username,
-      password: Crypto.createHash('md5').update(password).digest('hex'),
+      password: password,
       schema: appSchema,
     });
 
@@ -358,6 +359,10 @@ export default class TuyaOpenAPI {
     const url = `${path}?${kv.join('&')}`;
 
     return url;
+  }
+
+  _isSaltedPassword(password: string) {
+    return Buffer.from(password, 'hex').length === 16;
   }
 
 }

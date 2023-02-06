@@ -2,7 +2,14 @@
 
 **During the beta version, the options are unstable, may get changed during updates.**
 
-Before config, you need to know about [Tuya IoT Development Platform > Cloud Development > Standard Instruction Set > Data Type](https://developer.tuya.com/en/docs/iot/datatypedescription?id=K9i5ql2jo7j1k), and a little programming skills of writing very basic JavaScript code.
+The main function of `deviceOverrides` is to convert "non-standard schema" to "standard schema", making device compatible with this plugin.
+
+Before config, you may need to:
+- Have basic programming skills of JavaScript (Only used in `onGet`/`onSet` handler).
+- Understand the meaning of device schema (aka Data Type): [Tuya IoT Development Platform > Cloud Development > Standard Instruction Set > Data Type](https://developer.tuya.com/en/docs/iot/datatypedescription?id=K9i5ql2jo7j1k)
+- Find your device product's "Standard Instruction Set" and "Standard Status Set" documentation under [Tuya IoT Development Platform > Cloud Development > Standard Instruction Set](https://developer.tuya.com/en/docs/iot/datatypedescription?id=K9i5ql6waswzq)
+- Get your device's detail information from `/path/to/persist/TuyaDeviceList.xxx.json` (Full path can be found from logs).
+- Find the "wrong schema", then convert to the "correct schema" from product documentation.
 
 
 ### Configuration
@@ -20,7 +27,7 @@ Before config, you need to know about [Tuya IoT Development Platform > Cloud Dev
 - `options.deviceOverrides[].schema[].type` - **optional**: New DP type. One of the `Boolean`, `Integer`, `Enum`, `String`, `Json`, `Raw`.
 - `options.deviceOverrides[].schema[].property` - **optional**: New DP property object. For `Integer` type, the object should contains `min`, `max`, `scale`, `step`; For `Enum` type, the object should contains `range`. For detail information, please see `TuyaDeviceSchemaProperty` in [TuyaDevice.ts](./src/device/TuyaDevice.ts).
 - `options.deviceOverrides[].schema[].onGet` - **optional**: An one-line JavaScript code convert old value to new value. The function is called with two arguments: `device`, `value`.
-- `options.deviceOverrides[].schema[].onSet` - **optional**: An one-line JavaScript code convert new value to old value. The function is called with two arguments: `device`, `value`.
+- `options.deviceOverrides[].schema[].onSet` - **optional**: An one-line JavaScript code convert new value to old value. The function is called with two arguments: `device`, `value`. return `undefined` means skip send this command.
 
 ## Examples
 
@@ -88,7 +95,7 @@ A example of convert `open`/`close` into `true`/`false`.
         "code": "{new_dp_code}",
         "type": "Boolean",
         "onGet": "(value === 'open') ? true : false;",
-        "onSet": "(value === true) ? 'open' : 'close';",
+        "onSet": "(value === true) ? 'open' : 'close';"
       }]
     }]
   }
@@ -131,7 +138,7 @@ Here's the example config:
           "min": 50,
           "max": 350,
           "scale": 1,
-          "step": 5,
+          "step": 5
         }
       }]
     }]
@@ -140,3 +147,72 @@ Here's the example config:
 ```
 
 After transform value using `onGet` and `onSet`, and new range in `property`, it should be working now.
+
+### Reverse curtain motor's on/off state
+
+Most curtain motor have "reverse mode" setting in the Tuya App, if you don't have this, you can reverse `percent_control`/`position` and `percent_state` in the plugin config:
+
+```js
+{
+  "options": {
+    // ...
+    "deviceOverrides": [{
+      "id": "{device_id}",
+      "schema": [{
+        "oldCode": "percent_control",
+        "code": "percent_control",
+        "onGet": "(100 - value)",
+        "onSet": "(100 - value)"
+      }, {
+        "oldCode": "percent_state",
+        "code": "percent_state",
+        "onGet": "(100 - value)",
+        "onSet": "(100 - value)"
+      }]
+    }]
+  }
+}
+```
+
+### Skip send on/off command when touching brightness/speed slider
+
+Some products (dimmer, fan) having issue when sending brightness/speed command with on/off command together. Here's an example of skip on/off command.
+
+```js
+{
+  "options": {
+    // ...
+    "deviceOverrides": [{
+      "id": "{device_id}",
+      "schema": [{
+        "oldCode": "switch_led",
+        "code": "switch_led",
+        "onSet": "(value === device.status.find(status => status.code === 'switch_led').value) ? undefined : value"
+      }]
+    }]
+  }
+}
+```
+
+### Convert Fahrenheit to Celsius
+
+F = 1.8 * C + 32
+
+C = (F - 32) / 1.8
+
+```js
+{
+  "options": {
+    // ...
+    "deviceOverrides": [{
+      "id": "{device_id}",
+      "schema": [{
+        "oldCode": "temp_current",
+        "code": "temp_current",
+        "onGet": "Math.round((value - 32) / 1.8);",
+        "onSet": "Math.round(1.8 * value + 32);"
+      }]
+    }]
+  }
+}
+```

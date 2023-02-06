@@ -164,6 +164,14 @@ class BaseAccessory {
       return;
     }
 
+    commands = commands.filter((status) => status.code && status.value !== undefined);
+
+    if (this.device.online === false) {
+      this.log.warn('Device is offline, skip send command.');
+      this.updateAllValues();
+      return;
+    }
+
     // Update cache immediately
     for (const newStatus of commands) {
       const oldStatus = this.device.status.find(_status => _status.code === newStatus.code);
@@ -191,6 +199,7 @@ class BaseAccessory {
       if (schema) {
         continue;
       }
+      this.log.warn('Product Category: %s', this.device.category);
       this.log.warn('Missing one of the required schema: %s', codes);
       this.log.warn('Please switch device control mode to "DP Insctrution", and set `deviceOverrides` manually.');
       this.log.warn('Detail information: https://github.com/0x5e/homebridge-tuya-platform#faq');

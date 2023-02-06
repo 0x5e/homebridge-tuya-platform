@@ -20,7 +20,7 @@ Fork version of official Tuya Homebridge plugin. Brings a bunch of bug fix and n
 - Less development costs for new accessory categroies.
 - Tuya Scene supported (Tap-to-Run).
 - Device overriding config supported. "Non-standard DP" have possibility to be supported now.
-- More than 50+ device categories supported, including most of the lights, switches, sensors, cameras, IR remote control ...
+- More than 50+ device categories supported, including most of the lights, switches, sensors, cameras, IR/RF remote control ...
 
 
 ## Supported Tuya Devices
@@ -81,8 +81,8 @@ Before configuration, please goto [Tuya IoT Platform](https://iot.tuya.com)
 - `options.accessId` - **required** : Access ID from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
 - `options.accessKey` - **required** : Access Secret from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
 - `options.countryCode` - **required** : Country Code
-- `options.username` - **required** : Username
-- `options.password` - **required** : Password
+- `options.username` - **required** : App username.
+- `options.password` - **required** : App password. MD5 salted password is also available for better config security.
 - `options.appSchema` - **required** : App schema. 'tuyaSmart' for Tuya Smart App, 'smartlife' for Smart Life App.
 - `options.homeWhitelist` - **optional**: An array of integer home ID values to whitelist. If present, only includes devices matching this Home ID value. Home ID can be found in the homebridge log.
 
@@ -184,7 +184,7 @@ With the device info json and mqtt logs, please submit the issue to help us supp
 
 ## Contributing
 
-Please see https://github.com/homebridge/homebridge-plugin-template for setup development environment.
+Please see https://github.com/homebridge/homebridge-plugin-template#setup-development-environment for setup development environment.
 
 PRs and issues are welcome.
 
