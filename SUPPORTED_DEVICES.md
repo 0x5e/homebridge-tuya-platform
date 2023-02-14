@@ -181,7 +181,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | TV | 电视 | infrared_tv | Switch | ✅ |
 | STB | 机顶盒 | infrared_stb | Switch | ✅ |
 | TV Box | 电视盒子 | infrared_box | Switch | ✅ |
-| Air Conditioner | 空调 | infrared_ac | | |
+| Air Conditioner | 空调 | infrared_ac | Heater Cooler<br> Humidifier Dehumidifier<br> Fanv2 | ✅ |
 | Fan | 电风扇 | infrared_fan | Switch | ✅ |
 | Light | 灯 | infrared_light | Switch | ✅ |
 | Amplifier | 音响 | infrared_amplifier | Switch | ✅ |
