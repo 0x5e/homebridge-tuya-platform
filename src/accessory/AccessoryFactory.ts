@@ -35,6 +35,7 @@ import SceneAccessory from './SceneAccessory';
 import AirConditionerAccessory from './AirConditionerAccessory';
 import IRControlHubAccessory from './IRControlHubAccessory';
 import IRGenericAccessory from './IRGenericAccessory';
+import IRAirConditionerAccessory from './IRAirConditionerAccessory';
 
 
 export default class AccessoryFactory {
@@ -185,6 +186,7 @@ export default class AccessoryFactory {
     if (device.remote_keys) {
       switch (device.remote_keys.category_id) {
         case 5: // AC
+          handler = new IRAirConditionerAccessory(platform, accessory);
           break;
         default:
           handler = new IRGenericAccessory(platform, accessory);
