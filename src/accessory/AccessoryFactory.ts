@@ -173,6 +173,7 @@ export default class AccessoryFactory {
         handler = new HumanPresenceSensorAccessory(platform, accessory);
         break;
       case 'ms':
+      case 'jtmspro':
         handler = new LockAccessory(platform, accessory);
         break;
 

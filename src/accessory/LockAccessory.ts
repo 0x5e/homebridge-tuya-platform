@@ -2,7 +2,7 @@ import BaseAccessory from './BaseAccessory';
 
 const SCHEMA_CODE = {
   LOCK_CURRENT_STATE: ['lock_motor_state'],
-  LOCK_TARGET_STATE: ['unlock_app'], // TODO: need physical device test
+  LOCK_TARGET_STATE: ['lock_motor_state'],
 };
 
 export default class LockAccessory extends BaseAccessory {
@@ -45,13 +45,14 @@ export default class LockAccessory extends BaseAccessory {
     this.mainService().getCharacteristic(this.Characteristic.LockTargetState)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        return (status.value !== 0) ? UNSECURED : SECURED;
+        return (status.value as boolean) ? UNSECURED : SECURED;
       })
-      .onSet(value => {
-        this.deviceManager.sendCommands(this.device.id, [{
-          code: schema.code,
-          value: (value === UNSECURED) ? 1 : 0, // confused value
-        }]);
+      .onSet(async value => {
+        const res = await this.deviceManager.getLockTemporaryKey(this.device.id);
+        if (!res.success) {
+          return;
+        }
+        await this.deviceManager.sendLockCommands(this.device.id, res.result.ticket_id, (value === UNSECURED));
       });
   }
 
