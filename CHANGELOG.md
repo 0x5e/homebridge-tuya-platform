@@ -16,6 +16,9 @@
 - Add Temperature Control Socket support (`wkcz`).
 - Add Environmental Detector support (`hjjcy`).
 - Add Water Valve Controller support (`sfkzq`).
+- Add IR Remote Control support (`infrared_tv`, `infrared_stb`, `infrared_box`, `infrared_ac`, `infrared_fan`, `infrared_light`, `infrared_amplifier`, `infrared_projector`, `infrared_waterheater`, `infrared_airpurifier`).
+- Add IR AC Controller support (`hwktwkq`).
+- Add Fingerbot support (`szjqr`).
 
 
 ### Fixed
@@ -23,6 +26,7 @@
 - Fix `bright_value` not sent for the `C/CW` lights who doesn't have `work_mode`. (#171)
 - Fix crash when camera sends an invalid status message.
 - Fix incorrect Door and Window Controller state. (#178)
+- Fix Thermostat cold mode not working (#242).
 
 
 ### Changed

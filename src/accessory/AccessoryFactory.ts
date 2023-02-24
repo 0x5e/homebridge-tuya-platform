@@ -35,6 +35,8 @@ import CameraAccessory from './CameraAccessory';
 import SceneAccessory from './SceneAccessory';
 import AirConditionerAccessory from './AirConditionerAccessory';
 import IRControlHubAccessory from './IRControlHubAccessory';
+import IRGenericAccessory from './IRGenericAccessory';
+import IRAirConditionerAccessory from './IRAirConditionerAccessory';
 
 
 export default class AccessoryFactory {
@@ -68,6 +70,7 @@ export default class AccessoryFactory {
       case 'kg':
       case 'tdq':
       case 'qjdcz':
+      case 'szjqr':
         handler = new SwitchAccessory(platform, accessory);
         break;
       case 'cz':
@@ -173,15 +176,27 @@ export default class AccessoryFactory {
         handler = new LockAccessory(platform, accessory);
         break;
 
-      // IR Remote Control
-      case 'wnykq':
-        handler = new IRControlHubAccessory(platform, accessory);
-        break;
-
       // Other
       case 'scene':
         handler = new SceneAccessory(platform, accessory);
         break;
+    }
+
+    // IR Control Hub
+    if (device.isIRControlHub()) {
+      handler = new IRControlHubAccessory(platform, accessory);
+    }
+
+    // IR Remote Control
+    if (device.isIRRemoteControl()) {
+      switch (device.remote_keys.category_id) {
+        case 5: // AC
+          handler = new IRAirConditionerAccessory(platform, accessory);
+          break;
+        default:
+          handler = new IRGenericAccessory(platform, accessory);
+          break;
+      }
     }
 
     if (handler && !handler.checkRequirements()) {
