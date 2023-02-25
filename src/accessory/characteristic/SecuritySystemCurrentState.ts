@@ -40,10 +40,3 @@ export function configureSecuritySystemCurrentState(accessory: BaseAccessory, se
         tuyaHomebridgeMap.get(accessory.getStatus(masterModeSchema.code)!.value);
     });
 }
-
-export function onAlarmTriggered(accessory: BaseAccessory, service: Service, status: TuyaDeviceStatus) {
-  accessory.log.debug('SecuritySystemCurrentState updateValue: %o %o', status.code,
-    accessory.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED);
-  service.getCharacteristic(accessory.Characteristic.SecuritySystemCurrentState)
-    .updateValue(accessory.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED);
-}

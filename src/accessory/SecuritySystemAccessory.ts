@@ -26,17 +26,4 @@ export default class SecuritySystemAccessory extends BaseAccessory {
     configureSecuritySystemTargetState(this, service, this.getSchema(...SCHEMA_CODE.MASTER_MODE),
       this.getSchema(...SCHEMA_CODE.SOS_STATE));
   }
-
-  async onDeviceStatusUpdate(status: TuyaDeviceStatus[]) {
-    const sosStateSchema = this.getSchema(...SCHEMA_CODE.SOS_STATE);
-    const sosStateStatus = sosStateSchema && status.find(_status => _status.code === sosStateSchema.code);
-
-    const service = this.accessory.getService(this.Service.SecuritySystem);
-
-    if (service && sosStateStatus && sosStateStatus.value) {
-      onAlarmTriggered(this, service, sosStateStatus);
-    } else {
-      super.onDeviceStatusUpdate(status);
-    }
-  }
 }
