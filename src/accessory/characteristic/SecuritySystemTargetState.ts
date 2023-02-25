@@ -1,6 +1,7 @@
 import { Service } from 'homebridge';
 import { TuyaDeviceSchema } from '../../device/TuyaDevice';
 import BaseAccessory from '../BaseAccessory';
+import SecuritySystemAccessory from '../SecuritySystemAccessory';
 
 const TUYA_CODES = {
   MASTER_MODE: {
@@ -24,7 +25,7 @@ function getTuyaHomebridgeMap(accessory: BaseAccessory) {
   return tuyaHomebridgeMap;
 }
 
-export function configureSecuritySystemTargetState(accessory: BaseAccessory, service: Service,
+export function configureSecuritySystemTargetState(accessory: SecuritySystemAccessory, service: Service,
   masterModeSchema?: TuyaDeviceSchema, sosStateSchema?: TuyaDeviceSchema) {
   if (!masterModeSchema || !sosStateSchema) {
     return;
@@ -34,9 +35,16 @@ export function configureSecuritySystemTargetState(accessory: BaseAccessory, ser
 
   service.getCharacteristic(accessory.Characteristic.SecuritySystemTargetState)
     .onGet(() => {
-      return tuyaHomebridgeMap.get(accessory.getStatus(masterModeSchema.code)!.value);
+      const currentState = accessory.getStatus(masterModeSchema.code)!.value;
+      if (currentState === TUYA_CODES.MASTER_MODE.HOME) {
+        return accessory.isNightArm ? accessory.Characteristic.SecuritySystemCurrentState.NIGHT_ARM :
+          accessory.Characteristic.SecuritySystemCurrentState.STAY_ARM;
+      }
+
+      return tuyaHomebridgeMap.get(currentState);
     })
     .onSet(value => {
+
       const sosState = accessory.getStatus(sosStateSchema.code)?.value;
 
       // If we received a request to disarm the alarm, we make sure sos_state is set to false
@@ -46,6 +54,8 @@ export function configureSecuritySystemTargetState(accessory: BaseAccessory, ser
           value: false,
         }], true);
       }
+
+      accessory.isNightArm = value === accessory.Characteristic.SecuritySystemTargetState.NIGHT_ARM;
 
       accessory.sendCommands([{
         code: masterModeSchema.code,

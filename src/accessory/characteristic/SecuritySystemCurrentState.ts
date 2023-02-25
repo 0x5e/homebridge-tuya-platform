@@ -1,6 +1,7 @@
 import { Service } from 'homebridge';
 import { TuyaDeviceSchema, TuyaDeviceStatus } from '../../device/TuyaDevice';
 import BaseAccessory from '../BaseAccessory';
+import SecuritySystemAccessory from '../SecuritySystemAccessory';
 
 const TUYA_CODES = {
   MASTER_MODE: {
@@ -24,7 +25,7 @@ function getTuyaHomebridgeMap(accessory: BaseAccessory) {
   return tuyaHomebridgeMap;
 }
 
-export function configureSecuritySystemCurrentState(accessory: BaseAccessory, service: Service,
+export function configureSecuritySystemCurrentState(accessory: SecuritySystemAccessory, service: Service,
   masterModeSchema?: TuyaDeviceSchema, sosStateSchema?: TuyaDeviceSchema) {
   if (!masterModeSchema || !sosStateSchema) {
     return;
@@ -36,7 +37,16 @@ export function configureSecuritySystemCurrentState(accessory: BaseAccessory, se
     .onGet(() => {
       const alarmTriggered = accessory.getStatus(sosStateSchema.code)!.value;
 
-      return alarmTriggered ? accessory.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED :
-        tuyaHomebridgeMap.get(accessory.getStatus(masterModeSchema.code)!.value);
+      if (alarmTriggered) {
+        return accessory.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED;
+      } else {
+        const currentState = accessory.getStatus(masterModeSchema.code)!.value;
+        if (currentState === TUYA_CODES.MASTER_MODE.HOME) {
+          return accessory.isNightArm ? accessory.Characteristic.SecuritySystemCurrentState.NIGHT_ARM :
+            accessory.Characteristic.SecuritySystemCurrentState.STAY_ARM;
+        }
+
+        return tuyaHomebridgeMap.get(currentState);
+      }
     });
 }

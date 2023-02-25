@@ -1,8 +1,7 @@
 import BaseAccessory from './BaseAccessory';
-import { configureSecuritySystemCurrentState, onAlarmTriggered } from './characteristic/SecuritySystemCurrentState';
+import { configureSecuritySystemCurrentState } from './characteristic/SecuritySystemCurrentState';
 import { configureSecuritySystemTargetState } from './characteristic/SecuritySystemTargetState';
 import { configureName } from './characteristic/Name';
-import { TuyaDeviceStatus } from '../device/TuyaDevice';
 
 const SCHEMA_CODE = {
   MASTER_MODE: ['master_mode'],
@@ -14,6 +13,8 @@ export default class SecuritySystemAccessory extends BaseAccessory {
   requiredSchema() {
     return [SCHEMA_CODE.MASTER_MODE, SCHEMA_CODE.SOS_STATE];
   }
+
+  isNightArm = false;
 
   configureServices() {
     const service = this.accessory.getService(this.Service.SecuritySystem)
