@@ -1,6 +1,5 @@
 import BaseAccessory from './BaseAccessory';
-import { configureSecuritySystemCurrentState } from './characteristic/SecuritySystemCurrentState';
-import { configureSecuritySystemTargetState } from './characteristic/SecuritySystemTargetState';
+import { configureSecuritySystemCurrentState, configureSecuritySystemTargetState } from './characteristic/SecuritySystemState';
 import { configureName } from './characteristic/Name';
 
 const SCHEMA_CODE = {

@@ -25,6 +25,32 @@ function getTuyaHomebridgeMap(accessory: BaseAccessory) {
   return tuyaHomebridgeMap;
 }
 
+export function configureSecuritySystemCurrentState(accessory: SecuritySystemAccessory, service: Service,
+  masterModeSchema?: TuyaDeviceSchema, sosStateSchema?: TuyaDeviceSchema) {
+  if (!masterModeSchema || !sosStateSchema) {
+    return;
+  }
+
+  const tuyaHomebridgeMap = getTuyaHomebridgeMap(accessory);
+
+  service.getCharacteristic(accessory.Characteristic.SecuritySystemCurrentState)
+    .onGet(() => {
+      const alarmTriggered = accessory.getStatus(sosStateSchema.code)!.value;
+
+      if (alarmTriggered) {
+        return accessory.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED;
+      } else {
+        const currentState = accessory.getStatus(masterModeSchema.code)!.value;
+        if (currentState === TUYA_CODES.MASTER_MODE.HOME) {
+          return accessory.isNightArm ? accessory.Characteristic.SecuritySystemCurrentState.NIGHT_ARM :
+            accessory.Characteristic.SecuritySystemCurrentState.STAY_ARM;
+        }
+
+        return tuyaHomebridgeMap.get(currentState);
+      }
+    });
+}
+
 export function configureSecuritySystemTargetState(accessory: SecuritySystemAccessory, service: Service,
   masterModeSchema?: TuyaDeviceSchema, sosStateSchema?: TuyaDeviceSchema) {
   if (!masterModeSchema || !sosStateSchema) {
