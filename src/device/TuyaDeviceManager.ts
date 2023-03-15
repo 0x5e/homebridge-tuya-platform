@@ -128,6 +128,11 @@ export default class TuyaDeviceManager extends EventEmitter {
     return res;
   }
 
+  async getInfraredACStatus(infraredID: string, remoteID: string) {
+    const res = await this.api.get(`/v2.0/infrareds/${infraredID}/remotes/${remoteID}/ac/status`);
+    return res;
+  }
+
   async updateInfraredRemotes(allDevices: TuyaDevice[]) {
 
     const irDevices = allDevices.filter(device => device.isIRControlHub());
@@ -139,18 +144,27 @@ export default class TuyaDeviceManager extends EventEmitter {
       }
 
       for (const remoteInfo of res.result) {
-        const device = allDevices.find(device => device.id === remoteInfo.remote_id);
-        if (!device) {
+        const subDevice = allDevices.find(device => device.id === remoteInfo.remote_id);
+        if (!subDevice) {
           continue;
         }
-        device.parent_id = irDevice.id;
-        device.schema = [];
-        const res = await this.getInfraredKeys(irDevice.id, device.id);
+        subDevice.parent_id = irDevice.id;
+        subDevice.schema = [];
+        const res = await this.getInfraredKeys(irDevice.id, subDevice.id);
         if (!res.success) {
-          this.log.warn('Get infrared remote keys failed. deviceId = %d, code = %s, msg = %s', device.id, res.code, res.msg);
+          this.log.warn('Get infrared remote keys failed. deviceId = %d, code = %s, msg = %s', subDevice.id, res.code, res.msg);
           continue;
         }
-        device.remote_keys = res.result;
+        subDevice.remote_keys = res.result;
+
+        if (subDevice.category === 'infrared_ac') {
+          const res = await this.getInfraredACStatus(irDevice.id, subDevice.id);
+          if (!res.success) {
+            this.log.warn('Get infrared ac status failed. deviceId = %d, code = %s, msg = %s', subDevice.id, res.code, res.msg);
+            continue;
+          }
+          subDevice.status = Object.entries(res.result).map(([key, value]) => ({code: key, value} as TuyaDeviceStatus));
+        }
       }
     }
   }
