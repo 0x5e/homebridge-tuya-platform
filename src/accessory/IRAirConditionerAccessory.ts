@@ -119,6 +119,7 @@ export default class IRAirConditionerAccessory extends BaseAccessory {
       });
 
     // Optional Characteristics
+    this.configureTargetFanState(service);
     this.configureRotationSpeed(service);
   }
 
@@ -187,6 +188,13 @@ export default class IRAirConditionerAccessory extends BaseAccessory {
       .setProps({ validValues });
   }
 
+  configureTargetFanState(service) {
+    service.getCharacteristic(this.Characteristic.TargetFanState)
+      .onSet(() => {
+        this.debounceSendACCommands();
+      });
+  }
+
   configureRotationSpeed(service) {
     service.getCharacteristic(this.Characteristic.RotationSpeed)
       .onSet(() => {
@@ -240,7 +248,11 @@ export default class IRAirConditionerAccessory extends BaseAccessory {
       wind = this.dehumidifierService().getCharacteristic(this.Characteristic.RotationSpeed).value as number;
     } else if (mode === AC_MODE_FAN) {
       temp = this.mainService().getCharacteristic(this.Characteristic.CoolingThresholdTemperature).value as number;
-      wind = this.fanService().getCharacteristic(this.Characteristic.RotationSpeed).value as number;
+      if (this.fanService().getCharacteristic(this.Characteristic.TargetFanState).value === this.Characteristic.TargetFanState.AUTO) {
+        wind = 0;
+      } else {
+        wind = this.fanService().getCharacteristic(this.Characteristic.RotationSpeed).value as number;
+      }
     }
 
     (power === POWER_ON) && this.mainService().setCharacteristic(this.Characteristic.CurrentTemperature, temp);
