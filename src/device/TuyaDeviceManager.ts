@@ -133,6 +133,11 @@ export default class TuyaDeviceManager extends EventEmitter {
     return res;
   }
 
+  async getInfraredDIYKeys(infraredID: string, remoteID: string) {
+    const res = await this.api.get(`/v2.0/infrareds/${infraredID}/remotes/${remoteID}/learning-codes`);
+    return res;
+  }
+
   async updateInfraredRemotes(allDevices: TuyaDevice[]) {
 
     const irDevices = allDevices.filter(device => device.isIRControlHub());
@@ -143,8 +148,8 @@ export default class TuyaDeviceManager extends EventEmitter {
         continue;
       }
 
-      for (const remoteInfo of res.result) {
-        const subDevice = allDevices.find(device => device.id === remoteInfo.remote_id);
+      for (const { category_id, remote_id } of res.result) {
+        const subDevice = allDevices.find(device => device.id === remote_id);
         if (!subDevice) {
           continue;
         }
@@ -157,13 +162,27 @@ export default class TuyaDeviceManager extends EventEmitter {
         }
         subDevice.remote_keys = res.result;
 
-        if (subDevice.category === 'infrared_ac') {
+        if (subDevice.category === 'infrared_ac') { // AC Device
           const res = await this.getInfraredACStatus(irDevice.id, subDevice.id);
           if (!res.success) {
             this.log.warn('Get infrared ac status failed. deviceId = %d, code = %s, msg = %s', subDevice.id, res.code, res.msg);
             continue;
           }
           subDevice.status = Object.entries(res.result).map(([key, value]) => ({code: key, value} as TuyaDeviceStatus));
+        } else if (category_id === 999) { // DIY Device
+          const res = await this.getInfraredDIYKeys(irDevice.id, subDevice.id);
+          if (!res.success) {
+            this.log.warn('Get infrared diy keys failed. deviceId = %d, code = %s, msg = %s', subDevice.id, res.code, res.msg);
+            continue;
+          }
+          for (const key of subDevice.remote_keys.key_list) {
+            const item = (res.result as []).find(item => item['id'] === key.key_id && item['key'] === key.key);
+            if (!item) {
+              continue;
+            }
+            this.log.debug('learning_code:', item['code']);
+            key.learning_code = item['code'];
+          }
         }
       }
     }
@@ -182,6 +201,11 @@ export default class TuyaDeviceManager extends EventEmitter {
     if (!res.success) {
       this.log.info('Send AC command failed. code = %d, msg = %s', res.code, res.msg);
     }
+    return res;
+  }
+
+  async sendInfraredDIYCommands(infraredID: string, remoteID: string, code: string) {
+    const res = await this.api.post(`/v2.0/infrareds/${infraredID}/remotes/${remoteID}/learning-codes`, { code });
     return res;
   }
 
