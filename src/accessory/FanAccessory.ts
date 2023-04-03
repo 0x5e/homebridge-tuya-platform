@@ -29,13 +29,12 @@ export default class FanAccessory extends BaseAccessory {
 
   configureServices() {
 
-    const serviceType = this.fanServiceType();
-    if (serviceType === this.Service.Fan) {
+    if (this.fanServiceType() === this.Service.Fan) {
       const unusedService = this.accessory.getService(this.Service.Fanv2);
       unusedService && this.accessory.removeService(unusedService);
 
       configureOn(this, this.fanService(), this.getSchema(...SCHEMA_CODE.FAN_ON));
-    } else if (serviceType === this.Service.Fanv2) {
+    } else if (this.fanServiceType() === this.Service.Fanv2) {
       const unusedService = this.accessory.getService(this.Service.Fan);
       unusedService && this.accessory.removeService(unusedService);
 
@@ -57,19 +56,21 @@ export default class FanAccessory extends BaseAccessory {
 
     // Light
     if (this.getSchema(...SCHEMA_CODE.LIGHT_ON)) {
-      configureLight(
-        this,
-        this.lightService(),
-        this.getSchema(...SCHEMA_CODE.LIGHT_ON),
-        this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT),
-        this.getSchema(...SCHEMA_CODE.LIGHT_TEMP),
-        this.getSchema(...SCHEMA_CODE.LIGHT_COLOR),
-        this.getSchema(...SCHEMA_CODE.LIGHT_MODE),
-      );
-    } else {
-      this.log.warn('Remove Lightbulb Service...');
-      const unusedService = this.accessory.getService(this.Service.Lightbulb);
-      unusedService && this.accessory.removeService(unusedService);
+      if (this.lightServiceType() === this.Service.Lightbulb) {
+        configureLight(
+          this,
+          this.lightService(),
+          this.getSchema(...SCHEMA_CODE.LIGHT_ON),
+          this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT),
+          this.getSchema(...SCHEMA_CODE.LIGHT_TEMP),
+          this.getSchema(...SCHEMA_CODE.LIGHT_COLOR),
+          this.getSchema(...SCHEMA_CODE.LIGHT_MODE),
+        );
+      } else if (this.lightServiceType() === this.Service.Switch) {
+        configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.LIGHT_ON));
+        const unusedService = this.accessory.getService(this.Service.Lightbulb);
+        unusedService && this.accessory.removeService(unusedService);
+      }
     }
   }
 
@@ -85,6 +86,16 @@ export default class FanAccessory extends BaseAccessory {
     const serviceType = this.fanServiceType();
     return this.accessory.getService(serviceType)
       || this.accessory.addService(serviceType);
+  }
+
+  lightServiceType() {
+    if (this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT)
+      || this.getSchema(...SCHEMA_CODE.LIGHT_TEMP)
+      || this.getSchema(...SCHEMA_CODE.LIGHT_COLOR)
+      || this.getSchema(...SCHEMA_CODE.LIGHT_MODE)) {
+      return this.Service.Lightbulb;
+    }
+    return this.Service.Switch;
   }
 
   lightService() {
