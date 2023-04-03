@@ -10,7 +10,7 @@ import { configureSwingMode } from './characteristic/SwingMode';
 const SCHEMA_CODE = {
   FAN_ON: ['switch_fan', 'fan_switch', 'switch'],
   FAN_DIRECTION: ['fan_direction'],
-  FAN_SPEED: ['fan_speed'],
+  FAN_SPEED: ['fan_speed', 'fan_speed_percent'],
   FAN_SPEED_LEVEL: ['fan_speed_enum', 'fan_speed'],
   FAN_LOCK: ['child_lock'],
   FAN_SWING: ['switch_horizontal', 'switch_vertical'],
