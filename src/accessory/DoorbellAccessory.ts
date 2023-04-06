@@ -1,4 +1,4 @@
-import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
+import { TuyaDeviceStatus } from '../device/TuyaDevice';
 import BaseAccessory from './BaseAccessory';
 import { configureProgrammableSwitchEvent, onProgrammableSwitchEvent } from './characteristic/ProgrammableSwitchEvent';
 
@@ -15,11 +15,14 @@ export default class DoorbellAccessory extends BaseAccessory {
   }
 
   configureServices() {
+    this.log.warn('HomeKit Doorbell service does not work without camera anymore.');
+    this.log.warn('Downgrade to StatelessProgrammableSwitch. "Mute" and "Volume" not available.');
     configureProgrammableSwitchEvent(this, this.getDoorbellService(), this.getSchema(...SCHEMA_CODE.ALARM_MESSAGE));
-    this.configureMute();
-    this.configureVolume();
+    // this.configureMute();
+    // this.configureVolume();
   }
 
+  /*
   configureMute() {
     const schema = this.getSchema(...SCHEMA_CODE.ALARM_SWITCH);
     if (!schema) {
@@ -67,6 +70,12 @@ export default class DoorbellAccessory extends BaseAccessory {
   getDoorbellService() {
     return this.accessory.getService(this.Service.Doorbell)
       || this.accessory.addService(this.Service.Doorbell);
+  }
+  */
+
+  getDoorbellService() {
+    return this.accessory.getService(this.Service.StatelessProgrammableSwitch)
+      || this.accessory.addService(this.Service.StatelessProgrammableSwitch);
   }
 
   async onDeviceStatusUpdate(status: TuyaDeviceStatus[]) {
