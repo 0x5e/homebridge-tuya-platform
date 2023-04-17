@@ -6,6 +6,11 @@
 	"footerDisplay": "",
 	"customUi": false,
 	"schema": {
+		"name": {
+			"type": "string",
+			"title": "Name",
+			"default": "Tuya"
+		},
 		"type": "object",
 		"properties": {
 			"options": {
@@ -308,18 +313,18 @@
 										{
 											"type": "div",
 											"displayFlex": true,
-											"title": "{{ value.hidden || value.code + ' --> ' + value.newCode }}",
+											"title": "{{ value.code }}",
 											"flex-direction": "column",
 											"notitle": false,
 											"items": [
-												{
-													"key": "options.deviceOverrides[].schema[].hidden"
-												},
 												{
 													"key": "options.deviceOverrides[].schema[].code"
 												},
 												{
 													"key": "options.deviceOverrides[].schema[].newCode"
+												},
+												{
+													"key": "options.deviceOverrides[].schema[].hidden"
 												},
 												{
 													"key": "options.deviceOverrides[].schema[].type"
