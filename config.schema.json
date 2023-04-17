@@ -308,10 +308,13 @@
 										{
 											"type": "div",
 											"displayFlex": true,
-											"title": "{{ value.code + ' --> ' + value.newCode }}",
+											"title": "{{ value.hidden || value.code + ' --> ' + value.newCode }}",
 											"flex-direction": "column",
 											"notitle": false,
 											"items": [
+												{
+													"key": "options.deviceOverrides[].schema[].hidden"
+												},
 												{
 													"key": "options.deviceOverrides[].schema[].code"
 												},
@@ -351,9 +354,6 @@
 															]
 														}
 													]
-												},
-												{
-													"key": "options.deviceOverrides[].schema[].hidden"
 												}
 											]
 										}
