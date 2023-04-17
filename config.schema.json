@@ -6,10 +6,10 @@
 	"footerDisplay": "",
 	"schema": {
 		"name": {
-        "type": "string",
-        "title": "Name",
-        "default": "Tuya"
-      },
+			"type": "string",
+			"title": "Name",
+			"default": "Tuya"
+		},
 		"type": "object",
 		"properties": {
 			"options": {
