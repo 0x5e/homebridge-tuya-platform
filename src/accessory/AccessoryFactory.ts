@@ -136,6 +136,7 @@ export default class AccessoryFactory {
 
       // Security & Video Surveillance
       case 'sp':
+      case 'sp-unbridged':
         handler = new CameraAccessory(platform, accessory);
         break;
       case 'ywbj':
