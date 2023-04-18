@@ -176,7 +176,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
         continue;
       }
 
-      this.log.warn('Unbridge %o category %o', device.name, deviceConfig.category );
+      this.log.warn('Unbridge %o category %o', device.name, device.category );
       device.unbridged = deviceConfig.unbridged;
     }
 
