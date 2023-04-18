@@ -435,11 +435,11 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       this.accessoryHandlers.push(handler);
 
       // link the accessory to your platform
-      if (device.category = 'unbridged') {
+      if (device.category.includes('unbridged')) {
         this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
       } else {
-      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-    }
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      }
     }
   }
 
