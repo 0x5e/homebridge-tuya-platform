@@ -403,7 +403,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
 
     const uuid = this.api.hap.uuid.generate(device.id);
     const existingAccessory = this.cachedAccessories.find(accessory => accessory.UUID === uuid);
-    if (existingAccessory) {
+    if (existingAccessory && device.category !== 'unbridged') {
       this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
 
       // Update context
