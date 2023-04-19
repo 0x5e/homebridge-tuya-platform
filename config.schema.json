@@ -6,14 +6,14 @@
     "footerDisplay": "",
     "customUi": false,
     "schema": {
-        "name": {
+        "type": "object",
+        "properties": {
+            "name": {
             "type": "string",
             "title": "Name",
             "required": true,
             "default": "Tuya"
-        },
-        "type": "object",
-        "properties": {
+            },
             "options": {
                 "title": "Project Info",
                 "type": "object",
