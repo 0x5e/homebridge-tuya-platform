@@ -245,7 +245,7 @@
                                                             "type": "string"
                                                         },
                                                         "condition": {
-                                                            "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].code && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].type && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                            "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].type === 'Enum' && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
                                                         }
                                                     }
                                                 },
