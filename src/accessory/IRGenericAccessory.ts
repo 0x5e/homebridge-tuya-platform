@@ -5,17 +5,16 @@ import { configureName } from './characteristic/Name';
 export default class IRGenericAccessory extends BaseAccessory {
 
   configureServices() {
-    if (!this.device.remote_keys) {
-      return;
+    const key_list = this.device.remote_keys?.key_list || [];
+    
+    // Max 100 services allowed
+    if (key_list.length > 100) {
+      this.log.warn(`Skipping ${key_list.length - 100} keys for ${this.device.name}, ` +
+        'as we reached the limit of HomeKit (100 services per accessory)');
     }
-
-    // Max 100 accessories allowed
-    if (this.device.remote_keys.key_list.length > 100) {
-      this.log.warn(`Skipping ${this.device.remote_keys.key_list.length - 100} keys for ${this.device.name}, ` +
-       'as we reached the limit of HomeKit (100 services per accessory)');
-    }
-    const limitedAccessories = this.device.remote_keys.key_list.slice(0, 99);
-    for (const key of limitedAccessories) {
+    key_list = key_list.slice(0, 99);
+    
+    for (const key of key_list) {
       this.configureSwitch(key);
     }
   }
@@ -43,9 +42,12 @@ export default class IRGenericAccessory extends BaseAccessory {
 
   async sendInfraredCommands(key: TuyaIRRemoteKeyListItem) {
     const { parent_id, id } = this.device;
-    const { category_id, remote_index } = this.device.remote_keys;
-    const res = await this.deviceManager.sendInfraredCommands(parent_id, id, category_id, remote_index, key.key, key.key_id);
-    return res;
+    const { category_id, remote_index } = this.device.remote_keys!;
+    if (key.learning_code) {
+      await this.deviceManager.sendInfraredDIYCommands(parent_id!, id, key.learning_code);
+    } else {
+      await this.deviceManager.sendInfraredCommands(parent_id!, id, category_id, remote_index, key.key, key.key_id);
+    }
   }
 
 }

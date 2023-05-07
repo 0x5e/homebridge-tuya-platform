@@ -14,7 +14,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Ambiance Light | 氛围灯 | fwd | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/ambient-light?id=Kaiuz06amhe6g) |
 | String Lights | 灯串 | dc | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/dc?id=Kaof7taxmvadu) |
 | Strip Lights | 灯带 | dd | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/dd?id=Kaof804aibg2l) |
-| Motion Sensor Light | 感应灯 | gyd | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/gyd?id=Kaof8a8hycfmy) |
+| Motion Sensor Light | 感应灯 | gyd | Lightbulb<br> MotionSensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/gyd?id=Kaof8a8hycfmy) |
 | Ceiling Fan Light | 风扇灯 | fsd | Lightbulb<br> Fanv2 | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/fsd?id=Kaof8eiei4c2v) |
 | Solar Light | 太阳能灯 | tyndj | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/tynd?id=Kaof8j02e1t98) |
 | Dimmer | 调光器 | tgq | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/tgq?id=Kaof8ke9il4k4) |
@@ -49,8 +49,8 @@ Most category code is pinyin abbreviation of Chinese name.
 | Refrigerator | 冰箱 | bx | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorybx?id=Kaiuz0s58ia6h) |
 | Bathtub | 浴缸 | yg | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryyg?id=Kaiuz0uoisp47) |
 | Washing Machine | 洗衣机 | xy | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryxy?id=Kaiuz0wxh08jf) |
-| Air Conditioner | 空调 | kt | Heater Cooler<br> Humidifier Dehumidifier<br> Fanv2 | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorykt?id=Kaiuz0z71ov2n) |
-| Air Conditioner Controller | 空调控制器 | ktkzq | Heater Cooler<br> Humidifier Dehumidifier<br> Fanv2 | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryktkzq?id=Kaiuz11eqy892) |
+| Air Conditioner | 空调 | kt | Heater Cooler<br> Humidifier Dehumidifier<br> Fanv2<br> Temperature Sensor<br> Humidity Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorykt?id=Kaiuz0z71ov2n) |
+| Air Conditioner Controller | 空调控制器 | ktkzq | Heater Cooler<br> Humidifier Dehumidifier<br> Fanv2<br> Temperature Sensor<br> Humidity Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryktkzq?id=Kaiuz11eqy892) |
 | Boiler | 壁挂炉 | bgl | | | [Documentation](https://developer.tuya.com/en/docs/iot/boilerbgl?id=Kaiuz13shgrhp) |
 
 
@@ -107,14 +107,15 @@ Most category code is pinyin abbreviation of Chinese name.
 
 | Name | Name (zh) | Code | Homebridge Service | Supported | Links |
 | ---- | ---- | ---- | ---- | ---- | ---- |
-| Alarm Host | 报警主机 | mal | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorymal?id=Kaiuz33clqxaf) |
+| Alarm Host | 报警主机 | mal | Security System | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorymal?id=Kaiuz33clqxaf) |
 | Smart Camera | 智能摄像机 | sp | Motion Sensor<br> Doorbell | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorysp?id=Kaiuz35leyo12) |
+| Wireless Doorbell | 无线门铃 | wxml | StatelessProgrammableSwitch | ✅ | Documentation |
 | Siren Alarm | 声光报警传感器 | sgbj | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysgbj?id=Kaiuz37tlpbnu) |
 | Gas Alarm | 燃气报警传感器 | rqbj | Leak Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryrqbj?id=Kaiuz3d162ubw) |
 | Smoke Alarm | 烟雾报警传感器 | ywbj | Smoke Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryywbj?id=Kaiuz3f6sf952) |
 | Temperature and Humidity Sensor | 温湿度传感器 | wsdcg | Temperature Sensor<br> Humidity Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorywsdcg?id=Kaiuz3hinij34) |
 | Contact Sensor | 门磁传感器 | mcs | Contact Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorymcs?id=Kaiuz3bnflmh2) |
-| Vibration Sensor | 震动传感器 | zd | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryzd?id=Kaiuz3a5vrzno) |
+| Vibration Sensor | 震动传感器 | zd | Motion Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryzd?id=Kaiuz3a5vrzno) |
 | Water Detector | 水浸传感器 | sj | Leak Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorysj?id=Kaiuz3iub2sli) |
 | Luminance Sensor | 亮度传感器 | ldcg | Light Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryldcg?id=Kaiuz3n7u69l8) |
 | Pressure Sensor | 压力传感器 | ylcg<br> ylcgq | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryylcg?id=Kaiuz3kc2e4gm) |
@@ -126,7 +127,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Methane Detector | 甲烷报警传感器 | jwbj | Leak Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryjwbj?id=Kaiuz40u98lkm) |
 | Human Motion Sensor | 人体运动传感器 | pir | Motion Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorypir?id=Kaiuz3ss11b80) |
 | Human Presence Sensor | 人体存在传感器 | hps | Occupancy Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryhps?id=Kaiuz42yhn1hs) |
-| Smart Lock | 智能门锁 | ms | | | [Documentation](https://developer.tuya.com/en/docs/iot/ms?id=Kb0o2s20fn9sy) |
+| Smart Lock | 智能门锁 | ms<br> jtmspro | LockMechanism | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/ms?id=Kb0o2s20fn9sy) |
 | Environmental Detector | 环境检测仪 | hjjcy | Air Quality Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/hjjcy?id=Kbeoad8y1nnlv) |
 
 
@@ -173,11 +174,11 @@ Most category code is pinyin abbreviation of Chinese name.
 | Tracker | 定位器 | tracker | | | [Documentation](https://developer.tuya.com/en/docs/iot/tracker?id=Kajk21wwy2mhi) |
 
 
-## IR/RF Remote Control
+## IR Remote Control
 
 | Name | Name (zh) | Code | Homebridge Service | Supported | Links |
 | ---- | ---- | ---- | ---- | ---- | ---- |
-| Universal Remote Control | 万能遥控器 | wnykq<br> hwktwkq | | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/ir-control-hub-open-service?id=Kb3oe2mk8ya72) |
+| Universal Remote Control | 万能遥控器 | wnykq<br> hwktwkq<br> wsdykq | Temperature Sensor<br> Humidity Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/ir-control-hub-open-service?id=Kb3oe2mk8ya72) |
 | TV | 电视 | infrared_tv | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/infrared-common-apis?id=Kb3oe2o7z0so9) |
 | STB | 机顶盒 | infrared_stb | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/infrared-common-apis?id=Kb3oe2o7z0so9) |
 | TV Box | 电视盒子 | infrared_box | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/infrared-common-apis?id=Kb3oe2o7z0so9) |
@@ -190,6 +191,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Camera | 相机 | qt | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/infrared-common-apis?id=Kb3oe2o7z0so9) |
 | Water Heater | 热水器 | infrared_waterheater | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/infrared-common-apis?id=Kb3oe2o7z0so9) |
 | Air Purifier | 净化器 | infrared_airpurifier | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/infrared-common-apis?id=Kb3oe2o7z0so9) |
+| DIY | - | qt | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/cloud/infrared-learning-apis?id=Kb3oeap4nqqm3) |
 
 
 ## Others

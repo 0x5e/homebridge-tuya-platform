@@ -20,7 +20,7 @@ Fork version of the official Tuya Homebridge plugin, with a focus on fixing bugs
 - Lower development costs for new accessory categories.
 - Supports Tuya Scenes (Tap-to-Run).
 - Includes the ability to override device configurations, which enables support for "non-standard" DPs.
-- Supports over 60+ device categories, including most lights, switches, sensors, cameras, IR remote control, etc.
+- Supports over 60+ device categories, including most light, switch, sensor, camera, lock, IR remote control, etc.
 
 
 ## Supported Tuya Devices
@@ -66,6 +66,7 @@ Before you can configure, you must go to the [Tuya IoT Platform](https://iot.tuy
     - Industry Project Client Service (for the `Custom` project)
     - IR Control Hub Open Service (for IR devices)
     - Smart Home Scene Linkage (for scenes)
+    - Smart Lock Open Service (for Lock devices)
 - **⚠️Remember to extend the API trial period every 6 months here [Tuya IoT Platform > Cloud > Cloud Services > IoT Core](https://iot.tuya.com/cloud/products/detail?abilityId=1442730014117204014&id=p1668587814138nv4h3n&abilityAuth=0&tab=1) (the first-time subscription only gives you 1 month).**
 
 #### For "Custom" Project
@@ -100,6 +101,20 @@ See [ADVANCED_OPTIONS.md](./ADVANCED_OPTIONS.md)
 - The plugin requires an internet connection to the Tuya Cloud and does not support the LAN protocol. See [#90](https://github.com/0x5e/homebridge-tuya-platform/issues/90) for more information.
 
 ## FAQ
+
+#### About Login issue
+
+For most users, you can easily find your app account's data center through the [documentation](https://developer.tuya.com/en/docs/iot/oem-app-data-center-distributed?id=Kafi0ku9l07qb) and login without any issues. However, for some users, they may encounter error codes such as 1106 or 2406. If you encounter such errors, it's possible that there are differences between your data center and the documentation.
+
+To determine the data center, follow these steps:
+
+1. Open the app and navigate to "Me > Settings > Network Diagnosis".
+2. Start the diagnosis and select "Upload Log > Copy the Log to Clipboard".
+3. Paste the log anywhere and find the line beginning with "Region code:".
+4. Look for the following codes: "AY" for China, "AZ" for the West US, "EU" for Central Europe, and "IN" for India.
+
+Then manually specify endpoint in the plugin config.
+
 
 #### What is "Standard DP" and "Non-standard DP"?
 

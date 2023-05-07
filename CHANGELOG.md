@@ -16,9 +16,17 @@
 - Add Temperature Control Socket support (`wkcz`).
 - Add Environmental Detector support (`hjjcy`).
 - Add Water Valve Controller support (`sfkzq`).
-- Add IR Remote Control support (`infrared_tv`, `infrared_stb`, `infrared_box`, `infrared_ac`, `infrared_fan`, `infrared_light`, `infrared_amplifier`, `infrared_projector`, `infrared_waterheater`, `infrared_airpurifier`).
+- Add IR Remote Control support (`infrared_tv`, `infrared_stb`, `infrared_box`, `infrared_ac`, `infrared_fan`, `infrared_light`, `infrared_amplifier`, `infrared_projector`, `infrared_waterheater`, `infrared_airpurifier`). (#191)
 - Add IR AC Controller support (`hwktwkq`).
 - Add Fingerbot support (`szjqr`).
+- Add Smart Lock support (`ms`, `jtmspro`). (#120) Thanks @pfgimutao for the contribution
+- Add Alarm Host support (`mal`). (#246) Thanks @bFollon for the contribution
+- Add Vibration Sensor support (`zd`). (#262)
+- Add adaptive lighting support. (#272)
+- Add Wireless Doorbell support (`wxml`). (#277)
+- Add IR Remote Control support (`wsdykq`).
+- Add Layout to display schema in sections. (#283) Thanks @donavanbecker for the contribution
+- Add option to make accessory and unbridged accessory (#285) Thanks @donavanbecker for the contribution
 
 
 ### Fixed
@@ -26,6 +34,7 @@
 - Fix `bright_value` not sent for the `C/CW` lights who doesn't have `work_mode`. (#171)
 - Fix crash when camera sends an invalid status message.
 - Fix incorrect Door and Window Controller state. (#178)
+- Fix Thermostat cold mode not working (#242).
 
 
 ### Changed
@@ -34,11 +43,13 @@
 - Print scene id in logs.
 - Update support for RGB Power Switch (`dj`).
 - Support showing device online status via `StatusActive`. (#172)
-- Update unit and range of `RotationSpeed` with level, need clean accessory cache to take effect. (#174)
+- Update unit and range of `RotationSpeed`, need clean accessory cache to take effect. (#174, #273)
 - Support Diffuser RGB light. (#184)
 - Support Fan light temperature and color. (#184)
 - Support Humidifier light. (#184)
 - Expose energy usage for outlets/switches. (#190) Thanks @lstrojny for the contribution
+- Strict config validate for `deviceOverrides`. (#278)
+- Support AirPurifier air quality.
 
 
 ## [1.6.0] - (2022.12.3)

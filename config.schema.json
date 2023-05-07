@@ -1,194 +1,423 @@
 {
-	"pluginAlias": "TuyaPlatform",
-	"pluginType": "platform",
-	"singular": true,
-	"headerDisplay": "",
-	"footerDisplay": "",
-	"schema": {
-		"type": "object",
-		"properties": {
-			"options": {
-				"title": "Project Info",
-				"type": "object",
-				"required": true,
-				"properties": {
-					"projectType": {
-						"title": "Project Type (Development Method)",
-						"type": "string",
-						"default": "2",
-						"oneOf": [{
-							"title": "Custom",
-							"enum": ["1"]
-						}, {
-							"title": "Smart Home",
-							"enum": ["2"]
-						}],
-						"required": true
-					},
-					"endpoint": {
-						"title": "Endpoint URL",
-						"type": "string",
-						"format": "url"
-					},
-					"accessId": {
-						"title": "Access ID",
-						"type": "string",
-						"required": true
-					},
-					"accessKey": {
-						"title": "Access Secret",
-						"type": "string",
-						"required": true
-					},
-					"countryCode": {
-						"title": "Country Code",
-						"type": "integer",
-						"minimum": 1,
-						"condition": {
-							"functionBody": "return model.options.projectType === '2';"
-						}
-					},
-					"username": {
-						"title": "Username",
-						"type": "string",
-						"condition": {
-							"functionBody": "return model.options.projectType === '2';"
-						}
-					},
-					"password": {
-						"title": "Password",
-						"type": "string",
-						"condition": {
-							"functionBody": "return model.options.projectType === '2';"
-						}
-					},
-					"appSchema": {
-						"title": "App",
-						"type": "string",
-						"default": "tuyaSmart",
-						"oneOf": [{
-								"title": "Tuya Smart",
-								"enum": ["tuyaSmart"]
-							},
-							{
-								"title": "Smart Life",
-								"enum": ["smartlife"]
-							}
-						],
-						"condition": {
-							"functionBody": "return model.options.projectType === '2';"
-						}
-					},
-					"homeWhitelist": {
-						"title": "Whitelisted Home IDs",
-						"description": "An optional list of Home IDs to match. If blank, all homes are matched.",
-						"type": "array",
-						"items": {
-							"title": "Home ID",
-							"type": "integer"
-						},
-						"condition": {
-							"functionBody": "return model.options.projectType === '2';"
-						}
-					},
-					"deviceOverrides": {
-						"title": "Device Overriding Configs",
-						"type": "array",
-						"items": {
-							"type": "object",
-							"properties": {
-								"id": {
-									"title": "ID",
-									"description": "Device ID or Product ID or `global`",
-									"type": "string",
-									"required": true
-								},
-								"category": {
-									"title": "Category",
-									"description": "Category Code or `hidden`",
-									"type": "string"
-								},
-								"schema": {
-									"title": "Schema Overriding Configs",
-									"type": "array",
-									"items": {
-										"type": "object",
-										"properties": {
-											"code": {
-												"title": "DP Code",
-												"type": "string",
-												"required": true
-											},
-											"newCode": {
-												"title": "New DP Code",
-												"type": "string"
-											},
-											"type": {
-												"title": "New DP Type",
-												"type": "string",
-												"default": "Boolean",
-												"oneOf": [{
-													"title": "Boolean",
-													"enum": ["Boolean"]
-												}, {
-													"title": "Integer",
-													"enum": ["Integer"]
-												}, {
-													"title": "Enum",
-													"enum": ["Enum"]
-												}, {
-													"title": "String",
-													"enum": ["String"]
-												}, {
-													"title": "Json",
-													"enum": ["Json"]
-												}, {
-													"title": "Raw",
-													"enum": ["Raw"]
-												}]
-											},
-											"property": {
-												"title": "New DP Property",
-												"type": "object",
-												"properties": {
-													"min": {
-														"title": "min",
-														"type": "integer"
-													},
-													"max": {
-														"title": "max",
-														"type": "integer"
-													},
-													"scale": {
-														"title": "scale",
-														"type": "integer"
-													},
-													"step": {
-														"title": "step",
-														"type": "integer"
-													},
-													"range": {
-														"title": "range",
-														"type": "array",
-														"items": {
-															"title": "value",
-															"type": "string"
-														}
-													}
-												}
-											},
-											"hidden": {
-												"title": "Hidden",
-												"type": "boolean"
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-  }
+    "pluginAlias": "TuyaPlatform",
+    "pluginType": "platform",
+    "singular": true,
+    "headerDisplay": "",
+    "footerDisplay": "",
+    "customUi": false,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string",
+                "title": "Name",
+                "required": true,
+                "default": "Tuya"
+            },
+            "options": {
+                "title": "Project Info",
+                "type": "object",
+                "required": true,
+                "properties": {
+                    "projectType": {
+                        "title": "Project Type (Development Method)",
+                        "type": "string",
+                        "default": "2",
+                        "oneOf": [
+                            {
+                                "title": "Custom",
+                                "enum": [
+                                    "1"
+                                ]
+                            },
+                            {
+                                "title": "Smart Home",
+                                "enum": [
+                                    "2"
+                                ]
+                            }
+                        ],
+                        "required": true
+                    },
+                    "endpoint": {
+                        "title": "Endpoint URL",
+                        "type": "string",
+                        "format": "url"
+                    },
+                    "accessId": {
+                        "title": "Access ID",
+                        "type": "string",
+                        "required": true
+                    },
+                    "accessKey": {
+                        "title": "Access Secret",
+                        "type": "string",
+                        "required": true
+                    },
+                    "countryCode": {
+                        "title": "Country Code",
+                        "type": "integer",
+                        "minimum": 1,
+                        "condition": {
+                            "functionBody": "return model.options.projectType === '2';"
+                        }
+                    },
+                    "username": {
+                        "title": "Username",
+                        "type": "string",
+                        "condition": {
+                            "functionBody": "return model.options.projectType === '2';"
+                        }
+                    },
+                    "password": {
+                        "title": "Password",
+                        "type": "string",
+                        "condition": {
+                            "functionBody": "return model.options.projectType === '2';"
+                        }
+                    },
+                    "appSchema": {
+                        "title": "App",
+                        "type": "string",
+                        "default": "tuyaSmart",
+                        "oneOf": [
+                            {
+                                "title": "Tuya Smart",
+                                "enum": [
+                                    "tuyaSmart"
+                                ]
+                            },
+                            {
+                                "title": "Smart Life",
+                                "enum": [
+                                    "smartlife"
+                                ]
+                            }
+                        ],
+                        "condition": {
+                            "functionBody": "return model.options.projectType === '2';"
+                        }
+                    },
+                    "homeWhitelist": {
+                        "title": "Whitelisted Home IDs",
+                        "description": "An optional list of Home IDs to match. If blank, all homes are matched.",
+                        "type": "array",
+                        "items": {
+                            "title": "Home ID",
+                            "type": "integer"
+                        },
+                        "condition": {
+                            "functionBody": "return model.options.projectType === '2';"
+                        }
+                    },
+                    "deviceOverrides": {
+                        "title": "Device Overriding Configs",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "title": "ID",
+                                    "description": "Device ID or Product ID or `global`",
+                                    "type": "string",
+                                    "required": true
+                                },
+                                "category": {
+                                    "title": "Category",
+                                    "description": "Category Code or `hidden`",
+                                    "type": "string",
+                                    "condition": {
+                                        "functionBody": "return (model.options && model.options.deviceOverrides);"
+                                    }
+                                },
+                                "unbridged": {
+                                    "title": "Unbridge",
+                                    "description": "Would you like to make this device be an external device?",
+                                    "type": "boolean",
+                                    "condition": {
+                                        "functionBody": "return (model.options && model.options.deviceOverrides);"
+                                    }
+                                },
+                                "schema": {
+                                    "title": "Schema Overriding Configs",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "code": {
+                                                "title": "DP Code",
+                                                "type": "string",
+                                                "required": true,
+                                                "condition": {
+                                                    "functionBody": "return (model.options && model.options.deviceOverrides);"
+                                                }
+                                            },
+                                            "newCode": {
+                                                "title": "New DP Code",
+                                                "type": "string",
+                                                "condition": {
+                                                    "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].code && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                }
+                                            },
+                                            "type": {
+                                                "title": "New DP Type",
+                                                "type": "string",
+                                                "default": "",
+                                                "oneOf": [
+                                                    {
+                                                        "title": "Boolean",
+                                                        "enum": [
+                                                            "Boolean"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "title": "Integer",
+                                                        "enum": [
+                                                            "Integer"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "title": "Enum",
+                                                        "enum": [
+                                                            "Enum"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "title": "String",
+                                                        "enum": [
+                                                            "String"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "title": "Json",
+                                                        "enum": [
+                                                            "Json"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "title": "Raw",
+                                                        "enum": [
+                                                            "Raw"
+                                                        ]
+                                                    }
+                                                ],
+                                                "condition": {
+                                                    "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].code && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                }
+                                            },
+                                            "property": {
+                                                "title": "New DP Property",
+                                                "type": "object",
+                                                "properties": {
+                                                    "min": {
+                                                        "title": "min",
+                                                        "type": "integer",
+                                                        "condition": {
+                                                            "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].type === 'Integer' && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                        }
+                                                    },
+                                                    "max": {
+                                                        "title": "max",
+                                                        "type": "integer",
+                                                        "condition": {
+                                                            "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].type === 'Integer' && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                        }
+                                                    },
+                                                    "scale": {
+                                                        "title": "scale",
+                                                        "type": "integer",
+                                                        "condition": {
+                                                            "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].type === 'Integer' && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                        }
+                                                    },
+                                                    "step": {
+                                                        "title": "step",
+                                                        "type": "integer",
+                                                        "condition": {
+                                                            "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].type === 'Integer' && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                        }
+                                                    },
+                                                    "range": {
+                                                        "title": "range",
+                                                        "type": "array",
+                                                        "items": {
+                                                            "title": "value",
+                                                            "type": "string"
+                                                        },
+                                                        "condition": {
+                                                            "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].type === 'Enum' && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                        }
+                                                    }
+                                                },
+                                                "condition": {
+                                                    "functionBody": "return (model.options && model.options.deviceOverrides && model.options.deviceOverrides[arrayIndices[0]].schema && model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].code && !model.options.deviceOverrides[arrayIndices[0]].schema[arrayIndices[1]].hidden);"
+                                                }
+                                            },
+                                            "hidden": {
+                                                "title": "Hidden",
+                                                "type": "boolean",
+                                                "condition": {
+                                                    "functionBody": "return (model.options && model.options.deviceOverrides);"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "condition": {
+                                        "functionBody": "return (model.options && model.options.deviceOverrides);"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "layout": [
+        {
+            "type": "fieldset",
+            "title": "Tuya Account Info",
+            "expandable": true,
+            "expanded": false,
+            "items": [
+                "options.projectType",
+                "options.endpoint",
+                "options.accessId",
+                "options.accessKey",
+                "options.countryCode",
+                "options.username",
+                "options.password",
+                "options.appSchema"
+            ]
+        },
+        {
+            "type": "fieldset",
+            "title": "Tuya Home Settings",
+            "expandable": true,
+            "expanded": false,
+            "notitle": false,
+            "items": [
+                {
+                    "key": "options.homeWhitelist",
+                    "add": "Add Another Home ID",
+                    "title": "{{ 'New Whitelisted Home' }}",
+                    "type": "tabarray",
+                    "notitle": true,
+                    "items": [
+                        {
+                            "type": "div",
+                            "displayFlex": true,
+                            "flex-direction": "row",
+                            "notitle": true,
+                            "title": "{{ value }}",
+                            "items": [
+                                {
+                                    "key": "options.homeWhitelist[]",
+                                    "placeholder": "Home ID"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "fieldset",
+            "title": "Tuya Device Settings",
+            "expandable": true,
+            "expanded": true,
+            "notitle": false,
+            "items": [
+                {
+                    "key": "options.deviceOverrides",
+                    "add": "Add Another Device Override",
+                    "title": "{{ 'New Device Override' }}",
+                    "type": "tabarray",
+                    "notitle": true,
+                    "items": [
+                        {
+                            "type": "div",
+                            "displayFlex": false,
+                            "flex-direction": "row",
+                            "notitle": true,
+                            "title": "{{ value.id }}",
+                            "items": [
+                                {
+                                    "key": "options.deviceOverrides[].id"
+                                },
+                                {
+                                    "key": "options.deviceOverrides[].category"
+                                },
+                                {
+                                    "key": "options.deviceOverrides[].unbridged"
+                                },
+                                {
+                                    "key": "options.deviceOverrides[].schema",
+                                    "add": "Add New Schema",
+                                    "title": "{{ 'New Schema' }}",
+                                    "type": "tabarray",
+                                    "notitle": true,
+                                    "items": [
+                                        {
+                                            "type": "div",
+                                            "displayFlex": true,
+                                            "title": "{{ value.code }}",
+                                            "flex-direction": "column",
+                                            "notitle": false,
+                                            "items": [
+                                                {
+                                                    "key": "options.deviceOverrides[].schema[].code"
+                                                },
+                                                {
+                                                    "key": "options.deviceOverrides[].schema[].newCode"
+                                                },
+                                                {
+                                                    "key": "options.deviceOverrides[].schema[].hidden"
+                                                },
+                                                {
+                                                    "key": "options.deviceOverrides[].schema[].type"
+                                                },
+                                                {
+                                                    "key": "options.deviceOverrides[].schema[].property",
+                                                    "notitle": false,
+                                                    "items": [
+                                                        "options.deviceOverrides[].schema[].property.min",
+                                                        "options.deviceOverrides[].schema[].property.max",
+                                                        "options.deviceOverrides[].schema[].property.scale",
+                                                        "options.deviceOverrides[].schema[].property.step",
+                                                        {
+                                                            "key": "options.deviceOverrides[].schema[].property.range",
+                                                            "add": "Add Range",
+                                                            "title": "{{ 'New Range' }}",
+                                                            "type": "tabarray",
+                                                            "notitle": true,
+                                                            "items": [
+                                                                {
+                                                                    "type": "div",
+                                                                    "displayFlex": true,
+                                                                    "flex-direction": "row",
+                                                                    "notitle": true,
+                                                                    "title": "{{ value }}",
+                                                                    "items": [
+                                                                        {
+                                                                            "key": "options.deviceOverrides[].schema[].property.range[]",
+                                                                            "placeholder": "Range"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

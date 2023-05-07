@@ -10,40 +10,36 @@ export function configureEnergyUsage(
   currentSchema?: TuyaDeviceSchema,
   powerSchema?: TuyaDeviceSchema,
   voltageSchema?: TuyaDeviceSchema,
+  totalSchema?: TuyaDeviceSchema,
 ) {
 
   if (currentSchema) {
-    if (isUnit(currentSchema, 'A', 'mA')) {
-      const amperes = createAmperesCharacteristic(api);
-      if (!service.testCharacteristic(amperes)) {
-        service.addCharacteristic(amperes).onGet(
-          createStatusGetter(accessory, currentSchema, isUnit(currentSchema, 'mA') ? 1000 : 0),
-        );
-      }
-    } else {
-      accessory.log.warn('Unsupported current unit %p', currentSchema);
+    const amperes = createAmperesCharacteristic(api);
+    if (!service.testCharacteristic(amperes)) {
+      service.addCharacteristic(amperes).onGet(
+        createStatusGetter(accessory, currentSchema, isUnit(currentSchema, 'mA') ? 1000 : 0),
+      );
     }
   }
 
   if (powerSchema) {
-    if (isUnit(powerSchema, 'W')) {
-      const watts = createWattsCharacteristic(api);
-      if (!service.testCharacteristic(watts)) {
-        service.addCharacteristic(watts).onGet(createStatusGetter(accessory, powerSchema));
-      }
-    } else {
-      accessory.log.warn('Unsupported power unit %p', currentSchema);
+    const watts = createWattsCharacteristic(api);
+    if (!service.testCharacteristic(watts)) {
+      service.addCharacteristic(watts).onGet(createStatusGetter(accessory, powerSchema));
     }
   }
 
   if (voltageSchema) {
-    if (isUnit(voltageSchema, 'V')) {
-      const volts = createVoltsCharacteristic(api);
-      if (!service.testCharacteristic(volts)) {
-        service.addCharacteristic(volts).onGet(createStatusGetter(accessory, voltageSchema));
-      }
-    } else {
-      accessory.log.warn('Unsupported voltage unit %p', currentSchema);
+    const volts = createVoltsCharacteristic(api);
+    if (!service.testCharacteristic(volts)) {
+      service.addCharacteristic(volts).onGet(createStatusGetter(accessory, voltageSchema));
+    }
+  }
+
+  if (totalSchema) {
+    const kwh = createKilowattHourCharacteristic(api);
+    if (!service.testCharacteristic(kwh)) {
+      service.addCharacteristic(kwh).onGet(createStatusGetter(accessory, totalSchema));
     }
   }
 }
@@ -99,6 +95,20 @@ function createVoltsCharacteristic(api: API) {
         format: api.hap.Formats.FLOAT,
         perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_READ],
         unit: 'V',
+      });
+    }
+  };
+}
+
+function createKilowattHourCharacteristic(api: API) {
+  return class KilowattHour extends api.hap.Characteristic {
+    static readonly UUID = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
+
+    constructor() {
+      super('Total Consumption', KilowattHour.UUID, {
+        format: api.hap.Formats.FLOAT,
+        perms: [api.hap.Perms.NOTIFY, api.hap.Perms.PAIRED_READ],
+        unit: 'kWh',
       });
     }
   };

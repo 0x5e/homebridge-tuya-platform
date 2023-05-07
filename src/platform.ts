@@ -32,21 +32,78 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
   public deviceManager?: TuyaDeviceManager;
   public accessoryHandlers: BaseAccessory[] = [];
 
-  validate(config) {
+  validate() {
     let result;
-    if (!config.options) {
-      this.log.warn('Not configured, exit.');
+    if (!this.options) {
+      this.log.error('Not configured, exit.');
       return false;
-    } else if (config.options.projectType === '1') {
-      result = new Validator().validate(config.options, customOptionsSchema);
-    } else if (config.options.projectType === '2') {
-      result = new Validator().validate(config.options, homeOptionsSchema);
+    } else if (this.options.projectType === '1') {
+      result = new Validator().validate(this.options, customOptionsSchema);
+    } else if (this.options.projectType === '2') {
+      result = new Validator().validate(this.options, homeOptionsSchema);
     } else {
-      this.log.warn(`Unsupported projectType: ${config.options.projectType}, exit.`);
+      this.log.error(`Unsupported projectType: ${this.options['projectType']}, exit.`);
       return false;
     }
     result.errors.forEach(error => this.log.error(error.stack));
-    return result.errors.length === 0;
+    if (result.errors.length > 0) {
+      return false;
+    }
+
+    if (!this.validateDeviceOverrides() || !this.validateSchema()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  validateDeviceOverrides() {
+    if (!this.options.deviceOverrides) {
+      return true;
+    }
+
+    const idMap = new Map();
+    for (const item of this.options.deviceOverrides) {
+      if (idMap.has(item.id)) {
+        idMap.get(item.id)?.push(item);
+      } else {
+        idMap.set(item.id, [item]);
+      }
+    }
+    for (const items of idMap.values()) {
+      if (items.length > 1) {
+        this.log.error('"deviceOverrides" conflict, "id" must be unique: %o.', items);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  validateSchema() {
+    if (!this.options.deviceOverrides) {
+      return true;
+    }
+
+    for (const deviceOverride of this.options.deviceOverrides) {
+      if (!deviceOverride.schema) {
+        continue;
+      }
+      const idMap = new Map();
+      for (const item of deviceOverride.schema) {
+        if (idMap.has(item.code)) {
+          idMap.get(item.code)?.push(item);
+        } else {
+          idMap.set(item.code, [item]);
+        }
+      }
+      for (const items of idMap.values()) {
+        if (items.length > 1) {
+          this.log.error('"schema" conflict, "code" must be unique: %o.', items);
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   constructor(
@@ -55,7 +112,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
 
-    if (!this.validate(config)) {
+    if (!this.validate()) {
       return;
     }
 
@@ -66,7 +123,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
     // in order to ensure they weren't added to homebridge already. This event can also be used
     // to start discovery of new accessories.
     this.api.on('didFinishLaunching', async () => {
-      log.debug('Executed didFinishLaunching callback');
+      this.log.debug('Executed didFinishLaunching callback');
       // run the method to discover / register your devices as accessories
       await this.initDevices();
     });
@@ -111,6 +168,16 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       }
       this.log.warn('Override %o category from %o to %o', device.name, device.category, deviceConfig.category);
       device.category = deviceConfig.category;
+    }
+    // override device bridged
+    for (const device of devices) {
+      const deviceConfig = this.getDeviceConfig(device);
+      if (!deviceConfig || !deviceConfig.unbridged) {
+        continue;
+      }
+
+      this.log.warn('Unbridge %o category %o', device.name, device.category );
+      device.unbridged = deviceConfig.unbridged;
     }
 
     await this.deviceManager.updateInfraredRemotes(devices);
@@ -275,11 +342,15 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
 
     let res;
     const { accessId, accessKey, countryCode, username, password, appSchema, endpoint } = this.options;
-    const api = new TuyaOpenAPI(TuyaOpenAPI.Endpoints.AMERICA, accessId, accessKey, this.log);
+    const api = new TuyaOpenAPI(
+      (endpoint && endpoint.length > 0) ? endpoint : TuyaOpenAPI.getDefaultEndpoint(countryCode),
+      accessId,
+      accessKey,
+      this.log);
     const deviceManager = new TuyaHomeDeviceManager(api);
 
     this.log.info('Log in to Tuya Cloud.');
-    res = await api.homeLogin(countryCode, username, password, appSchema, endpoint);
+    res = await api.homeLogin(countryCode, username, password, appSchema);
     if (res.success === false) {
       this.log.error(`Login failed. code=${res.code}, msg=${res.msg}`);
       if (LOGIN_ERROR_MESSAGES[res.code]) {
@@ -342,7 +413,7 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
 
     const uuid = this.api.hap.uuid.generate(device.id);
     const existingAccessory = this.cachedAccessories.find(accessory => accessory.UUID === uuid);
-    if (existingAccessory) {
+    if (existingAccessory && !device.unbridged) {
       this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
 
       // Update context
@@ -374,7 +445,11 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       this.accessoryHandlers.push(handler);
 
       // link the accessory to your platform
-      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      if (device.unbridged) {
+        this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+      } else {
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      }
     }
   }
 

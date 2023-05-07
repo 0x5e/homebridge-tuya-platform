@@ -54,6 +54,7 @@ export type TuyaIRRemoteKeyListItem = {
   key_id: number;
   key_name: string;
   standard_key: boolean;
+  learning_code?: string; // IR DIY device learning code.
 };
 
 export type TuyaIRRemoteTempListItem = {
@@ -97,6 +98,7 @@ export default class TuyaDevice {
   product_name!: string;
   icon!: string;
   category!: string;
+  unbridged?: boolean;
   schema!: TuyaDeviceSchema[];
 
   // status
@@ -114,9 +116,9 @@ export default class TuyaDevice {
   update_time!: number;
 
   // ...
-  parent_id!: string;
   sub!: boolean;
-  remote_keys!: TuyaIRRemoteKeys;
+  parent_id?: string;
+  remote_keys?: TuyaIRRemoteKeys;
 
   constructor(obj: Partial<TuyaDevice>) {
     Object.assign(this, obj);
@@ -128,7 +130,8 @@ export default class TuyaDevice {
   }
 
   isIRControlHub() {
-    return this.category === 'wnykq' || this.category === 'hwktwkq';
+    return ['wnykq', 'hwktwkq', 'wsdykq']
+      .includes(this.category);
   }
 
   isIRRemoteControl() {

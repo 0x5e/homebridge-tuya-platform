@@ -13,6 +13,7 @@ import FanAccessory from './FanAccessory';
 import GarageDoorAccessory from './GarageDoorAccessory';
 import WindowAccessory from './WindowAccessory';
 import WindowCoveringAccessory from './WindowCoveringAccessory';
+import LockAccessory from './LockAccessory';
 import ThermostatAccessory from './ThermostatAccessory';
 import HeaterAccessory from './HeaterAccessory';
 import ValveAccessory from './ValveAccessory';
@@ -36,6 +37,9 @@ import AirConditionerAccessory from './AirConditionerAccessory';
 import IRControlHubAccessory from './IRControlHubAccessory';
 import IRGenericAccessory from './IRGenericAccessory';
 import IRAirConditionerAccessory from './IRAirConditionerAccessory';
+import SecuritySystemAccessory from './SecuritySystemAccessory';
+import VibrationSensorAccessory from './VibrationSensorAccessory';
+import DoorbellAccessory from './DoorbellAccessory';
 
 
 export default class AccessoryFactory {
@@ -140,6 +144,9 @@ export default class AccessoryFactory {
       case 'mcs':
         handler = new ContactSensorAccessory(platform, accessory);
         break;
+      case 'zd':
+        handler = new VibrationSensorAccessory(platform, accessory);
+        break;
       case 'rqbj':
       case 'jwbj':
       case 'sj':
@@ -171,6 +178,16 @@ export default class AccessoryFactory {
       case 'hps':
         handler = new HumanPresenceSensorAccessory(platform, accessory);
         break;
+      case 'ms':
+      case 'jtmspro':
+        handler = new LockAccessory(platform, accessory);
+        break;
+      case 'mal':
+        handler = new SecuritySystemAccessory(platform, accessory);
+        break;
+      case 'wxml':
+        handler = new DoorbellAccessory(platform, accessory);
+        break;
 
       // Other
       case 'scene':
@@ -185,7 +202,7 @@ export default class AccessoryFactory {
 
     // IR Remote Control
     if (device.isIRRemoteControl()) {
-      switch (device.remote_keys.category_id) {
+      switch (device.remote_keys?.category_id) {
         case 5: // AC
           handler = new IRAirConditionerAccessory(platform, accessory);
           break;
