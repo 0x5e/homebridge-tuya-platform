@@ -6,14 +6,14 @@ export default class IRGenericAccessory extends BaseAccessory {
 
   configureServices() {
     const key_list = this.device.remote_keys?.key_list || [];
-    
+
     // Max 100 services allowed
     if (key_list.length > 100) {
       this.log.warn(`Skipping ${key_list.length - 100} keys for ${this.device.name}, ` +
         'as we reached the limit of HomeKit (100 services per accessory)');
     }
     key_list = key_list.slice(0, 99);
-    
+
     for (const key of key_list) {
       this.configureSwitch(key);
     }
