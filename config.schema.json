@@ -436,7 +436,7 @@
             "type": "fieldset",
             "title": "Advance Settings",
             "expandable": true,
-            "expanded": true,
+            "expanded": false,
             "notitle": false,
             "items": [
                 "options.debug",
