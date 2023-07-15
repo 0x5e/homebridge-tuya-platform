@@ -14,7 +14,7 @@ const SCHEMA_CODE = [
     CURRENT_POSITION: ['percent_state'],
     TARGET_POSITION_CONTROL: ['control_2', 'mach_operate'],
     TARGET_POSITION_PERCENT: ['percent_control_2', 'position'],
-  }
+  },
 ];
 
 export default class WindowCoveringAccessory extends BaseAccessory {
@@ -26,15 +26,12 @@ export default class WindowCoveringAccessory extends BaseAccessory {
   configureServices() {
 
     let amount = 1;
-    const schema = this.getSchema("control_2");
+    const schema = this.getSchema('control_2');
     if (schema) {
       amount = 2;
     }
     this.log.warn('Curtain amount:', amount);
     for (let i = 0; i < amount; i++) {
-
-      const service = this.accessory.getService(SCHEMA_CODE[i].NAME) ||
-       this.accessory.addService(this.Service.WindowCovering, SCHEMA_CODE[i].NAME, SCHEMA_CODE[i].NAME);
 
       this.configureCurrentPosition(i);
       this.configurePositionState(i);
