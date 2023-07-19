@@ -4,6 +4,7 @@
     "singular": true,
     "headerDisplay": "",
     "footerDisplay": "",
+    "fixArrays": true,
     "customUi": false,
     "schema": {
         "type": "object",
