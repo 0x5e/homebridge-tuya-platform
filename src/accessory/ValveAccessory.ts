@@ -21,7 +21,7 @@ export default class ValveAccessory extends BaseAccessory {
     }
 
     const schema = SCHEMA_CODE.ON.map(code => this.getSchema(code))
-        .filter((s: TuyaDeviceSchema | undefined): s is TuyaDeviceSchema => !!s && s.type === TuyaDeviceSchemaType.Boolean);
+      .filter((s: TuyaDeviceSchema | undefined): s is TuyaDeviceSchema => !!s && s.type === TuyaDeviceSchemaType.Boolean);
 
     for (const _schema of schema) {
       const name = (schema.length === 1) ? this.device.name : _schema.code;
