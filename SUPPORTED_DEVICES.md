@@ -36,7 +36,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Dimmer Switch | 调光开关 | tgkg | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorytgkg?id=Kaiuz0ktx7m0o) |
 | Fan Switch | 风扇开关 | fskg | Fanv2 | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryfskg?id=Kbcs129cl1gr9) |
 | Wireless Switch | 无线开关 | wxkg | Stateless Programmable Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/wxkg?id=Kbeo9t3ryuqm5) |
-| Secne Light Socket | 情景灯插座 | qjdcz | Switch | ✅ | Documentation |
+| Scene Light Socket | 情景灯插座 | qjdcz | Switch | ✅ | Documentation |
 | Temperature Control Socket | 温控插座 | wkcz | Switch<br> Temperature Sensor<br> Humidity Sensor | ✅ | Documentation |
 
 
@@ -59,7 +59,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Name | Name (zh) | Code | Homebridge Service | Supported | Links |
 | ---- | ---- | ---- | ---- | ---- | ---- |
 | Robot Vacuum | 扫地机 | sd | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysd?id=Kaiuz16b2s6yd) |
-| Heater | 取暖器 | qn | Heater Coller | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryqn?id=Kaiuz18kih0sm) |
+| Heater | 取暖器 | qn | Heater Cooler | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryqn?id=Kaiuz18kih0sm) |
 | Air Purifier | 空气净化器 | kj | Air Purifier | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorykj?id=Kaiuz1atqo5l7) |
 | Drying Rack | 晾衣架 | lyj | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorylyj?id=Kaiuz1cy926vh) |
 | Diffuser | 香薰机 | xxj | Air Purifier<br> Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryxxj?id=Kaiuz1f9mo6bl) |

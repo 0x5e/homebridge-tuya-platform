@@ -29,7 +29,7 @@
 - Add option to make accessory and unbridged accessory (#285) Thanks @donavanbecker for the contribution
 - Add inching button for switches.
 - Add support to 2ch windows covering. (#339) Thanks @CryptoIR for the contribution
-- Add retry when network error happend.
+- Add retry when network error happened.
 
 
 ### Fixed
@@ -39,7 +39,7 @@
 - Fix incorrect Door and Window Controller state. (#178)
 - Fix Thermostat cold mode not working (#242).
 - Order temp before get the min and max for IRAirConditionerAccessory. (#433) Thanks @tuliocll for the contribution
-- Fix enerage usage not updated after homebridge restart. (#268)
+- Fix energy usage not updated after homebridge restart. (#268)
 
 
 ### Changed
