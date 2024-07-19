@@ -40,6 +40,7 @@ import IRAirConditionerAccessory from './IRAirConditionerAccessory';
 import SecuritySystemAccessory from './SecuritySystemAccessory';
 import VibrationSensorAccessory from './VibrationSensorAccessory';
 import DoorbellAccessory from './DoorbellAccessory';
+import PetFeederAccessory from './PetFeederAccessory';
 
 
 export default class AccessoryFactory {
@@ -111,6 +112,9 @@ export default class AccessoryFactory {
       case 'cl':
       case 'clkg':
         handler = new WindowCoveringAccessory(platform, accessory);
+        break;
+      case 'cwwsq':
+        handler = new PetFeederAccessory(platform, accessory);
         break;
       case 'mc':
         handler = new WindowAccessory(platform, accessory);
