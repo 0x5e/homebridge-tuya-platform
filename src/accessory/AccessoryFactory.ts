@@ -31,6 +31,7 @@ import HumidifierAccessory from './HumidifierAccessory';
 import DehumidifierAccessory from './DehumidifierAccessory';
 import DiffuserAccessory from './DiffuserAccessory';
 import AirPurifierAccessory from './AirPurifierAccessory';
+import ExtractionHoodAccessory from './ExtractionHoodAccessory';
 import CameraAccessory from './CameraAccessory';
 import SceneAccessory from './SceneAccessory';
 import AirConditionerAccessory from './AirConditionerAccessory';
@@ -137,6 +138,9 @@ export default class AccessoryFactory {
       case 'fsd':
       case 'fskg':
         handler = new FanAccessory(platform, accessory);
+        break;
+      case 'yyj':
+        handler = new ExtractionHoodAccessory(platform, accessory)
         break;
 
       // Security & Video Surveillance
