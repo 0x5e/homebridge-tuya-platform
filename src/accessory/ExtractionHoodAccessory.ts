@@ -1,11 +1,10 @@
 import { TuyaDeviceSchemaType } from '../device/TuyaDevice';
 import BaseAccessory from './BaseAccessory';
 import { configureActive } from './characteristic/Active';
-import { configureAirQuality } from './characteristic/AirQuality';
 import { configureLockPhysicalControls } from './characteristic/LockPhysicalControls';
 import { configureRotationSpeed, configureRotationSpeedLevel } from './characteristic/RotationSpeed';
-import {configureLight} from "./characteristic/Light";
-import {configureOn} from "./characteristic/On";
+import {configureLight} from './characteristic/Light';
+import {configureOn} from './characteristic/On';
 
 const SCHEMA_CODE = {
   ACTIVE: ['switch'],
@@ -44,13 +43,13 @@ export default class ExtractionHoodAccessory extends BaseAccessory {
     if (this.getSchema(...SCHEMA_CODE.LIGHT_ON)) {
       if (this.lightServiceType() === this.Service.Lightbulb) {
         configureLight(
-            this,
-            this.lightService(),
-            this.getSchema(...SCHEMA_CODE.LIGHT_ON),
-            this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT),
-            this.getSchema(...SCHEMA_CODE.LIGHT_TEMP),
-            this.getSchema(...SCHEMA_CODE.LIGHT_COLOR),
-            this.getSchema(...SCHEMA_CODE.LIGHT_MODE),
+          this,
+          this.lightService(),
+          this.getSchema(...SCHEMA_CODE.LIGHT_ON),
+          this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT),
+          this.getSchema(...SCHEMA_CODE.LIGHT_TEMP),
+          this.getSchema(...SCHEMA_CODE.LIGHT_COLOR),
+          this.getSchema(...SCHEMA_CODE.LIGHT_MODE),
         );
       } else if (this.lightServiceType() === this.Service.Switch) {
         configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.LIGHT_ON));

@@ -140,7 +140,7 @@ export default class AccessoryFactory {
         handler = new FanAccessory(platform, accessory);
         break;
       case 'yyj':
-        handler = new ExtractionHoodAccessory(platform, accessory)
+        handler = new ExtractionHoodAccessory(platform, accessory);
         break;
 
       // Security & Video Surveillance
