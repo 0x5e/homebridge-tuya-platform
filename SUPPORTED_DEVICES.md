@@ -56,35 +56,36 @@ Most category code is pinyin abbreviation of Chinese name.
 
 ## Small Home Appliances
 
-| Name | Name (zh) | Code | Homebridge Service | Supported | Links |
-| ---- | ---- | ---- | ---- | ---- | ---- |
-| Robot Vacuum | 扫地机 | sd | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysd?id=Kaiuz16b2s6yd) |
-| Heater | 取暖器 | qn | Heater Cooler | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryqn?id=Kaiuz18kih0sm) |
-| Air Purifier | 空气净化器 | kj | Air Purifier | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorykj?id=Kaiuz1atqo5l7) |
-| Drying Rack | 晾衣架 | lyj | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorylyj?id=Kaiuz1cy926vh) |
-| Diffuser | 香薰机 | xxj | Air Purifier<br> Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryxxj?id=Kaiuz1f9mo6bl) |
-| Curtain | 窗帘 | cl | Window Covering | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorycl?id=Kaiuz1hnpo7df) |
-| Door and Window Controller | 门窗控制器 | mc | Window | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorymc?id=Kaiuz1jyoassg) |
-| Thermostat | 温控器 | wk | Thermostat | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorywk?id=Kaiuz1m1xqnt6) |
-| Thermostat Valve | 温控阀 | wkf | Thermostat | ✅ | Documentation |
-| Bathroom Heater | 浴霸 | yb | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryyb?id=Kaiuz1oajgpib) |
-| Irrigator | 灌溉器 | ggq<br> sfkzq | Valve | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryggq?id=Kaiuz1qib7z0k) |
-| Humidifier | 加湿器 | jsq | Humidifier Dehumidifier | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryjsq?id=Kaiuz1smr440b) |
-| Dehumidifier | 除湿机 | cs | Humidifier Dehumidifier | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorycs?id=Kaiuz1vcz4dha) |
-| Fan | 风扇 | fs | Fanv2 | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryfs?id=Kaiuz1xweel1c) |
-| Water Purifier | 净水器 | js | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryjs?id=Kaiuz204l58n9) |
-| Electric Blanket | 电热毯 | dr | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorydr?id=Kaiuz22dyc66p) |
-| Pet Treat Feeder | 宠物弹射喂食器 | cwtswsq | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwtswsq?id=Kaiuz24lq3fq5) |
-| Pet Ball Thrower | 宠物网球发射器 | cwwqfsq | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwwqfsq?id=Kaiuz26r7g1up) |
-| HVAC | 暖通器 | ntq | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryntq?id=Kaiuz292sjqcz) |
-| Pet Feeder | 宠物喂食器 | cwwsq | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwwsq?id=Kaiuz2b6vydld) |
-| Pet Fountain | 宠物饮水机 | cwysj | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwysj?id=Kaiuz2dfro0nd) |
-| Sofa | 沙发 | sf | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysf?id=Kaiuz2fp9uqtt) |
-| Electric Fireplace | 电壁炉 | dbl | | | [Documentation](https://developer.tuya.com/en/docs/iot/electric-fireplace?id=Kaiuz2hz4iyp6) |
-| Smart Milk Kettle | 智能调奶器 | tnq | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorytnq?id=Kakf01agbfkfa) |
-| Cat Toilet | 猫砂盆 | msp | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorymsp?id=Kakg2t7714ky7) |
-| Towel Rack | 毛巾架 | mjj | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorymjj?id=Kakkmlm9k4cir) |
-| Smart Indoor Garden | 植物生长机 | sz | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysz?id=Kaiuz4e6h7up0) |
+| Name                       | Name (zh) | Code          | Homebridge Service | Supported | Links                                                                                    |
+|----------------------------| ---- |---------------| ---- | ---- |------------------------------------------------------------------------------------------|
+| Robot Vacuum               | 扫地机 | sd            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysd?id=Kaiuz16b2s6yd)      |
+| Heater                     | 取暖器 | qn            | Heater Cooler | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryqn?id=Kaiuz18kih0sm)      |
+| Air Purifier               | 空气净化器 | kj            | Air Purifier | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorykj?id=Kaiuz1atqo5l7)      |
+| Drying Rack                | 晾衣架 | lyj           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorylyj?id=Kaiuz1cy926vh)     |
+| Diffuser                   | 香薰机 | xxj           | Air Purifier<br> Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryxxj?id=Kaiuz1f9mo6bl)     |
+| Extraction hood            | 香薰机 | yyj           | Air Purifier<br> Lightbulb | ✅ | Documentation        |
+| Curtain                    | 窗帘 | cl            | Window Covering | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorycl?id=Kaiuz1hnpo7df)      |
+| Door and Window Controller | 门窗控制器 | mc            | Window | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorymc?id=Kaiuz1jyoassg)      |
+| Thermostat                 | 温控器 | wk            | Thermostat | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorywk?id=Kaiuz1m1xqnt6)      |
+| Thermostat Valve           | 温控阀 | wkf           | Thermostat | ✅ | Documentation                                                                            |
+| Bathroom Heater            | 浴霸 | yb            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryyb?id=Kaiuz1oajgpib)      |
+| Irrigator                  | 灌溉器 | ggq<br> sfkzq | Valve | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryggq?id=Kaiuz1qib7z0k)     |
+| Humidifier                 | 加湿器 | jsq           | Humidifier Dehumidifier | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryjsq?id=Kaiuz1smr440b)     |
+| Dehumidifier               | 除湿机 | cs            | Humidifier Dehumidifier | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorycs?id=Kaiuz1vcz4dha)      |
+| Fan                        | 风扇 | fs            | Fanv2 | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryfs?id=Kaiuz1xweel1c)      |
+| Water Purifier             | 净水器 | js            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryjs?id=Kaiuz204l58n9)      |
+| Electric Blanket           | 电热毯 | dr            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorydr?id=Kaiuz22dyc66p)      |
+| Pet Treat Feeder           | 宠物弹射喂食器 | cwtswsq       | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwtswsq?id=Kaiuz24lq3fq5) |
+| Pet Ball Thrower           | 宠物网球发射器 | cwwqfsq       | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwwqfsq?id=Kaiuz26r7g1up) |
+| HVAC                       | 暖通器 | ntq           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categoryntq?id=Kaiuz292sjqcz)     |
+| Pet Feeder                 | 宠物喂食器 | cwwsq         | Switch | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwwsq?id=Kaiuz2b6vydld)   |
+| Pet Fountain               | 宠物饮水机 | cwysj         | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorycwysj?id=Kaiuz2dfro0nd)   |
+| Sofa                       | 沙发 | sf            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysf?id=Kaiuz2fp9uqtt)      |
+| Electric Fireplace         | 电壁炉 | dbl           | | | [Documentation](https://developer.tuya.com/en/docs/iot/electric-fireplace?id=Kaiuz2hz4iyp6) |
+| Smart Milk Kettle          | 智能调奶器 | tnq           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorytnq?id=Kakf01agbfkfa)     |
+| Cat Toilet                 | 猫砂盆 | msp           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorymsp?id=Kakg2t7714ky7)     |
+| Towel Rack                 | 毛巾架 | mjj           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorymjj?id=Kakkmlm9k4cir)     |
+| Smart Indoor Garden        | 植物生长机 | sz            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysz?id=Kaiuz4e6h7up0)      |
 
 
 ## Kitchen Appliances
