@@ -197,7 +197,7 @@ export default class AccessoryFactory {
       case 'wxml':
         handler = new DoorbellAccessory(platform, accessory);
         break;
-      case "qxj":
+      case 'qxj':
         handler = new WeatherStationAccessory(platform, accessory);
         break;
 
