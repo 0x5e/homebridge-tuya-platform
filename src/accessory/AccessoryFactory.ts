@@ -43,6 +43,7 @@ import VibrationSensorAccessory from './VibrationSensorAccessory';
 import WeatherStationAccessory from './WeatherStationAccessory';
 import DoorbellAccessory from './DoorbellAccessory';
 import PetFeederAccessory from './PetFeederAccessory';
+import WhiteNoiseMachineAccessory from './WhiteNoiseMachineAccessory';
 
 
 export default class AccessoryFactory {
@@ -142,6 +143,9 @@ export default class AccessoryFactory {
         break;
       case 'yyj':
         handler = new ExtractionHoodAccessory(platform, accessory);
+        break;
+      case 'bzyd':
+        handler = new WhiteNoiseMachineAccessory(platform, accessory);
         break;
 
       // Security & Video Surveillance
