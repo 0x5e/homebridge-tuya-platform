@@ -17,6 +17,17 @@ export default class WhiteNoiseMachineAccessory extends BaseAccessory {
     // Music / White Noise
     configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.MUSIC_ON));
 
+    //{
+//   code: 'colour_data',
+//   mode: 'rw',
+//   type: 'Json',
+//   property: {
+//     h: { min: 0, scale: 0, unit: '', max: 360, step: 1 },
+//     s: { min: 0, scale: 0, unit: '', max: 1000, step: 1 },
+//     v: { min: 0, scale: 0, unit: '', max: 1000, step: 1 }
+//   }
+// }
+
     // Light
     if (this.lightServiceType() === this.Service.Lightbulb) {
       configureLight(
