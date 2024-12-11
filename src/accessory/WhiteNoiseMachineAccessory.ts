@@ -17,17 +17,6 @@ export default class WhiteNoiseMachineAccessory extends BaseAccessory {
     // Music / White Noise
     configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.MUSIC_ON));
 
-    //{
-//   code: 'colour_data',
-//   mode: 'rw',
-//   type: 'Json',
-//   property: {
-//     h: { min: 0, scale: 0, unit: '', max: 360, step: 1 },
-//     s: { min: 0, scale: 0, unit: '', max: 1000, step: 1 },
-//     v: { min: 0, scale: 0, unit: '', max: 1000, step: 1 }
-//   }
-// }
-
     // Light
     if (this.lightServiceType() === this.Service.Lightbulb) {
       configureLight(
@@ -36,7 +25,7 @@ export default class WhiteNoiseMachineAccessory extends BaseAccessory {
         this.getSchema(...SCHEMA_CODE.LIGHT_ON),
         undefined,
         undefined,
-        this.getSchema(...SCHEMA_CODE.LIGHT_COLOR),
+        this.lightColorSchema(),
         undefined
       );
     } else if (this.lightServiceType() === this.Service.Switch) {
@@ -46,8 +35,27 @@ export default class WhiteNoiseMachineAccessory extends BaseAccessory {
     }
   }
 
+  lightColorSchema() {
+    const colorSchema = this.getSchema(...SCHEMA_CODE.LIGHT_COLOR);
+    if (!colorSchema) {
+      return;
+    }
+
+    const { h, s, v } = (colorSchema.property || {}) as never;
+    if (!h || !s || !v) {
+      // Set sensible defaults
+      colorSchema.property = {
+        h: { min: 0, scale: 0, unit: "", max: 360, step: 1 },
+        s: { min: 0, scale: 0, unit: "", max: 1000, step: 1 },
+        v: { min: 0, scale: 0, unit: "", max: 1000, step: 1 },
+      };
+    }
+
+    return colorSchema;
+  }
+
   lightServiceType() {
-    if (this.getSchema(...SCHEMA_CODE.LIGHT_COLOR)) {
+    if (this.lightColorSchema()) {
       return this.Service.Lightbulb;
     }
     return this.Service.Switch;
