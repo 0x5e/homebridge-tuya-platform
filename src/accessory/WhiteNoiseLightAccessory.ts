@@ -1,11 +1,11 @@
-import BaseAccessory from "./BaseAccessory";
-import { configureOn } from "./characteristic/On";
-import { configureLight } from "./characteristic/Light";
+import BaseAccessory from './BaseAccessory';
+import { configureOn } from './characteristic/On';
+import { configureLight } from './characteristic/Light';
 
 const SCHEMA_CODE = {
-  LIGHT_ON: ["switch_led"],
-  LIGHT_COLOR: ["colour_data"],
-  MUSIC_ON: ["switch_music"],
+  LIGHT_ON: ['switch_led'],
+  LIGHT_COLOR: ['colour_data'],
+  MUSIC_ON: ['switch_music'],
 };
 
 export default class WhiteNoiseLightAccessory extends BaseAccessory {
@@ -23,7 +23,7 @@ export default class WhiteNoiseLightAccessory extends BaseAccessory {
         undefined,
         undefined,
         this.lightColorSchema(),
-        undefined
+        undefined,
       );
     } else if (this.lightServiceType() === this.Service.Switch) {
       configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.LIGHT_ON));
@@ -45,9 +45,9 @@ export default class WhiteNoiseLightAccessory extends BaseAccessory {
     if (!h || !s || !v) {
       // Set sensible defaults for missing properties
       colorSchema.property = {
-        h: { min: 0, scale: 0, unit: "", max: 360, step: 1 },
-        s: { min: 0, scale: 0, unit: "", max: 1000, step: 1 },
-        v: { min: 0, scale: 0, unit: "", max: 1000, step: 1 },
+        h: { min: 0, scale: 0, unit: '', max: 360, step: 1 },
+        s: { min: 0, scale: 0, unit: '', max: 1000, step: 1 },
+        v: { min: 0, scale: 0, unit: '', max: 1000, step: 1 },
       };
     }
 
