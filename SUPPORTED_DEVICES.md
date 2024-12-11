@@ -20,6 +20,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Dimmer | 调光器 | tgq | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/tgq?id=Kaof8ke9il4k4) |
 | Remote Control | 遥控器 | ykq | | | [Documentation](https://developer.tuya.com/en/docs/iot/ykq?id=Kaof8ljn81aov) |
 | Spotlight | 射灯 | sxd | Lightbulb | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/sxd?id=Kb7jayalltstu) |
+| White Noise Light | 白噪音灯 | bzyd | Lightbulb<br> Switch | ✅ | Documentation |
 
 
 ## Electrical Products

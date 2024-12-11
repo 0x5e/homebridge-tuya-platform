@@ -3,20 +3,17 @@ import { configureOn } from "./characteristic/On";
 import { configureLight } from "./characteristic/Light";
 
 const SCHEMA_CODE = {
-  MUSIC_ON: ["switch_music"],
   LIGHT_ON: ["switch_led"],
   LIGHT_COLOR: ["colour_data"],
+  MUSIC_ON: ["switch_music"],
 };
 
 export default class WhiteNoiseLightAccessory extends BaseAccessory {
   requiredSchema() {
-    return [SCHEMA_CODE.MUSIC_ON, SCHEMA_CODE.LIGHT_ON];
+    return [SCHEMA_CODE.LIGHT_ON, SCHEMA_CODE.MUSIC_ON];
   }
 
   configureServices() {
-    // White Noise
-    configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.MUSIC_ON));
-
     // Light
     if (this.lightServiceType() === this.Service.Lightbulb) {
       configureLight(
@@ -33,6 +30,9 @@ export default class WhiteNoiseLightAccessory extends BaseAccessory {
       const unusedService = this.accessory.getService(this.Service.Lightbulb);
       unusedService && this.accessory.removeService(unusedService);
     }
+
+    // White Noise
+    configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.MUSIC_ON));
   }
 
   lightColorSchema() {
