@@ -8,13 +8,13 @@ const SCHEMA_CODE = {
   LIGHT_COLOR: ["colour_data"],
 };
 
-export default class WhiteNoiseMachineAccessory extends BaseAccessory {
+export default class WhiteNoiseLightAccessory extends BaseAccessory {
   requiredSchema() {
     return [SCHEMA_CODE.MUSIC_ON, SCHEMA_CODE.LIGHT_ON];
   }
 
   configureServices() {
-    // Music / White Noise
+    // White Noise
     configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.MUSIC_ON));
 
     // Light
