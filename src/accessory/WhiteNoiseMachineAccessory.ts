@@ -43,7 +43,7 @@ export default class WhiteNoiseMachineAccessory extends BaseAccessory {
 
     const { h, s, v } = (colorSchema.property || {}) as never;
     if (!h || !s || !v) {
-      // Set sensible defaults
+      // Set sensible defaults for missing properties
       colorSchema.property = {
         h: { min: 0, scale: 0, unit: "", max: 360, step: 1 },
         s: { min: 0, scale: 0, unit: "", max: 1000, step: 1 },
