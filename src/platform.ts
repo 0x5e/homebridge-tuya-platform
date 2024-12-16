@@ -428,8 +428,8 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       }
 
       // create the accessory handler for the restored accessory
-      const handler = AccessoryFactory.createAccessory(this, existingAccessory, device);
-      this.accessoryHandlers.push(handler);
+      const handlers = AccessoryFactory.createAccessory(this, existingAccessory, device);
+      this.accessoryHandlers.concat(handlers);
 
       const index = this.cachedAccessories.indexOf(existingAccessory);
       if (index >= 0) {
@@ -445,8 +445,8 @@ export class TuyaPlatform implements DynamicPlatformPlugin {
       accessory.context.deviceID = device.id;
 
       // create the accessory handler for the newly create accessory
-      const handler = AccessoryFactory.createAccessory(this, accessory, device);
-      this.accessoryHandlers.push(handler);
+      const handlers = AccessoryFactory.createAccessory(this, accessory, device);
+      this.accessoryHandlers.concat(handlers);
 
       // link the accessory to your platform
       if (device.unbridged) {

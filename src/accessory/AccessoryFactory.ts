@@ -51,9 +51,9 @@ export default class AccessoryFactory {
     platform: TuyaPlatform,
     accessory: PlatformAccessory,
     device: TuyaDevice,
-  ): BaseAccessory {
+  ): BaseAccessory[] {
 
-    let handler : BaseAccessory | undefined;
+    let handlers : BaseAccessory[] = [];
     switch (device.category) {
 
       // Lighting
@@ -66,11 +66,11 @@ export default class AccessoryFactory {
       case 'gyd':
       case 'tyndj':
       case 'sxd':
-        handler = new LightAccessory(platform, accessory);
+        handlers = [new LightAccessory(platform, accessory)];
         break;
       case 'tgq':
       case 'tgkg':
-        handler = new DimmerAccessory(platform, accessory);
+        handlers = [new DimmerAccessory(platform, accessory)];
         break;
 
       // Electrical Products
@@ -79,18 +79,18 @@ export default class AccessoryFactory {
       case 'tdq':
       case 'qjdcz':
       case 'szjqr':
-        handler = new SwitchAccessory(platform, accessory);
+        handlers = [new SwitchAccessory(platform, accessory)];
         break;
       case 'cz':
       case 'pc':
       case 'wkcz':
-        handler = new OutletAccessory(platform, accessory);
+        handlers = [new OutletAccessory(platform, accessory)];
         break;
       case 'wxkg':
-        handler = new WirelessSwitchAccessory(platform, accessory);
+        handlers = [new WirelessSwitchAccessory(platform, accessory)];
         break;
       case 'cjkg':
-        handler = new SceneSwitchAccessory(platform, accessory);
+        handlers = [new SceneSwitchAccessory(platform, accessory)];
         break;
       case 'bzyd':
         handler = new WhiteNoiseLightAccessory(platform, accessory);
@@ -99,50 +99,56 @@ export default class AccessoryFactory {
       // Large Home Appliances
       case 'kt':
       case 'ktkzq':
-        handler = new AirConditionerAccessory(platform, accessory);
+        handlers = [new AirConditionerAccessory(platform, accessory)];
         break;
 
       // Small Home Appliances
       case 'qn':
-        handler = new HeaterAccessory(platform, accessory);
+        handlers = [new HeaterAccessory(platform, accessory)];
         break;
       case 'kj':
-        handler = new AirPurifierAccessory(platform, accessory);
+        handlers = [new AirPurifierAccessory(platform, accessory)];
         break;
       case 'xxj':
-        handler = new DiffuserAccessory(platform, accessory);
+        handlers = [new DiffuserAccessory(platform, accessory)];
         break;
       case 'ckmkzq':
-        handler = new GarageDoorAccessory(platform, accessory);
+        handlers = [new GarageDoorAccessory(platform, accessory)];
         break;
       case 'cl':
+        handlers = [
+          new WindowCoveringAccessory(platform, accessory)];
+        break;
       case 'clkg':
-        handler = new WindowCoveringAccessory(platform, accessory);
+        handlers = [
+          new WindowCoveringAccessory(platform, accessory),
+          new LightAccessory(platform, accessory),
+        ];
         break;
       case 'cwwsq':
         handler = new PetFeederAccessory(platform, accessory);
         break;
       case 'mc':
-        handler = new WindowAccessory(platform, accessory);
+        handlers = [new WindowAccessory(platform, accessory)];
         break;
       case 'wk':
       case 'wkf':
-        handler = new ThermostatAccessory(platform, accessory);
+        handlers = [new ThermostatAccessory(platform, accessory)];
         break;
       case 'ggq':
       case 'sfkzq':
-        handler = new ValveAccessory(platform, accessory);
+        handlers = [new ValveAccessory(platform, accessory)];
         break;
       case 'jsq':
-        handler = new HumidifierAccessory(platform, accessory);
+        handlers = [new HumidifierAccessory(platform, accessory)];
         break;
       case 'cs':
-        handler = new DehumidifierAccessory(platform, accessory);
+        handlers = [new DehumidifierAccessory(platform, accessory)];
         break;
       case 'fs':
       case 'fsd':
       case 'fskg':
-        handler = new FanAccessory(platform, accessory);
+        handlers = [new FanAccessory(platform, accessory)];
         break;
       case 'yyj':
         handler = new ExtractionHoodAccessory(platform, accessory);
@@ -150,57 +156,57 @@ export default class AccessoryFactory {
 
       // Security & Video Surveillance
       case 'sp':
-        handler = new CameraAccessory(platform, accessory);
+        handlers = [new CameraAccessory(platform, accessory)];
         break;
       case 'ywbj':
-        handler = new SmokeSensorAccessory(platform, accessory);
+        handlers = [new SmokeSensorAccessory(platform, accessory)];
         break;
       case 'mcs':
-        handler = new ContactSensorAccessory(platform, accessory);
+        handlers = [new ContactSensorAccessory(platform, accessory)];
         break;
       case 'zd':
-        handler = new VibrationSensorAccessory(platform, accessory);
+        handlers = [new VibrationSensorAccessory(platform, accessory)];
         break;
       case 'rqbj':
       case 'jwbj':
       case 'sj':
-        handler = new LeakSensorAccessory(platform, accessory);
+        handlers = [new LeakSensorAccessory(platform, accessory)];
         break;
       case 'cobj':
       case 'cocgq':
-        handler = new CarbonMonoxideSensorAccessory(platform, accessory);
+        handlers = [new CarbonMonoxideSensorAccessory(platform, accessory)];
         break;
       case 'co2bj':
       case 'co2cgq':
-        handler = new CarbonDioxideSensorAccessory(platform, accessory);
+        handlers = [new CarbonDioxideSensorAccessory(platform, accessory)];
         break;
       case 'wsdcg':
-        handler = new TemperatureHumiditySensorAccessory(platform, accessory);
+        handlers = [new TemperatureHumiditySensorAccessory(platform, accessory)];
         break;
       case 'ldcg':
-        handler = new LightSensorAccessory(platform, accessory);
+        handlers = [new LightSensorAccessory(platform, accessory)];
         break;
       case 'pir':
-        handler = new MotionSensorAccessory(platform, accessory);
+        handlers = [new MotionSensorAccessory(platform, accessory)];
         break;
       case 'pm25':
       case 'pm2.5':
       case 'pm25cgq':
       case 'hjjcy':
-        handler = new AirQualitySensorAccessory(platform, accessory);
+        handlers = [new AirQualitySensorAccessory(platform, accessory)];
         break;
       case 'hps':
-        handler = new HumanPresenceSensorAccessory(platform, accessory);
+        handlers = [new HumanPresenceSensorAccessory(platform, accessory)];
         break;
       case 'ms':
       case 'jtmspro':
-        handler = new LockAccessory(platform, accessory);
+        handlers = [new LockAccessory(platform, accessory)];
         break;
       case 'mal':
-        handler = new SecuritySystemAccessory(platform, accessory);
+        handlers = [new SecuritySystemAccessory(platform, accessory)];
         break;
       case 'wxml':
-        handler = new DoorbellAccessory(platform, accessory);
+        handlers = [new DoorbellAccessory(platform, accessory)];
         break;
       case 'qxj':
         handler = new WeatherStationAccessory(platform, accessory);
@@ -208,41 +214,39 @@ export default class AccessoryFactory {
 
       // Other
       case 'scene':
-        handler = new SceneAccessory(platform, accessory);
+        handlers = [new SceneAccessory(platform, accessory)];
         break;
     }
 
     // IR Control Hub
     if (device.isIRControlHub()) {
-      handler = new IRControlHubAccessory(platform, accessory);
+      handlers = [new IRControlHubAccessory(platform, accessory)];
     }
 
     // IR Remote Control
     if (device.isIRRemoteControl()) {
       switch (device.remote_keys?.category_id) {
         case 5: // AC
-          handler = new IRAirConditionerAccessory(platform, accessory);
+          handlers = [new IRAirConditionerAccessory(platform, accessory)];
           break;
         default:
-          handler = new IRGenericAccessory(platform, accessory);
+          handlers = [new IRGenericAccessory(platform, accessory)];
           break;
       }
     }
+    for (let handler of handlers){
+      if (!handler.checkRequirements()) {
+        platform.log.warn(`Unsupported device: ${device.name}.`);
+        handler = new BaseAccessory(platform, accessory);
+        handlers.push(handler);
+      }
 
-    if (handler && !handler.checkRequirements()) {
-      handler = undefined;
+      handler.configureServices();
+      handler.configureStatusActive();
+      handler.updateAllValues();
+      handler.intialized = true;
     }
 
-    if (!handler) {
-      platform.log.warn(`Unsupported device: ${device.name}.`);
-      handler = new BaseAccessory(platform, accessory);
-    }
-
-    handler.configureServices();
-    handler.configureStatusActive();
-    handler.updateAllValues();
-    handler.intialized = true;
-
-    return handler;
+    return handlers;
   }
 }
