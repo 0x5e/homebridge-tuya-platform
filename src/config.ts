@@ -21,7 +21,7 @@ export interface TuyaPlatformDeviceConfig {
 
 export interface TuyaPlatformCustomConfigOptions {
   projectType: '1';
-  endpoint: string;
+  endPoint: string;
   accessId: string;
   accessKey: string;
   username: string;
@@ -33,7 +33,7 @@ export interface TuyaPlatformCustomConfigOptions {
 
 export interface TuyaPlatformHomeConfigOptions {
   projectType: '2';
-  endpoint?: string;
+  endPoint?: string;
   accessId: string;
   accessKey: string;
   countryCode: number;
@@ -54,7 +54,7 @@ export interface TuyaPlatformConfig extends PlatformConfig {
 
 export const customOptionsSchema = {
   properties: {
-    endpoint: { type: 'string', format: 'url', required: true },
+    endPoint: { type: 'string', format: 'url', required: true },
     accessId: { type: 'string', required: true },
     accessKey: { type: 'string', required: true },
     deviceOverrides: { 'type': 'array' },
@@ -67,7 +67,7 @@ export const homeOptionsSchema = {
   properties: {
     accessId: { type: 'string', required: true },
     accessKey: { type: 'string', required: true },
-    endpoint: { type: 'string', format: 'url' },
+    endPoint: { type: 'string', format: 'url' },
     countryCode: { 'type': 'integer', 'minimum': 1, required: true },
     username: { type: 'string', required: true },
     password: { type: 'string', required: true },
