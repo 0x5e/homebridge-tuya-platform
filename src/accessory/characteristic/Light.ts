@@ -47,6 +47,8 @@ function getLightType(
     lightType = LightType.C;
   } else if (on && !bright && !temp) {
     lightType = LightType.Normal;
+  } else if (on && !bright && temp) {
+    lightType = LightType.Normal;
   } else {
     lightType = LightType.Unknown;
   }
