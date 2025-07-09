@@ -32,7 +32,8 @@ export default class TuyaOpenMQ {
   public messageListeners = new Set<TuyaMQTTCallback>();
   public linkId = uuid_v4();
 
-  public timer?: NodeJS.Timer;
+  //public timer?: NodeJS.Timer;
+  public timer?: NodeJS.Timeout;
 
   constructor(
     public api: TuyaOpenAPI,

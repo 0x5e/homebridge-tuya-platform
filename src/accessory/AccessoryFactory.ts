@@ -44,6 +44,7 @@ import WeatherStationAccessory from './WeatherStationAccessory';
 import DoorbellAccessory from './DoorbellAccessory';
 import PetFeederAccessory from './PetFeederAccessory';
 import WhiteNoiseLightAccessory from './WhiteNoiseLightAccessory';
+import SaunaAccessory from './SaunaAccessory';
 
 
 export default class AccessoryFactory {
@@ -100,6 +101,9 @@ export default class AccessoryFactory {
       case 'kt':
       case 'ktkzq':
         handler = new AirConditionerAccessory(platform, accessory);
+        break;
+      case 'qtwk':
+        handler = new SaunaAccessory(platform, accessory);
         break;
 
       // Small Home Appliances
