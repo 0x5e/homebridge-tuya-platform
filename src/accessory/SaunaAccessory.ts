@@ -1,4 +1,4 @@
-import { TuyaDeviceSchemaEnumProperty, TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
+import { TuyaDeviceSchemaIntegerProperty, TuyaDeviceStatus } from '../device/TuyaDevice';
 import { limit } from '../util/util';
 import BaseAccessory from './BaseAccessory';
 import { configureCurrentTemperature } from './characteristic/CurrentTemperature';
