@@ -55,19 +55,32 @@ export default class FanAccessory extends BaseAccessory {
     this.configureRotationDirection();
 
     // Light
-    if (this.getSchema(...SCHEMA_CODE.LIGHT_ON)) {
+    const warmOn = this.getSchema('light');
+    const warmBright = this.getSchema('bright_value');
+    const coldOn = this.getSchema('switch_led');
+    const coldBright = this.getSchema('bright_value_1');
+
+    if (warmOn && warmBright && coldOn && coldBright) {
+      const warmService = this.accessory.getService('Warm Light')
+        || this.accessory.addService(this.Service.Lightbulb, 'Warm Light', 'warm_light');
+      configureLight(this, warmService, warmOn, warmBright);
+
+      const whiteService = this.accessory.getService('White Light')
+        || this.accessory.addService(this.Service.Lightbulb, 'White Light', 'white_light');
+      configureLight(this, whiteService, coldOn, coldBright);
+    } else if (warmOn) {
       if (this.lightServiceType() === this.Service.Lightbulb) {
         configureLight(
           this,
           this.lightService(),
-          this.getSchema(...SCHEMA_CODE.LIGHT_ON),
-          this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT),
+          warmOn,
+          warmBright,
           this.getSchema(...SCHEMA_CODE.LIGHT_TEMP),
           this.getSchema(...SCHEMA_CODE.LIGHT_COLOR),
           this.getSchema(...SCHEMA_CODE.LIGHT_MODE),
         );
       } else if (this.lightServiceType() === this.Service.Switch) {
-        configureOn(this, undefined, this.getSchema(...SCHEMA_CODE.LIGHT_ON));
+        configureOn(this, undefined, warmOn);
         const unusedService = this.accessory.getService(this.Service.Lightbulb);
         unusedService && this.accessory.removeService(unusedService);
       }
