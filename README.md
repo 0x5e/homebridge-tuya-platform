@@ -77,23 +77,23 @@ Before you can configure, you must go to the [Tuya IoT Platform](https://iot.tuy
 
 #### For "Custom" Project
 
-- `platform` - **required** : Must be 'TuyaPlatform'
+- `platform` - **required** : Must be 'TuyaPlatform'.
 - `options.projectType` - **required** : Must be '1'
 - `options.endpoint` - **required** : The endpoint URL taken from the [API Reference > Endpoints](https://developer.tuya.com/en/docs/iot/api-request?id=Ka4a8uuo1j4t4#title-1-Endpoints) table.
-- `options.accessId` - **required** : The Access ID obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
-- `options.accessKey` - **required** : The Access Secret obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
+- `options.accessId` - **required** : The Access ID obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud).
+- `options.accessKey` - **required** : The Access Secret obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud).
 - `options.debug` - **optional**: Includes debugging output in the Homebridge log. (Default: `false`)
 - `options.debugLevel` - **optional**: An optional list of strings seperated with comma `,`. `api` represents for HTTP API log, `mqtt` represents for MQTT log, and device ID represents for device log. If blank, all logs are outputed.
 
 #### For "Smart Home" Project
 
-- `platform` - **required** : Must be 'TuyaPlatform'
-- `options.projectType` - **required** : Must be '2'
-- `options.accessId` - **required** : The Access ID obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
-- `options.accessKey` - **required** : The Access Secret obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud)
-- `options.countryCode` - **required** : The country code of your app account's region.
-- `options.username` - **required** : The app account's username.
-- `options.password` - **required** : The app account's password. MD5 salted password is also available for increased security.
+- `platform` - **required** : Must be 'TuyaPlatform'.
+- `options.projectType` - **required** : Must be '2'.
+- `options.accessId` - **required** : The Access ID obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud).
+- `options.accessKey` - **required** : The Access Secret obtained from [Tuya IoT Platform > Cloud Develop](https://iot.tuya.com/cloud).
+- `options.countryCode` - **required** : The numeric country code of your developer account's region. You can find the country codes list [here](https://developer.tuya.com/en/docs/iot/oem-app-data-center-distributed?id=Kafi0ku9l07qb).
+- `options.username` - **required** : The mobile app (Tuya or SmartLife) account's username. Don't use the Tuya IoT Platform developer username.
+- `options.password` - **required** : The mobile app (Tuya or SmartLife) account's password. MD5 salted password is also available for increased security. Don't use the Tuya IoT Platform developer password.
 - `options.appSchema` - **required** : The app schema: 'tuyaSmart' for the Tuya Smart App, or 'smartlife' for the Smart Life App.
 - `options.endpoint` - **optional** : The endpoint URL can be inferred from the [API Reference > Endpoints](https://developer.tuya.com/en/docs/iot/api-request?id=Ka4a8uuo1j4t4#title-1-Endpoints) table based on the country code provided. Only manually set this value if you encounter login issues and need to specify the endpoint for your account location.
 - `options.homeWhitelist` - **optional**: An array of integer values for the home IDs you want to whitelist. If provided, only devices with matching Home IDs will be included. You can find the Home ID in the Homebridge log.
