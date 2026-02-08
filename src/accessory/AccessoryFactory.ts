@@ -43,6 +43,7 @@ import VibrationSensorAccessory from './VibrationSensorAccessory';
 import WeatherStationAccessory from './WeatherStationAccessory';
 import DoorbellAccessory from './DoorbellAccessory';
 import PetFeederAccessory from './PetFeederAccessory';
+import CatToiletAccessory from './CatToiletAccessory';
 import WhiteNoiseLightAccessory from './WhiteNoiseLightAccessory';
 
 
@@ -121,6 +122,9 @@ export default class AccessoryFactory {
         break;
       case 'cwwsq':
         handler = new PetFeederAccessory(platform, accessory);
+        break;
+      case 'msp':
+        handler = new CatToiletAccessory(platform, accessory);
         break;
       case 'mc':
         handler = new WindowAccessory(platform, accessory);

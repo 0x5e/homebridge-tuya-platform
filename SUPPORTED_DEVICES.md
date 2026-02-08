@@ -84,7 +84,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Sofa                       | 沙发 | sf            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysf?id=Kaiuz2fp9uqtt)      |
 | Electric Fireplace         | 电壁炉 | dbl           | | | [Documentation](https://developer.tuya.com/en/docs/iot/electric-fireplace?id=Kaiuz2hz4iyp6) |
 | Smart Milk Kettle          | 智能调奶器 | tnq           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorytnq?id=Kakf01agbfkfa)     |
-| Cat Toilet                 | 猫砂盆 | msp           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorymsp?id=Kakg2t7714ky7)     |
+| Cat Toilet                 | 猫砂盆 | msp           | Switch, Lightbulb, OccupancySensor, FilterMaintenance | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorymsp?id=Kakg2t7714ky7)     |
 | Towel Rack                 | 毛巾架 | mjj           | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorymjj?id=Kakkmlm9k4cir)     |
 | Smart Indoor Garden        | 植物生长机 | sz            | | | [Documentation](https://developer.tuya.com/en/docs/iot/categorysz?id=Kaiuz4e6h7up0)      |
 
