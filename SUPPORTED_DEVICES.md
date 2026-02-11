@@ -53,6 +53,7 @@ Most category code is pinyin abbreviation of Chinese name.
 | Air Conditioner | 空调 | kt | Heater Cooler<br> Humidifier Dehumidifier<br> Fanv2<br> Temperature Sensor<br> Humidity Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categorykt?id=Kaiuz0z71ov2n) |
 | Air Conditioner Controller | 空调控制器 | ktkzq | Heater Cooler<br> Humidifier Dehumidifier<br> Fanv2<br> Temperature Sensor<br> Humidity Sensor | ✅ | [Documentation](https://developer.tuya.com/en/docs/iot/categoryktkzq?id=Kaiuz11eqy892) |
 | Boiler | 壁挂炉 | bgl | | | [Documentation](https://developer.tuya.com/en/docs/iot/boilerbgl?id=Kaiuz13shgrhp) |
+| Sauna | 华氏度摄氏度两用(30-90) | qtwk | Lightbulb<br>Thermostat | ✅ | Documentation |
 
 
 ## Small Home Appliances
