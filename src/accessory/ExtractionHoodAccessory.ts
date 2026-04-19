@@ -5,6 +5,7 @@ import { configureLockPhysicalControls } from './characteristic/LockPhysicalCont
 import { configureRotationSpeed, configureRotationSpeedLevel } from './characteristic/RotationSpeed';
 import {configureLight} from './characteristic/Light';
 import {configureOn} from './characteristic/On';
+import { Service } from 'homebridge';
 
 const SCHEMA_CODE = {
   ACTIVE: ['switch'],
@@ -60,7 +61,7 @@ export default class ExtractionHoodAccessory extends BaseAccessory {
   }
 
 
-  mainService() {
+  mainService(): Service {
     return this.accessory.getService(this.Service.AirPurifier)
       || this.accessory.addService(this.Service.AirPurifier);
   }
@@ -116,7 +117,7 @@ export default class ExtractionHoodAccessory extends BaseAccessory {
       });
   }
 
-  lightServiceType() {
+  lightServiceType(): typeof Service {
     if (this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT)
         || this.getSchema(...SCHEMA_CODE.LIGHT_TEMP)
         || this.getSchema(...SCHEMA_CODE.LIGHT_COLOR)
@@ -126,7 +127,7 @@ export default class ExtractionHoodAccessory extends BaseAccessory {
     return this.Service.Switch;
   }
 
-  lightService() {
+  lightService(): Service {
     return this.accessory.getService(this.Service.Lightbulb)
         || this.accessory.addService(this.Service.Lightbulb);
   }

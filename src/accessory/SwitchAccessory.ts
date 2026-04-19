@@ -48,7 +48,7 @@ export default class SwitchAccessory extends BaseAccessory {
   }
 
 
-  mainService() {
+  mainService(): typeof this.Service.Switch {
     return this.Service.Switch;
   }
 

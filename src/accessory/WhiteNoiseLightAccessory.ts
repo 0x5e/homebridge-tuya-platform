@@ -1,6 +1,7 @@
 import BaseAccessory from './BaseAccessory';
 import { configureOn } from './characteristic/On';
 import { configureLight } from './characteristic/Light';
+import { Service } from 'homebridge';
 
 const SCHEMA_CODE = {
   LIGHT_ON: ['switch_led'],
@@ -54,7 +55,7 @@ export default class WhiteNoiseLightAccessory extends BaseAccessory {
     return colorSchema;
   }
 
-  lightServiceType() {
+  lightServiceType(): typeof Service.Lightbulb | typeof Service.Switch {
     if (this.lightColorSchema()) {
       return this.Service.Lightbulb;
     }

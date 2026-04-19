@@ -6,6 +6,7 @@ import { configureLockPhysicalControls } from './characteristic/LockPhysicalCont
 import { configureOn } from './characteristic/On';
 import { configureRotationSpeed, configureRotationSpeedLevel, configureRotationSpeedOn } from './characteristic/RotationSpeed';
 import { configureSwingMode } from './characteristic/SwingMode';
+import { Service } from 'homebridge';
 
 const SCHEMA_CODE = {
   FAN_ON: ['switch_fan', 'fan_switch', 'switch'],
@@ -87,7 +88,7 @@ export default class FanAccessory extends BaseAccessory {
     }
   }
 
-  fanServiceType() {
+  fanServiceType(): typeof Service.Fan | typeof Service.Fanv2 {
     if (this.getSchema(...SCHEMA_CODE.FAN_LOCK)
       || this.getSchema(...SCHEMA_CODE.FAN_SWING)) {
       return this.Service.Fanv2;
@@ -95,13 +96,13 @@ export default class FanAccessory extends BaseAccessory {
     return this.Service.Fan;
   }
 
-  fanService() {
+  fanService(): Service {
     const serviceType = this.fanServiceType();
     return this.accessory.getService(serviceType)
       || this.accessory.addService(serviceType);
   }
 
-  lightServiceType() {
+  lightServiceType(): typeof Service {
     if (this.getSchema(...SCHEMA_CODE.LIGHT_BRIGHT)
       || this.getSchema(...SCHEMA_CODE.LIGHT_TEMP)
       || this.getSchema(...SCHEMA_CODE.LIGHT_COLOR)
@@ -111,7 +112,7 @@ export default class FanAccessory extends BaseAccessory {
     return this.Service.Switch;
   }
 
-  lightService() {
+  lightService(): Service {
     return this.accessory.getService(this.Service.Lightbulb)
     || this.accessory.addService(this.Service.Lightbulb);
   }
