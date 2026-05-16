@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2018", // ~node10
+    "target": "ES2022",
     "module": "commonjs",
+    "moduleResolution": "node",
     "lib": [
-      "es2015",
-      "es2016",
-      "es2017",
-      "es2018"
+      "ES2022",
+      "DOM"
     ],
     "declaration": true,
     "declarationMap": true,
@@ -15,6 +14,7 @@
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
     "allowJs": true
