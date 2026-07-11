@@ -25,18 +25,12 @@ const SCHEMA_CODE = {
  *   https://developer.tuya.com/en/docs/iot/standarddescription?id=K9i5ql6waswzq
  */
 class BaseAccessory {
-  public readonly Service: typeof Service = this.platform.api.hap.Service;
-  public readonly Characteristic: typeof Characteristic = this.platform.api.hap.Characteristic;
+  public readonly Service: typeof Service;
+  public readonly Characteristic: typeof Characteristic;
 
-  public deviceManager = this.platform.deviceManager!;
-  public device = this.deviceManager.getDevice(this.accessory.context.deviceID)!;
-  public log = new PrefixLogger(
-    this.platform.log,
-    this.device.name.length > 0 ? this.device.name : this.device.id,
-    this.platform.options.debug && ((this.platform.options.debugLevel ?? '').length > 0
-      ? this.platform.options.debugLevel?.includes(this.device.id)
-      : true),
-  );
+  public deviceManager;
+  public device;
+  public log;
 
   public intialized = false;
 
@@ -46,6 +40,18 @@ class BaseAccessory {
     public readonly platform: TuyaPlatform,
     public readonly accessory: PlatformAccessory,
   ) {
+    this.Service = this.platform.api.hap.Service;
+    this.Characteristic = this.platform.api.hap.Characteristic;
+    this.deviceManager = this.platform.deviceManager!;
+    this.device = this.deviceManager.getDevice(this.accessory.context.deviceID)!;
+    this.log = new PrefixLogger(
+      this.platform.log,
+      this.device.name.length > 0 ? this.device.name : this.device.id,
+      this.platform.options.debug && ((this.platform.options.debugLevel ?? '').length > 0
+        ? this.platform.options.debugLevel?.includes(this.device.id)
+        : true),
+    );
+
     this.addAccessoryInfoService();
     this.addBatteryService();
   }
