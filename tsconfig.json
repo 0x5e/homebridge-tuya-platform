@@ -4,8 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": [
-      "ES2022",
-      "DOM"
+      "ES2022"
     ],
     "declaration": true,
     "declarationMap": true,
